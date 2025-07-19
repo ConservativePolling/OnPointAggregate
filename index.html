@@ -5793,10 +5793,11 @@
 
         // --- Performance Optimization Functions ---
         
-        function getCacheKey(aggregateId, term, pollster, searchQuery, startDate, endDate) {
+        function getCacheKey(aggregateId, term, pollster, searchQuery, startDate, endDate, density) {
             const start = startDate instanceof Date ? startDate.getTime() : null;
             const end = endDate instanceof Date ? endDate.getTime() : null;
-            return `${aggregateId}_${term}_${pollster}_${searchQuery}_${start}_${end}`;
+            const dens = density !== undefined ? density : pollDensitySlider.value;
+            return `${aggregateId}_${term}_${pollster}_${searchQuery}_${start}_${end}_${dens}`;
         }
         
         function getCachedAggregation(key) {
@@ -5858,36 +5859,16 @@
             return Math.max(1, Math.ceil(baseInterval * detailMultiplier));
         }
         
-        function adaptivePollPointDistribution(polls, maxPoints, timeRange) {
+        function adaptivePollPointDistribution(polls, maxPoints) {
             if (polls.length <= maxPoints) return polls;
-            
-            // Group polls by time periods and ensure even distribution
-            const periods = Math.min(20, Math.ceil(timeRange / (30 * MS_PER_DAY))); // ~monthly periods
-            const pollsPerPeriod = Math.ceil(maxPoints / periods);
-            
+
             const sortedPolls = [...polls].sort((a, b) => a.date.getTime() - b.date.getTime());
-            const result = [];
-            
-            for (let i = 0; i < periods; i++) {
-                const startTime = sortedPolls[0].date.getTime() + (timeRange * i / periods);
-                const endTime = sortedPolls[0].date.getTime() + (timeRange * (i + 1) / periods);
-                
-                const periodPolls = sortedPolls.filter(p => 
-                    p.date.getTime() >= startTime && p.date.getTime() < endTime
-                );
-                
-                if (periodPolls.length > pollsPerPeriod) {
-                    // Take evenly spaced polls from this period
-                    const step = Math.ceil(periodPolls.length / pollsPerPeriod);
-                    for (let j = 0; j < periodPolls.length; j += step) {
-                        result.push(periodPolls[j]);
-                    }
-                } else {
-                    result.push(...periodPolls);
-                }
+            const step = sortedPolls.length / maxPoints;
+            const sampled = [];
+            for (let i = 0; i < maxPoints; i++) {
+                sampled.push(sortedPolls[Math.floor(i * step)]);
             }
-            
-            return result;
+            return sampled;
         }
         
         function progressiveRender(renderFunction, data, chunkSize = PROGRESSIVE_RENDER_CHUNK_SIZE) {
@@ -6559,7 +6540,7 @@
             if (isProcessing) return; // Prevent concurrent processing
             isProcessing = true;
             
-            const cacheKey = getCacheKey(currentAggregateId, currentTerm, selectedPollster, searchQuery, null, null);
+            const cacheKey = getCacheKey(currentAggregateId, currentTerm, selectedPollster, searchQuery, null, null, pollDensitySlider.value);
             
             const cached = getCachedAggregation(cacheKey);
             if (cached) {
@@ -6700,8 +6681,7 @@
                 p.date.getTime() <= endDateForAggregation.getTime()
             );
             
-            const timeRange = endDateForAggregation.getTime() - startDateForAggregation.getTime();
-            visiblePolls = adaptivePollPointDistribution(visiblePolls, maxPoints, timeRange);
+            visiblePolls = adaptivePollPointDistribution(visiblePolls, maxPoints);
             
             aggregatedData.pollPoints = [];
             visiblePolls.forEach(poll => {
@@ -8292,6 +8272,8 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                     points.push({ label: currentAggregate.candidates[1], value: valuesInfo.values[1], yChart: yScale(valuesInfo.values[1]), colorVar: currentAggregate.colors[1], colorGlowVar: currentAggregate.colorGlow[1] });
                 }
                 hoverDisplayState.points = points;
+                hoveredPollPoint = null;
+                pollTooltip.style.display = 'none';
     
                 const spreadsInfo = [];
                 const mainSpreadVal = aggregatedData.spreads[dataIndex];
