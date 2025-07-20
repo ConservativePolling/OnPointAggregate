@@ -4089,7 +4089,14 @@
             if (isProcessing) return; // Prevent concurrent processing
             isProcessing = true;
             
-            const cacheKey = getCacheKey(currentAggregateId, currentTerm, selectedPollster, searchQuery, null, null);
+            const cacheKey = getCacheKey(
+                currentAggregateId,
+                currentTerm,
+                selectedPollster,
+                searchQuery,
+                currentZoomSelection.isActive ? currentZoomSelection.startDate : null,
+                currentZoomSelection.isActive ? currentZoomSelection.endDate : null
+            );
             
             const cached = getCachedAggregation(cacheKey);
             if (cached) {
