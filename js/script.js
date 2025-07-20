@@ -16,11 +16,10 @@
         const MAX_POLLS_PER_AGGREGATE = 10000;
         const SPATIAL_GRID_SIZE = 50;
         
-        // Performance optimization constants
-        const CACHE_DURATION = 100000000000000000000000000000000000000000000000000000000000000; // 30 seconds
+        // Sampling and rendering constants
         const MIN_SAMPLING_INTERVAL = 1; // Minimum days between samples
-        const MAX_SAMPLING_INTERVAL = 1000000000000000000000000000000000000000000000000000000000000000000000000 // Maximum days between samples
-        const PROGRESSIVE_RENDER_CHUNK_SIZE = 10000000000000000000000000000000000000000000000000000000000
+        const MAX_SAMPLING_INTERVAL = 30; // Maximum days between samples
+        const PROGRESSIVE_RENDER_CHUNK_SIZE = 100;
         
         // --- Data Definitions ---
         const AGGREGATES = [
@@ -3221,7 +3220,7 @@
         let currentAggregate = AGGREGATES.find(a => a.id === currentAggregateId);
         let currentTerm = 'second'; 
         let currentLineWidth = 3;
-        let currentLineDetail = 3; // 1-5 scale for line detail/sampling
+        let currentLineDetail = 5; // Fixed to maximum detail
         let animationFrameId = null;
         let wordCyclerInterval = null;
         let aggregatedData = { timestamps: [], values: [[], []], spreads: [], current: [null, null], pollPoints: [] };
@@ -3230,7 +3229,7 @@
         let chartDimensions = { margin: { top: 50, right: 30, bottom: 40, left: 30 }, width: 0, height: 0, yMin: DEFAULT_Y_MIN, yMax: DEFAULT_Y_MAX };
         let currentHoverIndex = null; 
         let hoveredPollPoint = null; 
-        let highlightZoom = { isHighlighting: false, startX: null, rect: null };
+        let highlightZoom = { isHighlighting: false, startX: null };
         let currentZoomSelection = { isActive: false, startDate: null, endDate: null };
         let previousZoomStateBeforeCurrent = null; 
         let searchQuery = ''; 
@@ -3240,9 +3239,7 @@
         let isScrollerPaused = false;
         let currentTheme = 'dark';
         
-        // Performance optimization state
-        let aggregationCache = new Map();
-        let pollWeightCache = new Map();
+        // Performance state
         let isProcessing = false;
         let renderQueue = [];
         let lastRenderTime = 0;
@@ -3275,7 +3272,6 @@
         const hoverValueItemElements = [];
         const glowEffectToggle = document.getElementById('glowEffectToggle');
         const lineThicknessSlider = document.getElementById('lineThicknessSlider');
-        const lineDetailSlider = document.getElementById('lineDetailSlider');
         const pollDensitySlider = document.getElementById('pollDensitySlider');
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
@@ -3321,55 +3317,7 @@
         const downloadCancel = document.getElementById('downloadCancel');
         const downloadConfirm = document.getElementById('downloadConfirm');
 
-        // --- Performance Optimization Functions ---
-        
-        function getCacheKey(aggregateId, term, pollster, searchQuery, startDate, endDate) {
-            const start = startDate instanceof Date ? startDate.getTime() : null;
-            const end = endDate instanceof Date ? endDate.getTime() : null;
-            return `${aggregateId}_${term}_${pollster}_${searchQuery}_${start}_${end}`;
-        }
-        
-        function getCachedAggregation(key) {
-            const cached = aggregationCache.get(key);
-            if (cached && (Date.now() - cached.timestamp < CACHE_DURATION)) {
-                // Deserialize date objects
-                const data = JSON.parse(cached.data);
-                data.timestamps = data.timestamps.map(ts => new Date(ts));
-                data.pollPoints.forEach(p => p.date = new Date(p.date));
-                return data;
-            }
-            return null;
-        }
-        
-        function setCachedAggregation(key, data) {
-            aggregationCache.set(key, {
-                data: JSON.stringify(data), // Serialize for deep clone and smaller memory footprint
-                timestamp: Date.now()
-            });
-            
-            // Clean old cache entries
-            if (aggregationCache.size > 50) {
-                const entries = Array.from(aggregationCache.entries());
-                entries.sort((a, b) => a[1].timestamp - b[1].timestamp);
-                for (let i = 0; i < 10; i++) {
-                    aggregationCache.delete(entries[i][0]);
-                }
-            }
-        }
-        
-        function getCachedPollWeight(poll, referenceDate) {
-            const key = `${poll.pollster}_${poll.date.getTime()}_${referenceDate.getTime()}`;
-            if (pollWeightCache.has(key)) return pollWeightCache.get(key);
-            
-            const weight = calculatePollWeightDirect(poll, referenceDate);
-            pollWeightCache.set(key, weight);
-
-            if (pollWeightCache.size > 20000) {
-                 pollWeightCache.clear();
-            }
-            
-            return weight;
-        }
+        // --- Sampling & Rendering Helpers ---
         
         function calculatePollWeightDirect(poll, referenceDate) {
             const pollDate = poll.date.getTime();
@@ -3583,7 +3531,7 @@
 
         function calculatePollWeight(poll, referenceDate){
             if (!(poll.date instanceof Date) || isNaN(poll.date)) return 0;
-            return getCachedPollWeight(poll, referenceDate);
+            return calculatePollWeightDirect(poll, referenceDate);
         }
 
         function getValuesAtDate(dateToFind) {
@@ -3950,12 +3898,17 @@
             updateAllMiniAggregateCharts();
         }
 
-        function loadPolls() {
-            if (isProcessing) return; // Prevent concurrent loading
-            
+       function loadPolls() {
+           if (isProcessing) return; // Prevent concurrent loading
+
             chartLoader.classList.add('active');
-            
-            // Use requestIdleCallback for non-critical UI updates
+
+            currentHoverIndex = null;
+            hoveredPollPoint = null;
+            highlightZoom.isHighlighting = false;
+            highlightZoomRect.style.display = 'none';
+
+           // Use requestIdleCallback for non-critical UI updates
             requestIdleCallback(() => {
                 applyFilters(); 
                 updateAggregation(); 
@@ -4088,17 +4041,6 @@
         function updateAggregation() {
             if (isProcessing) return; // Prevent concurrent processing
             isProcessing = true;
-            
-            const cacheKey = getCacheKey(currentAggregateId, currentTerm, selectedPollster, searchQuery, null, null);
-            
-            const cached = getCachedAggregation(cacheKey);
-            if (cached) {
-                aggregatedData = cached;
-                updateDisplay();
-                isProcessing = false;
-                return;
-            }
-            
             let primaryPollsForLine = _filterPollsForLineCalc(getCurrentTermPolls(currentAggregate, currentTerm), selectedPollster, searchQuery);
             
             let countForBadge = primaryPollsForLine.length; 
@@ -4117,7 +4059,7 @@
 
             requestIdleCallback(() => {
                 try {
-                    computeAggregationData(primaryPollsForLine, cacheKey);
+                    computeAggregationData(primaryPollsForLine);
                 } catch (error) {
                     console.error('Aggregation computation failed:', error);
                     setEmptyAggData();
@@ -4125,7 +4067,7 @@
             }, { timeout: 100 });
         }
         
-        function computeAggregationData(primaryPollsForLine, cacheKey) {
+        function computeAggregationData(primaryPollsForLine) {
             const sortedPolls = primaryPollsForLine.sort((a,b) => a.date.getTime() - b.date.getTime());
             const earliestPollDateOverall = sortedPolls[0].date;
             let latestPollDateOverall = sortedPolls[sortedPolls.length - 1].date;
@@ -4200,7 +4142,7 @@
                     
                     for(let j = 0; j < sortedPolls.length; j++) {
                         if (sortedPolls[j].date.getTime() > currentDate.getTime()) break;
-                        const weight = getCachedPollWeight(sortedPolls[j], currentDate);
+                        const weight = calculatePollWeight(sortedPolls[j], currentDate);
                         if (weight > 0.001) { // Skip negligible weights
                             weightedSum1 += sortedPolls[j][field1] * weight;
                             weightedSum2 += sortedPolls[j][field2] * weight;
@@ -4250,8 +4192,6 @@
                     }
                 );
             });
-            
-            setCachedAggregation(cacheKey, aggregatedData);
             
             updateDisplay();
             isProcessing = false;
@@ -4813,60 +4753,59 @@
             }
         }
 
-        function initHighlightZoom() { 
-            pollChart.addEventListener('mousedown', startZoomHighlight); 
-            document.addEventListener('mousemove', updateZoomHighlight); 
-            document.addEventListener('mouseup', applyZoomSelectionFromHighlight); 
+        function initHighlightZoom() {
+            pollChart.addEventListener('mousedown', startZoomHighlight);
+            document.addEventListener('mousemove', updateZoomHighlight);
+            document.addEventListener('mouseup', endZoomHighlight);
         }
 
-        function startZoomHighlight(event) { 
-            if (event.button !== 0 || (!aggregatedData.timestamps || aggregatedData.timestamps.length === 0)) return; 
-            const { margin, width, height, yMin, yMax } = chartDimensions;
-            const rect = pollChart.getBoundingClientRect(); 
-            const x = event.clientX - rect.left; 
-            if (x < margin.left || x > width - margin.right) return; 
-            previousZoomStateBeforeCurrent = { 
-                yMin: yMin, yMax: yMax, 
-                startDate: currentZoomSelection.isActive ? currentZoomSelection.startDate : (aggregatedData.timestamps.length > 0 ? aggregatedData.timestamps[0] : new Date()), 
-                endDate: currentZoomSelection.isActive ? currentZoomSelection.endDate : (aggregatedData.timestamps.length > 0 ? aggregatedData.timestamps.at(-1) : new Date()) 
-            }; 
-            highlightZoom.isHighlighting = true; 
-            highlightZoom.startX = x; 
-            Object.assign(highlightZoomRect.style, { 
-                display: 'block', left: `${x}px`, top: `${margin.top}px`, 
-                width: '0', height: `${height - margin.top - margin.bottom}px` 
-            }); 
-            event.preventDefault(); 
+        function startZoomHighlight(event) {
+            if (event.button !== 0) return;
+            if (!aggregatedData.timestamps || aggregatedData.timestamps.length === 0) return;
+            const rect = pollChart.getBoundingClientRect();
+            const { margin, width, height } = chartDimensions;
+            const x = event.clientX - rect.left;
+            if (x < margin.left || x > width - margin.right) return;
+            previousZoomStateBeforeCurrent = {
+                yMin: chartDimensions.yMin,
+                yMax: chartDimensions.yMax,
+                startDate: currentZoomSelection.isActive ? currentZoomSelection.startDate : aggregatedData.timestamps[0],
+                endDate: currentZoomSelection.isActive ? currentZoomSelection.endDate : aggregatedData.timestamps.at(-1)
+            };
+            highlightZoom.isHighlighting = true;
+            highlightZoom.startX = x;
+            highlightZoomRect.style.left = `${x}px`;
+            highlightZoomRect.style.top = `${margin.top}px`;
+            highlightZoomRect.style.width = '0';
+            highlightZoomRect.style.height = `${height - margin.top - margin.bottom}px`;
+            highlightZoomRect.style.display = 'block';
+            event.preventDefault();
         }
 
-        function updateZoomHighlight(event) { 
-            if (!highlightZoom.isHighlighting) return; 
+        function updateZoomHighlight(event) {
+            if (!highlightZoom.isHighlighting) return;
+            const rect = pollChart.getBoundingClientRect();
             const { margin, width } = chartDimensions;
-            const rect = pollChart.getBoundingClientRect(); 
-            const currentX = Math.min(Math.max(margin.left, event.clientX - rect.left), width - margin.right); 
-            const zoomWidth = Math.abs(currentX - highlightZoom.startX); 
-            const left = Math.min(highlightZoom.startX, currentX); 
-            highlightZoomRect.style.left = `${left}px`; 
-            highlightZoomRect.style.width = `${zoomWidth}px`; 
-            highlightZoomRect.style.display = zoomWidth < 3 ? 'none' : 'block'; 
+            const currentX = Math.min(Math.max(margin.left, event.clientX - rect.left), width - margin.right);
+            const left = Math.min(highlightZoom.startX, currentX);
+            const w = Math.abs(currentX - highlightZoom.startX);
+            highlightZoomRect.style.left = `${left}px`;
+            highlightZoomRect.style.width = `${w}px`;
+            highlightZoomRect.style.display = w < 3 ? 'none' : 'block';
         }
 
-        function applyZoomSelectionFromHighlight(event) { 
-            if (!highlightZoom.isHighlighting) return; 
-            highlightZoom.isHighlighting = false; 
-            highlightZoomRect.style.display = 'none'; 
+        function endZoomHighlight(event) {
+            if (!highlightZoom.isHighlighting) return;
+            highlightZoom.isHighlighting = false;
+            highlightZoomRect.style.display = 'none';
+            const rect = pollChart.getBoundingClientRect();
             const { margin, width } = chartDimensions;
-            const rect = pollChart.getBoundingClientRect(); 
-            const endX = Math.min(Math.max(margin.left, event.clientX - rect.left), width - margin.right); 
-            const zoomWidth = Math.abs(endX - highlightZoom.startX); 
-            if (zoomWidth > 10 && aggregatedData.timestamps.length > 1) { 
-                const leftX = Math.min(highlightZoom.startX, endX); 
-                const rightX = Math.max(highlightZoom.startX, endX);
-                const chartAreaWidth = width - margin.left - margin.right;
-                const fullTimeRange = aggregatedData.timestamps.at(-1).getTime() - aggregatedData.timestamps[0].getTime(); 
-                const dateAtX = xPos => new Date(aggregatedData.timestamps[0].getTime() + ((xPos - margin.left) / chartAreaWidth) * fullTimeRange); 
-                applyZoomToRange(dateAtX(leftX), dateAtX(rightX)); 
-            } 
+            const endX = Math.min(Math.max(margin.left, event.clientX - rect.left), width - margin.right);
+            const w = Math.abs(endX - highlightZoom.startX);
+            if (w < 10 || aggregatedData.timestamps.length <= 1) return;
+            const startDate = xToDate(Math.min(highlightZoom.startX, endX));
+            const endDate = xToDate(Math.max(highlightZoom.startX, endX));
+            applyZoomToRange(startDate, endDate);
         }
 
         function applyZoomToRange(startDate, endDate) { 
@@ -5123,8 +5062,7 @@
         }
     
         function resetUIForNewAggregate(){ 
-            aggregationCache.clear();
-            pollWeightCache.clear();
+
             
             updateYAxisLabels(); 
             updateHoverState(null); 
@@ -5684,14 +5622,6 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 }
             });
             
-            lineDetailSlider.addEventListener('input', (e) => {
-                currentLineDetail = parseInt(e.target.value);
-                if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
-                    // Clear cache when detail level changes
-                    aggregationCache.clear();
-                    loadPolls();
-                }
-            });
     
             pollDensitySlider.addEventListener('input', (e) => {
                 if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
@@ -5790,13 +5720,18 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                  return;
             }
     
-            currentHoverIndex = dataIndex;
-    
-            if (dataIndex === null) {
+            if (dataIndex === null || dataIndex < 0 || dataIndex >= aggregatedData.timestamps.length) {
+                currentHoverIndex = null;
                 hoverDisplayState.active = false;
+                renderHoverOverlay();
+                const dpr = window.devicePixelRatio || 1;
+                overlayCtx.clearRect(0, 0, overlayCanvas.width/dpr, overlayCanvas.height/dpr);
+                fadeCtx.clearRect(0, 0, fadeCanvas.width/dpr, fadeCanvas.height/dpr);
+                return;
             } else {
-                 const timeRange = (aggregatedData.timestamps.length > 1) ? (aggregatedData.timestamps.at(-1).getTime() - aggregatedData.timestamps[0].getTime()) : 1;
-                 const interpolatedDate = aggregatedData.timestamps[dataIndex];
+                currentHoverIndex = dataIndex;
+                const timeRange = (aggregatedData.timestamps.length > 1) ? (aggregatedData.timestamps.at(-1).getTime() - aggregatedData.timestamps[0].getTime()) : 1;
+                const interpolatedDate = aggregatedData.timestamps[dataIndex];
                  
                  if (xOnCanvas === null) {
                     const firstTimestamp = aggregatedData.timestamps[0].getTime();
