@@ -2388,10 +2388,6 @@
                         <input type="range" id="lineThicknessSlider" min="1" max="6" step="0.5" value="3" data-tooltip="Line Thickness">
                     </div>
                     <div class="toggle">
-                        <i class="fas fa-wave-square"></i>
-                        <input type="range" id="lineDetailSlider" min="1" max="5" step="1" value="3" data-tooltip="Line Detail (1=Smooth, 5=Detailed)">
-                    </div>
-                    <div class="toggle">
                         <i class="fas fa-circle-nodes"></i>
                         <input type="range" id="pollDensitySlider" min="5" max="50" step="5" value="25" data-tooltip="Poll Point Density">
                     </div>
@@ -5691,7 +5687,7 @@
         let currentAggregate = AGGREGATES.find(a => a.id === currentAggregateId);
         let currentTerm = 'second'; 
         let currentLineWidth = 3;
-        let currentLineDetail = 3; // 1-5 scale for line detail/sampling
+        const currentLineDetail = 5; // fixed at maximum detail
         let animationFrameId = null;
         let wordCyclerInterval = null;
         let aggregatedData = { timestamps: [], values: [[], []], spreads: [], current: [null, null], pollPoints: [] };
@@ -5745,7 +5741,6 @@
         const hoverValueItemElements = [];
         const glowEffectToggle = document.getElementById('glowEffectToggle');
         const lineThicknessSlider = document.getElementById('lineThicknessSlider');
-        const lineDetailSlider = document.getElementById('lineDetailSlider');
         const pollDensitySlider = document.getElementById('pollDensitySlider');
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
@@ -6540,7 +6535,9 @@
             if (isProcessing) return; // Prevent concurrent processing
             isProcessing = true;
             
-            const cacheKey = getCacheKey(currentAggregateId, currentTerm, selectedPollster, searchQuery, null, null, pollDensitySlider.value);
+            const startDateKey = currentZoomSelection.isActive ? currentZoomSelection.startDate : null;
+            const endDateKey = currentZoomSelection.isActive ? currentZoomSelection.endDate : null;
+            const cacheKey = getCacheKey(currentAggregateId, currentTerm, selectedPollster, searchQuery, startDateKey, endDateKey, pollDensitySlider.value);
             
             const cached = getCachedAggregation(cacheKey);
             if (cached) {
@@ -8134,14 +8131,6 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 }
             });
             
-            lineDetailSlider.addEventListener('input', (e) => {
-                currentLineDetail = parseInt(e.target.value);
-                if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
-                    // Clear cache when detail level changes
-                    aggregationCache.clear();
-                    loadPolls();
-                }
-            });
     
             pollDensitySlider.addEventListener('input', (e) => {
                 if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
