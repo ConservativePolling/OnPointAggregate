@@ -2906,6 +2906,7 @@
     { pollster: "AtlasIntel",       date: "2025-05-27", sampleSize: 3469, approve: 42, disapprove: 51, quality: "A+" },
 
   /* ========== Rasmussen Reports (LV) ========== */
+{ pollster: "Rasmussen Reports", date: "2025-07-21", sampleSize: 1012, approve: 42, disapprove: 46, quality: "A+" }
   { pollster: "Rasmussen Reports", date: "2025-05-15", sampleSize: 1012, approve: 44, disapprove: 45, quality: "A+" },
 
   /* ========== NYT / Siena College (RV) ========== */
