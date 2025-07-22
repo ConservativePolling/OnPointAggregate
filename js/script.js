@@ -30,7 +30,8 @@
                 colorGlow: ['var(--approve-color-glow)', 'var(--disapprove-color-glow)'], directGlowColors: ['rgba(74,222,128,0.4)', 'rgba(255,61,113,0.4)'], 
                 lineClasses: ['approve-line', 'disapprove-line'],
                 firstTermPolls: [ 
-                    { pollster: "Rasmussen Reports", date: "2021-01-19", sampleSize: 1500, approve: 51, disapprove: 48, quality: "A+" },
+   { pollster: "Rasmussen Reports", date: "2025-07-22", sampleSize: 1500, approve: 50, disapprove: 48, quality: "A+" },                  
+{ pollster: "Rasmussen Reports", date: "2021-01-19", sampleSize: 1500, approve: 51, disapprove: 48, quality: "A+" },
   { pollster: "Rasmussen Reports", date: "2021-01-18", sampleSize: 1500, approve: 48, disapprove: 51, quality: "A+" },
   { pollster: "Rasmussen Reports", date: "2021-01-15", sampleSize: 1500, approve: 48, disapprove: 52, quality: "A+" },
   { pollster: "Rasmussen Reports", date: "2021-01-13", sampleSize: 1500, approve: 46, disapprove: 53, quality: "A+" },
