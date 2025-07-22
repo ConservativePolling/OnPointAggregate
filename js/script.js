@@ -1068,7 +1068,8 @@
   { pollster: "Emerson", date: "2020-12-07", sampleSize: 1027, approve: 46, disapprove: 48, quality: "A" }
                 ],
                 polls: [ 
-  { pollster: "Rasmussen Reports", date: "2025-07-18", sampleSize: 1500, approve: 50, disapprove: 48, quality: "A+" },
+  { pollster: "Rasmussen Reports", date: "2025-07-21", sampleSize: 1500, approve: 50, disapprove: 48, quality: "A+" },  
+{ pollster: "Rasmussen Reports", date: "2025-07-18", sampleSize: 1500, approve: 50, disapprove: 48, quality: "A+" },
   { pollster: "Rasmussen Reports", date: "2025-07-17", sampleSize: 1500, approve: 49, disapprove: 49, quality: "A+" },
   { pollster: "Rasmussen Reports", date: "2025-07-16", sampleSize: 1500, approve: 48, disapprove: 50, quality: "A+" },
   { pollster: "Rasmussen Reports", date: "2025-07-15", sampleSize: 1500, approve: 47, disapprove: 51, quality: "A+" },
