@@ -3323,14 +3323,19 @@
 
         // --- Sampling & Rendering Helpers ---
         
+        function computeBasePollWeight(poll) {
+            const qualityWeight = POLL_QUALITY_WEIGHTS[poll.quality] || 0.5;
+            const sampleWeight = Math.sqrt(poll.sampleSize || 100) / 100;
+            return qualityWeight * sampleWeight;
+        }
+
         function calculatePollWeightDirect(poll, referenceDate) {
             const pollDate = poll.date.getTime();
             const daysDiff = (referenceDate.getTime() - pollDate) / MS_PER_DAY;
             if (daysDiff < 0) return 0;
             const recencyWeight = Math.exp(-daysDiff / HALF_LIFE);
-            const qualityWeight = POLL_QUALITY_WEIGHTS[poll.quality] || 0.5;
-            const sampleWeight = Math.sqrt(poll.sampleSize || 100) / 100;
-            return qualityWeight * sampleWeight * recencyWeight;
+            const baseWeight = poll.baseWeight ?? computeBasePollWeight(poll);
+            return baseWeight * recencyWeight;
         }
         
         function optimizedSampling(totalDays, lineDetail) {
@@ -3590,10 +3595,11 @@
         function calculateAggregateFromPolls(pollList, refDate, field){
             let totalWeight = 0;
             let weightedSum = 0;
-            if (!pollList || pollList.length === 0) return 0; 
+            if (!pollList || pollList.length === 0) return 0;
             pollList.forEach(poll => {
                 if(poll.date.getTime() <= refDate.getTime()){
-                    const weight = calculatePollWeight(poll, refDate);
+                    const daysDiff = (refDate.getTime() - poll.date.getTime()) / MS_PER_DAY;
+                    const weight = (poll.baseWeight ?? computeBasePollWeight(poll)) * Math.exp(-daysDiff / HALF_LIFE);
                     totalWeight += weight;
                     weightedSum += poll[field] * weight;
                 }
@@ -3601,10 +3607,10 @@
             return totalWeight > 0 ? weightedSum / totalWeight : 0;
         }
 
-        function calculateAllMargins() { 
-            return AGGREGATES.map(aggregateConfig => {
-                let pollsUsed = getCurrentTermPolls(aggregateConfig, currentTerm); 
-                if (!pollsUsed || pollsUsed.length === 0) return { id: aggregateConfig.id, margin: 0 };
+       function calculateAllMargins() {
+           return AGGREGATES.map(aggregateConfig => {
+               let pollsUsed = getCurrentTermPolls(aggregateConfig, currentTerm);
+               if (!pollsUsed || pollsUsed.length === 0) return { id: aggregateConfig.id, margin: 0 };
                 
                 const lastPollDate = new Date(Math.max(...pollsUsed.map(poll => poll.date.getTime())));
                 
@@ -3617,8 +3623,10 @@
                      refDate = new Date(Math.min(lastPollDate.getTime(), BIDEN_TERM_END_DATE.getTime()));
                 }
 
-                const aggVal1 = calculateAggregateFromPolls(pollsUsed, refDate, aggregateConfig.pollFields[0]);
-                const aggVal2 = calculateAggregateFromPolls(pollsUsed, refDate, aggregateConfig.pollFields[1]);
+                const sorted = [...pollsUsed].sort((a,b) => a.date.getTime() - b.date.getTime());
+                const [vals1, vals2] = calculateSeriesValues(sorted, [refDate], aggregateConfig.pollFields[0], aggregateConfig.pollFields[1]);
+                const aggVal1 = vals1[0];
+                const aggVal2 = vals2[0];
                 return { id: aggregateConfig.id, margin: (aggVal1 || 0) - (aggVal2 || 0) };
             });
         }
@@ -3682,9 +3690,12 @@
             } else {
                 polls = aggregateConfig.polls || [];
             }
-             return polls.map(p => {
-                if (p.date instanceof Date) return p; // Already a Date object
-                return { ...p, date: new Date(p.date + 'T12:00:00Z') };
+            return polls.map(p => {
+                const pollObj = (p.date instanceof Date) ? p : { ...p, date: new Date(p.date + 'T12:00:00Z') };
+                if (pollObj.baseWeight === undefined) {
+                    pollObj.baseWeight = computeBasePollWeight(pollObj);
+                }
+                return pollObj;
             });
         }
 
@@ -4036,6 +4047,47 @@
             tableRow.innerHTML = `<td><div class="pollster-name"><div class="pollster-logo">${initials}</div>${displayPollster}</div></td><td class="poll-date">${displayDate}</td><td class="poll-info">${displaySampleSize}</td><td><div class="poll-quality">${formatQualityStars(poll.quality)}</div></td><td class="${approveClass}">${displayApprove}</td><td class="${disapproveClass}">${displayDisapprove}</td>${marginHtml}<td class="poll-info">${weight.toFixed(3)}</td>`;
             return tableRow;
         }
+
+        function calculateSeriesValues(sortedPolls, timestamps, field1, field2) {
+            const values1 = [], values2 = [];
+            let pollIdx = 0;
+            let active = [];
+
+            for (let i = 0; i < timestamps.length; i++) {
+                const currentDate = timestamps[i];
+
+                while (pollIdx < sortedPolls.length && sortedPolls[pollIdx].date.getTime() <= currentDate.getTime()) {
+                    const p = sortedPolls[pollIdx];
+                    active.push({
+                        date: p.date,
+                        baseWeight: p.baseWeight ?? computeBasePollWeight(p),
+                        val1: p[field1],
+                        val2: p[field2]
+                    });
+                    pollIdx++;
+                }
+
+                let weightedSum1 = 0, weightedSum2 = 0, totalWeight = 0;
+                const newActive = [];
+                for (let k = 0; k < active.length; k++) {
+                    const ap = active[k];
+                    const daysDiff = (currentDate.getTime() - ap.date.getTime()) / MS_PER_DAY;
+                    const weight = ap.baseWeight * Math.exp(-daysDiff / HALF_LIFE);
+                    if (weight > 0.001) {
+                        weightedSum1 += ap.val1 * weight;
+                        weightedSum2 += ap.val2 * weight;
+                        totalWeight += weight;
+                        newActive.push(ap);
+                    }
+                }
+                active = newActive;
+
+                values1[i] = totalWeight > 0 ? weightedSum1 / totalWeight : null;
+                values2[i] = totalWeight > 0 ? weightedSum2 / totalWeight : null;
+            }
+
+            return [values1, values2];
+        }
         
         function updateAggregation() {
             if (isProcessing) return; // Prevent concurrent processing
@@ -4134,27 +4186,9 @@
             const field2 = currentAggregate.pollFields[1];
             aggregatedData.values = [[], []];
 
-            const computeValues = () => {
-                for(let i = 0; i < timestamps.length; i++) {
-                    const currentDate = timestamps[i];
-                    let weightedSum1 = 0, weightedSum2 = 0, totalWeight = 0;
-                    
-                    for(let j = 0; j < sortedPolls.length; j++) {
-                        if (sortedPolls[j].date.getTime() > currentDate.getTime()) break;
-                        const weight = calculatePollWeight(sortedPolls[j], currentDate);
-                        if (weight > 0.001) { // Skip negligible weights
-                            weightedSum1 += sortedPolls[j][field1] * weight;
-                            weightedSum2 += sortedPolls[j][field2] * weight;
-                            totalWeight += weight;
-                        }
-                    }
-
-                    aggregatedData.values[0][i] = totalWeight > 0 ? weightedSum1 / totalWeight : null;
-                    aggregatedData.values[1][i] = totalWeight > 0 ? weightedSum2 / totalWeight : null;
-                }
-            };
-
-            computeValues();
+            const [vals1, vals2] = calculateSeriesValues(sortedPolls, timestamps, field1, field2);
+            aggregatedData.values[0] = vals1;
+            aggregatedData.values[1] = vals2;
 
             aggregatedData.current = [ aggregatedData.values[0].at(-1), aggregatedData.values[1].at(-1) ];
             aggregatedData.spreads = aggregatedData.timestamps.map((_, i) => 
@@ -5193,8 +5227,9 @@
                         latestPollDateForMini = new Date(Math.min(latestPollDateForMini.getTime(), BIDEN_TERM_END_DATE.getTime())); 
                     }
     
-                    const val1Latest = calculateAggregateFromPolls(pollsForMini, latestPollDateForMini, aggConfig.pollFields[0]); 
-                    const val2Latest = calculateAggregateFromPolls(pollsForMini, latestPollDateForMini, aggConfig.pollFields[1]); 
+                    const [tmpVals1, tmpVals2] = calculateSeriesValues(sortedPolls, [latestPollDateForMini], aggConfig.pollFields[0], aggConfig.pollFields[1]);
+                    const val1Latest = tmpVals1[0];
+                    const val2Latest = tmpVals2[0];
                     val1Indicator.textContent = val1Latest !== null && !isNaN(val1Latest) ? val1Latest.toFixed(1) + '%' : '--.-%'; 
                     val2Indicator.textContent = val2Latest !== null && !isNaN(val2Latest) ? val2Latest.toFixed(1) + '%' : '--.-%'; 
     
@@ -5220,8 +5255,7 @@
                             miniTimestamps.push(latestPollDateForMini); 
                         } 
                         
-                        const miniValues1 = miniTimestamps.map(date => calculateAggregateFromPolls(pollsForMini, date, aggConfig.pollFields[0])); 
-                        const miniValues2 = miniTimestamps.map(date => calculateAggregateFromPolls(pollsForMini, date, aggConfig.pollFields[1])); 
+                        const [miniValues1, miniValues2] = calculateSeriesValues(sortedPolls, miniTimestamps, aggConfig.pollFields[0], aggConfig.pollFields[1]);
                         
                         path1Data = miniValues1.map((val, i) => ({ val, x: (i / Math.max(1, numMiniPoints - 1)) * 300 }))
                                             .filter(p => p.val !== null && !isNaN(p.val))
