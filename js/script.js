@@ -2813,19 +2813,6 @@
                 ] 
             },
             { 
-                id: 'favorable', name: 'Trump Favorability', shortName: 'Trump Fav.', category: 'National', isRace: false, 
-                candidates: ['Favorable', 'Unfavorable'], pollFields: ['approve', 'disapprove'], 
-                colors: ['var(--favorable-color)', 'var(--unfavorable-color)'], directColors: ['#a855f7', '#f97316'], 
-                colorGlow: ['var(--favorable-color-glow)', 'var(--unfavorable-color-glow)'], directGlowColors: ['rgba(168,85,247,0.4)', 'rgba(249,115,22,0.4)'],
-                 firstTermPolls: [ 
-                   
-                
-                ],
-                polls: [ 
-                    
-                ]
-            },
-            { 
                 id: 'race2024', name: '2024 Presidential Race', baseId: 'race2024', category: '2024 Election', isRace: true, 
                 candidates: ['Trump', 'Harris'], pollFields: ['approve', 'disapprove'], 
                 colors: ['var(--trump-color)', 'var(--harris-color)'], directColors: ['#ef4444', '#3b82f6'], 
@@ -3321,6 +3308,10 @@
         const downloadCancel = document.getElementById('downloadCancel');
         const downloadConfirm = document.getElementById('downloadConfirm');
 
+        const idleCallback = window.requestIdleCallback
+            ? (cb, opts) => window.requestIdleCallback(cb, opts)
+            : (cb, opts) => setTimeout(cb, (opts && opts.timeout) || 0);
+
         // --- Sampling & Rendering Helpers ---
         
         function computeBasePollWeight(poll) {
@@ -3392,7 +3383,7 @@
                     index = end;
                     
                     if (index < data.length) {
-                        requestIdleCallback(() => renderChunk(), { timeout: 16 });
+                        idleCallback(() => renderChunk(), { timeout: 16 });
                     } else {
                         resolve();
                     }
@@ -3685,7 +3676,7 @@
         function getCurrentTermPolls(aggregateConfig, term = currentTerm) {
             if (!aggregateConfig) return [];
             let polls = [];
-            if ((aggregateConfig.id === 'trump' || aggregateConfig.id === 'favorable') && term === 'first' && aggregateConfig.firstTermPolls) {
+            if (aggregateConfig.id === 'trump' && term === 'first' && aggregateConfig.firstTermPolls) {
                 polls = aggregateConfig.firstTermPolls;
             } else {
                 polls = aggregateConfig.polls || [];
@@ -3918,8 +3909,8 @@
             
             chartLoader.classList.add('active');
             
-            // Use requestIdleCallback for non-critical UI updates
-            requestIdleCallback(() => {
+            // Use idleCallback for non-critical UI updates
+            idleCallback(() => {
                 applyFilters(); 
                 updateAggregation(); 
                 
@@ -3935,7 +3926,7 @@
                         emptyState.style.display = 'flex';
                     }
                     
-                    termSelector.style.display = (currentAggregate.id === 'trump' || currentAggregate.id === 'favorable') ? 'flex' : 'none';
+                    termSelector.style.display = currentAggregate.id === 'trump' ? 'flex' : 'none';
                     updateHoverState(currentHoverIndex);
                     chartLoader.classList.remove('active');
                 });
@@ -4038,7 +4029,6 @@
 
             let approveClass, disapproveClass;
             switch(currentAggregate.baseId || currentAggregate.id){
-                case 'favorable': approveClass = 'poll-percentage favorable'; disapproveClass = 'poll-percentage unfavorable'; break;
                 case 'generic_ballot': approveClass = 'poll-percentage republican'; disapproveClass = 'poll-percentage democrat'; break;
                 case 'race2024': approveClass = 'poll-percentage trump'; disapproveClass = 'poll-percentage harris'; break;
                 default: approveClass = 'poll-percentage approve'; disapproveClass = 'poll-percentage disapprove';
@@ -4108,7 +4098,7 @@
                 return; 
             }
 
-            requestIdleCallback(() => {
+            idleCallback(() => {
                 try {
                     computeAggregationData(primaryPollsForLine);
                 } catch (error) {
@@ -4250,7 +4240,7 @@
             const { candidates, isRace } = currentAggregate;
             let name = currentAggregate.name;
             const termDisplay = currentTerm.charAt(0).toUpperCase() + currentTerm.slice(1);
-            if (currentAggregate.id === 'trump' || currentAggregate.id === 'favorable') {
+            if (currentAggregate.id === 'trump') {
                 name = `${name.replace('Trump', `Trump ${termDisplay} Term`)}`;
             }
 
@@ -4261,7 +4251,6 @@
             switch(currentAggregate.baseId || currentAggregate.id) {
                 case 'race2024': animClass1 = 'trump'; animClass2 = 'harris'; break;
                 case 'generic_ballot': animClass1 = 'republican'; animClass2 = 'democrat'; break;
-                case 'favorable': animClass1 = 'favorable'; animClass2 = 'unfavorable'; break;
                 default: animClass1 = 'approve'; animClass2 = 'disapprove'; break;
             }
             const animClasses = [animClass1, animClass2];
@@ -4994,7 +4983,6 @@
                     if(aggregateConfig.isRace) iconClass = "fa-flag-checkered";
                     else if(aggregateConfig.id.includes('approval')) iconClass = "fa-user-tie";
                     else if(aggregateConfig.id === 'direction') iconClass = "fa-compass";
-                    else if(aggregateConfig.id === 'favorable') iconClass = "fa-thumbs-up";
     
                     option.innerHTML = `<i class="fas ${iconClass} option-icon"></i><span>${aggregateConfig.name}</span><span class="option-badge"></span>`;
                     dropdownOptions.appendChild(option);
@@ -5110,7 +5098,7 @@
             clearSearch.style.display = 'none';
             filteredModeIndicator.classList.remove('active'); 
             
-            termSelector.style.display = (currentAggregate.id === 'trump' || currentAggregate.id === 'favorable') ? 'flex' : 'none';
+            termSelector.style.display = currentAggregate.id === 'trump' ? 'flex' : 'none';
     
             updatePollsterDropdown(); 
             loadPolls(); 
@@ -5806,8 +5794,7 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                         }
                         spreadsInfo.push({ label: `${leaderName} `, value: `+${Math.abs(mainSpreadVal).toFixed(1)}`, colorVar: leaderColor });
                     } else {
-                        let spreadLabel = (currentAggregate.id === 'favorable') ? 'Net Fav:' : 'Net:';
-                        spreadsInfo.push({ label: spreadLabel, value: `${mainSpreadVal >= 0 ? '+' : ''}${mainSpreadVal.toFixed(1)}%`, colorVar: mainSpreadVal >= 0 ? currentAggregate.colors[0] : currentAggregate.colors[1] });
+                        spreadsInfo.push({ label: 'Net:', value: `${mainSpreadVal >= 0 ? '+' : ''}${mainSpreadVal.toFixed(1)}%`, colorVar: mainSpreadVal >= 0 ? currentAggregate.colors[0] : currentAggregate.colors[1] });
                     }
                 }
                 hoverDisplayState.spreadsInfo = spreadsInfo;
