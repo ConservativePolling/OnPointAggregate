@@ -4621,7 +4621,7 @@
                 if (pointData.value === null || isNaN(pointData.value) || index >= hoverValueItemElements.length) return;
 
                 const item = hoverValueItemElements[index];
-                const hoverCircleSize = screenConfig.pollCircleSize + 4;
+                const hoverCircleSize = screenConfig.pollCircleSize + (window.innerWidth < 768 ? 1 : 4);
                 
                 item.circle.style.left = `${hoverDisplayState.xChart - (hoverCircleSize/2)}px`;
                 item.circle.style.top = `${pointData.yChart - (hoverCircleSize/2)}px`;
