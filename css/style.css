@@ -262,9 +262,9 @@
             display: inline-block;
             position: relative;
             width: 180px;
-            text-align: left;
+            text-align: center;
             margin: 0 8px;
-            height: 1.1em; 
+            height: 1.1em;
         }
 
         .animate-word { 
@@ -850,12 +850,12 @@
             transform: translateY(-2px);
         }
         
-        .search-icon { 
-            position: absolute; 
-            left: 18px; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            color: var(--text-secondary); 
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
             pointer-events: none;
             transition: color 0.3s ease;
         }
@@ -1085,13 +1085,14 @@
             50% { transform: scale(1.1); }
         }
         
-        .hover-value-label { 
-            position: absolute; 
-            font-size: 0.85rem; 
-            font-weight: 700; 
-            padding: 6px 12px; 
+        .hover-value-label {
+            position: absolute;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 6px 12px;
             border-radius: 8px;
             background: var(--chart-overlay);
+            opacity: 0.5;
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
             white-space: nowrap;
