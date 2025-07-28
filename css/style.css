@@ -2232,3 +2232,16 @@
             -webkit-transform: translateZ(0);
             -webkit-backface-visibility: hidden;
             -webkit-perspective: 1000;
+
+        }
+
+        @media (max-width: 480px) {
+            .poll-list-wrapper {
+                overflow-x: auto;
+            }
+            .mini-aggregate-display {
+                width: 240px;
+                min-width: 240px;
+                padding: 14px;
+            }
+        }
