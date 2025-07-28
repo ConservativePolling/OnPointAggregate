@@ -3264,7 +3264,6 @@
         const hoverValueItemElements = [];
         const glowEffectToggle = document.getElementById('glowEffectToggle');
         const lineThicknessSlider = document.getElementById('lineThicknessSlider');
-        const lineDetailSlider = document.getElementById('lineDetailSlider');
         const pollDensitySlider = document.getElementById('pollDensitySlider');
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
@@ -4818,9 +4817,12 @@
             highlightZoom.isHighlighting = true;
             highlightZoom.startX = x;
             highlightZoomRect.style.left = `${x}px`;
-            highlightZoomRect.style.top = `${margin.top}px`;
+            const heightRatio = (chartDimensions.yMax - chartDimensions.yMin) / (DEFAULT_Y_MAX - DEFAULT_Y_MIN);
+            const h = (height - margin.top - margin.bottom) * heightRatio;
+            const topOffset = margin.top + (height - margin.top - margin.bottom - h) / 2;
+            highlightZoomRect.style.top = `${topOffset}px`;
             highlightZoomRect.style.width = '0';
-            highlightZoomRect.style.height = `${height - margin.top - margin.bottom}px`;
+            highlightZoomRect.style.height = `${h}px`;
             highlightZoomRect.style.display = 'block';
             if(isTouch) event.preventDefault();
         }
@@ -4830,12 +4832,17 @@
             const isTouch = event.touches && event.touches.length > 0;
             const clientX = isTouch ? event.touches[0].clientX : event.clientX;
             const rect = pollChart.getBoundingClientRect();
-            const { margin, width } = chartDimensions;
+            const { margin, width, height, yMin, yMax } = chartDimensions;
             const currentX = Math.min(Math.max(margin.left, clientX - rect.left), width - margin.right);
             const left = Math.min(highlightZoom.startX, currentX);
             const w = Math.abs(currentX - highlightZoom.startX);
             highlightZoomRect.style.left = `${left}px`;
             highlightZoomRect.style.width = `${w}px`;
+            const heightRatio = (yMax - yMin) / (DEFAULT_Y_MAX - DEFAULT_Y_MIN);
+            const h = (height - margin.top - margin.bottom) * heightRatio;
+            const topOffset = margin.top + (height - margin.top - margin.bottom - h) / 2;
+            highlightZoomRect.style.top = `${topOffset}px`;
+            highlightZoomRect.style.height = `${h}px`;
             highlightZoomRect.style.display = w < 3 ? 'none' : 'block';
             if(isTouch) event.preventDefault();
         }
@@ -5669,14 +5676,7 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                     drawChart(false);
                 }
             });
-            
-            lineDetailSlider.addEventListener('input', (e) => {
-                currentLineDetail = parseInt(e.target.value);
-                if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
-                    loadPolls();
-                }
-            });
-    
+
             pollDensitySlider.addEventListener('input', (e) => {
                 if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
                     updateAggregation();
