@@ -30,7 +30,7 @@
             --scrollbar-thumb: rgba(255, 255, 255, 0.1);
             --card-shadow: 0 0 0 1px rgba(255, 255, 255, 0.03), var(--shadow-elevation-2);
             --chart-grid: rgba(255, 255, 255, 0.04);
-            --chart-overlay: rgba(16, 16, 31, 0.95);
+            --chart-overlay: rgba(16, 16, 31, 0.75);
             --zoom-hint-color: rgba(123, 97, 255, 0.3);
             --approve-color: #4ade80;
             --disapprove-color: #ff3d71;
@@ -69,7 +69,7 @@
             --scrollbar-thumb: rgba(255, 255, 255, 0.2);
             --card-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1), var(--shadow-elevation-2);
             --chart-grid: rgba(255, 255, 255, 0.1);
-            --chart-overlay: rgba(0, 0, 0, 0.95);
+            --chart-overlay: rgba(0, 0, 0, 0.75);
             --zoom-hint-color: rgba(123, 97, 255, 0.3);
             --approve-color: #4ade80;
             --disapprove-color: #ff3d71;
@@ -109,7 +109,7 @@
             --scrollbar-thumb: rgba(0, 0, 0, 0.1);
             --card-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03), var(--shadow-elevation-1);
             --chart-grid: rgba(0, 0, 0, 0.04);
-            --chart-overlay: rgba(255, 255, 255, 0.95);
+            --chart-overlay: rgba(255, 255, 255, 0.75);
             --zoom-hint-color: rgba(123, 97, 255, 0.15);
             --approve-color: #22c55e;
             --disapprove-color: #ef4444;
@@ -2140,6 +2140,18 @@
             }
             .download-options {
                 grid-template-columns: 1fr;
+            }
+
+            /* Smaller hover overlay elements for mobile */
+            .hover-info-top-item {
+                font-size: 0.75rem;
+                padding: 6px 10px;
+                border-radius: 8px;
+            }
+            .hover-value-label {
+                font-size: 0.75rem;
+                padding: 4px 8px;
+                border-radius: 6px;
             }
         }
         
