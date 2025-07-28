@@ -3220,6 +3220,8 @@
         let currentHoverIndex = null; 
         let hoveredPollPoint = null; 
         let highlightZoom = { isHighlighting: false, startX: null };
+        let lastTouchTime = 0;
+        let touchHoverActive = false;
         let currentZoomSelection = { isActive: false, startDate: null, endDate: null };
         let previousZoomStateBeforeCurrent = null; 
         let searchQuery = ''; 
@@ -4779,14 +4781,21 @@
             pollChart.addEventListener('mousedown', startZoomHighlight);
             document.addEventListener('mousemove', updateZoomHighlight);
             document.addEventListener('mouseup', endZoomHighlight);
+            pollChart.addEventListener('touchstart', handleTouchStart, { passive: false });
+            pollChart.addEventListener('touchmove', handleTouchMoveWrapper, { passive: false });
+            pollChart.addEventListener('touchend', handleTouchEnd);
+            pollChart.addEventListener('touchcancel', handleTouchEnd);
         }
 
         function startZoomHighlight(event) {
-            if (event.button !== 0) return;
+            const isTouch = event.touches && event.touches.length > 0;
+            const button = isTouch ? 0 : event.button;
+            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+            if (button !== 0) return;
             if (!aggregatedData.timestamps || aggregatedData.timestamps.length === 0) return;
             const rect = pollChart.getBoundingClientRect();
             const { margin, width, height } = chartDimensions;
-            const x = event.clientX - rect.left;
+            const x = clientX - rect.left;
             if (x < margin.left || x > width - margin.right) return;
             previousZoomStateBeforeCurrent = {
                 yMin: chartDimensions.yMin,
@@ -4801,33 +4810,39 @@
             highlightZoomRect.style.width = '0';
             highlightZoomRect.style.height = `${height - margin.top - margin.bottom}px`;
             highlightZoomRect.style.display = 'block';
-            event.preventDefault();
+            if(isTouch) event.preventDefault();
         }
 
         function updateZoomHighlight(event) {
             if (!highlightZoom.isHighlighting) return;
+            const isTouch = event.touches && event.touches.length > 0;
+            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
             const rect = pollChart.getBoundingClientRect();
             const { margin, width } = chartDimensions;
-            const currentX = Math.min(Math.max(margin.left, event.clientX - rect.left), width - margin.right);
+            const currentX = Math.min(Math.max(margin.left, clientX - rect.left), width - margin.right);
             const left = Math.min(highlightZoom.startX, currentX);
             const w = Math.abs(currentX - highlightZoom.startX);
             highlightZoomRect.style.left = `${left}px`;
             highlightZoomRect.style.width = `${w}px`;
             highlightZoomRect.style.display = w < 3 ? 'none' : 'block';
+            if(isTouch) event.preventDefault();
         }
 
         function endZoomHighlight(event) {
             if (!highlightZoom.isHighlighting) return;
+            const isTouch = event.changedTouches && event.changedTouches.length > 0;
+            const clientX = isTouch ? event.changedTouches[0].clientX : event.clientX;
             highlightZoom.isHighlighting = false;
             highlightZoomRect.style.display = 'none';
             const rect = pollChart.getBoundingClientRect();
             const { margin, width } = chartDimensions;
-            const endX = Math.min(Math.max(margin.left, event.clientX - rect.left), width - margin.right);
+            const endX = Math.min(Math.max(margin.left, clientX - rect.left), width - margin.right);
             const w = Math.abs(endX - highlightZoom.startX);
             if (w < 10 || aggregatedData.timestamps.length <= 1) return;
             const startDate = xToDate(Math.min(highlightZoom.startX, endX));
             const endDate = xToDate(Math.max(highlightZoom.startX, endX));
             applyZoomToRange(startDate, endDate);
+            if(isTouch) event.preventDefault();
         }
 
         function applyZoomToRange(startDate, endDate) { 
@@ -5812,12 +5827,16 @@ For questions about methodology, contact: info@onpointaggregate.com`;
             highlightComparativeBars(dataIndex);
         }
     
-        function handleMouseMove(event) { 
+        function handleMouseMove(event) {
             if (highlightZoom.isHighlighting) return;
-            
+            const isTouch = event.touches && event.touches.length > 0;
+            const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+            const clientY = isTouch ? event.touches[0].clientY : event.clientY;
+            if(isTouch) event.preventDefault();
+
             const rect = pollChart.getBoundingClientRect();
-            const xOnCanvas = event.clientX - rect.left;
-            const yOnCanvas = event.clientY - rect.top;
+            const xOnCanvas = clientX - rect.left;
+            const yOnCanvas = clientY - rect.top;
             
             let foundHoveredPoint = null;
             const gridX = Math.floor(xOnCanvas / SPATIAL_GRID_SIZE);
@@ -5872,6 +5891,39 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                     drawVerticalIndicator(xOnCanvas);
                     drawFadedChart();
                 }
+            }
+        }
+
+        function handleTouchStart(e){
+            if(e.touches.length !== 1) return;
+            const now = Date.now();
+            if(now - lastTouchTime < 300){
+                startZoomHighlight(e);
+                touchHoverActive = false;
+            } else {
+                touchHoverActive = true;
+                handleMouseMove(e);
+            }
+            lastTouchTime = now;
+        }
+
+        function handleTouchMoveWrapper(e){
+            if(highlightZoom.isHighlighting){
+                updateZoomHighlight(e);
+            } else if(touchHoverActive){
+                handleMouseMove(e);
+            }
+        }
+
+        function handleTouchEnd(e){
+            if(highlightZoom.isHighlighting){
+                endZoomHighlight(e);
+            }
+            if(touchHoverActive){
+                updateHoverState(null);
+                hoveredPollPoint = null;
+                pollTooltip.style.display = 'none';
+                touchHoverActive = false;
             }
         }
         
