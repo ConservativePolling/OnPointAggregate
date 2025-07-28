@@ -3322,6 +3322,27 @@
             return qualityWeight * sampleWeight;
         }
 
+        function preprocessPollData(){
+            const processPollArray = arr => arr.map(p => {
+                if(!(p.date instanceof Date)){
+                    p.date = new Date(p.date + 'T12:00:00Z');
+                }
+                if(p.baseWeight === undefined){
+                    p.baseWeight = computeBasePollWeight(p);
+                }
+                return p;
+            });
+
+            AGGREGATES.forEach(agg => {
+                if(Array.isArray(agg.polls)){
+                    agg.polls = processPollArray(agg.polls);
+                }
+                if(Array.isArray(agg.firstTermPolls)){
+                    agg.firstTermPolls = processPollArray(agg.firstTermPolls);
+                }
+            });
+        }
+
         function calculatePollWeightDirect(poll, referenceDate) {
             const pollDate = poll.date.getTime();
             const daysDiff = (referenceDate.getTime() - pollDate) / MS_PER_DAY;
@@ -3677,19 +3698,10 @@
     
         function getCurrentTermPolls(aggregateConfig, term = currentTerm) {
             if (!aggregateConfig) return [];
-            let polls = [];
             if (aggregateConfig.id === 'trump' && term === 'first' && aggregateConfig.firstTermPolls) {
-                polls = aggregateConfig.firstTermPolls;
-            } else {
-                polls = aggregateConfig.polls || [];
+                return aggregateConfig.firstTermPolls;
             }
-            return polls.map(p => {
-                const pollObj = (p.date instanceof Date) ? p : { ...p, date: new Date(p.date + 'T12:00:00Z') };
-                if (pollObj.baseWeight === undefined) {
-                    pollObj.baseWeight = computeBasePollWeight(pollObj);
-                }
-                return pollObj;
-            });
+            return aggregateConfig.polls || [];
         }
 
         function updatePollsterDropdown(){
@@ -6004,5 +6016,8 @@ For questions about methodology, contact: info@onpointaggregate.com`;
     
         document.addEventListener('DOMContentLoaded', () => {
              pageLoader.classList.add('active');
-             setTimeout(initApp, 500);
+             setTimeout(() => {
+                 preprocessPollData();
+                 initApp();
+             }, 500);
         });
