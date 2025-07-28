@@ -3322,6 +3322,56 @@
             return qualityWeight * sampleWeight;
         }
 
+        function computeMarginForAggregate(aggregateConfig, term = 'second') {
+            let pollsUsed = term === 'first' ? aggregateConfig.firstTermPolls : aggregateConfig.polls;
+            if (!pollsUsed || pollsUsed.length === 0) return 0;
+
+            const lastPollDate = new Date(Math.max(...pollsUsed.map(p => p.date.getTime())));
+
+            let refDate = lastPollDate;
+            if (aggregateConfig.isRace && lastPollDate.getTime() <= ELECTION_END_DATE_2024.getTime()) {
+                refDate = new Date(Math.min(lastPollDate.getTime(), ELECTION_END_DATE_2024.getTime()));
+            } else if (aggregateConfig.id === 'trump' && term === 'first') {
+                refDate = new Date(Math.min(lastPollDate.getTime(), FIRST_TERM_END_DATE.getTime()));
+            } else if (aggregateConfig.id === 'biden') {
+                refDate = new Date(Math.min(lastPollDate.getTime(), BIDEN_TERM_END_DATE.getTime()));
+            }
+
+            const sorted = [...pollsUsed].sort((a,b) => a.date.getTime() - b.date.getTime());
+            const [vals1, vals2] = calculateSeriesValues(sorted, [refDate], aggregateConfig.pollFields[0], aggregateConfig.pollFields[1]);
+            const aggVal1 = vals1[0];
+            const aggVal2 = vals2[0];
+            return (aggVal1 || 0) - (aggVal2 || 0);
+        }
+
+        function preprocessPollData(){
+            const processPollArray = arr => arr.map(p => {
+                if(!(p.date instanceof Date)){
+                    p.date = new Date(p.date + 'T12:00:00Z');
+                }
+                if(p.baseWeight === undefined){
+                    p.baseWeight = computeBasePollWeight(p);
+                }
+                return p;
+            });
+
+            AGGREGATES.forEach(agg => {
+                if(Array.isArray(agg.polls)){
+                    agg.polls = processPollArray(agg.polls);
+                }
+                if(Array.isArray(agg.firstTermPolls)){
+                    agg.firstTermPolls = processPollArray(agg.firstTermPolls);
+                }
+
+                agg.marginCache = {
+                    second: computeMarginForAggregate(agg, 'second')
+                };
+                if(agg.firstTermPolls){
+                    agg.marginCache.first = computeMarginForAggregate(agg, 'first');
+                }
+            });
+        }
+
         function calculatePollWeightDirect(poll, referenceDate) {
             const pollDate = poll.date.getTime();
             const daysDiff = (referenceDate.getTime() - pollDate) / MS_PER_DAY;
@@ -3602,26 +3652,10 @@
 
        function calculateAllMargins() {
            return AGGREGATES.map(aggregateConfig => {
-               let pollsUsed = getCurrentTermPolls(aggregateConfig, currentTerm);
-               if (!pollsUsed || pollsUsed.length === 0) return { id: aggregateConfig.id, margin: 0 };
-                
-                const lastPollDate = new Date(Math.max(...pollsUsed.map(poll => poll.date.getTime())));
-                
-                let refDate = lastPollDate;
-                if (aggregateConfig.isRace && lastPollDate.getTime() <= ELECTION_END_DATE_2024.getTime()) {
-                    refDate = new Date(Math.min(lastPollDate.getTime(), ELECTION_END_DATE_2024.getTime()));
-                } else if (aggregateConfig.id === 'trump' && currentTerm === 'first') {
-                    refDate = new Date(Math.min(lastPollDate.getTime(), FIRST_TERM_END_DATE.getTime()));
-                } else if (aggregateConfig.id === 'biden') {
-                     refDate = new Date(Math.min(lastPollDate.getTime(), BIDEN_TERM_END_DATE.getTime()));
-                }
-
-                const sorted = [...pollsUsed].sort((a,b) => a.date.getTime() - b.date.getTime());
-                const [vals1, vals2] = calculateSeriesValues(sorted, [refDate], aggregateConfig.pollFields[0], aggregateConfig.pollFields[1]);
-                const aggVal1 = vals1[0];
-                const aggVal2 = vals2[0];
-                return { id: aggregateConfig.id, margin: (aggVal1 || 0) - (aggVal2 || 0) };
-            });
+               if (!aggregateConfig.marginCache) return { id: aggregateConfig.id, margin: 0 };
+               const margin = currentTerm === 'first' ? aggregateConfig.marginCache.first : aggregateConfig.marginCache.second;
+               return { id: aggregateConfig.id, margin: margin ?? 0 };
+           });
         }
     
         function updateDropdownMargins() {
@@ -3677,19 +3711,10 @@
     
         function getCurrentTermPolls(aggregateConfig, term = currentTerm) {
             if (!aggregateConfig) return [];
-            let polls = [];
             if (aggregateConfig.id === 'trump' && term === 'first' && aggregateConfig.firstTermPolls) {
-                polls = aggregateConfig.firstTermPolls;
-            } else {
-                polls = aggregateConfig.polls || [];
+                return aggregateConfig.firstTermPolls;
             }
-            return polls.map(p => {
-                const pollObj = (p.date instanceof Date) ? p : { ...p, date: new Date(p.date + 'T12:00:00Z') };
-                if (pollObj.baseWeight === undefined) {
-                    pollObj.baseWeight = computeBasePollWeight(pollObj);
-                }
-                return pollObj;
-            });
+            return aggregateConfig.polls || [];
         }
 
         function updatePollsterDropdown(){
@@ -6004,5 +6029,8 @@ For questions about methodology, contact: info@onpointaggregate.com`;
     
         document.addEventListener('DOMContentLoaded', () => {
              pageLoader.classList.add('active');
-             setTimeout(initApp, 500);
+             setTimeout(() => {
+                 preprocessPollData();
+                 initApp();
+             }, 500);
         });
