@@ -3264,7 +3264,6 @@
         const hoverValueItemElements = [];
         const glowEffectToggle = document.getElementById('glowEffectToggle');
         const lineThicknessSlider = document.getElementById('lineThicknessSlider');
-        const lineDetailSlider = document.getElementById('lineDetailSlider');
         const pollDensitySlider = document.getElementById('pollDensitySlider');
         const zoomInBtn = document.getElementById('zoomInBtn');
         const zoomOutBtn = document.getElementById('zoomOutBtn');
@@ -3359,35 +3358,16 @@
             return Math.max(1, Math.ceil(baseInterval * detailMultiplier));
         }
         
-        function adaptivePollPointDistribution(polls, maxPoints, timeRange) {
+        function limitPollPoints(polls, maxPoints) {
             if (polls.length <= maxPoints) return polls;
-            
-            // Group polls by time periods and ensure even distribution
-            const periods = Math.min(20, Math.ceil(timeRange / (30 * MS_PER_DAY))); // ~monthly periods
-            const pollsPerPeriod = Math.ceil(maxPoints / periods);
-            
+
             const sortedPolls = [...polls].sort((a, b) => a.date.getTime() - b.date.getTime());
+            const step = (sortedPolls.length - 1) / (maxPoints - 1);
             const result = [];
-            
-            for (let i = 0; i < periods; i++) {
-                const startTime = sortedPolls[0].date.getTime() + (timeRange * i / periods);
-                const endTime = sortedPolls[0].date.getTime() + (timeRange * (i + 1) / periods);
-                
-                const periodPolls = sortedPolls.filter(p => 
-                    p.date.getTime() >= startTime && p.date.getTime() < endTime
-                );
-                
-                if (periodPolls.length > pollsPerPeriod) {
-                    // Take evenly spaced polls from this period
-                    const step = Math.ceil(periodPolls.length / pollsPerPeriod);
-                    for (let j = 0; j < periodPolls.length; j += step) {
-                        result.push(periodPolls[j]);
-                    }
-                } else {
-                    result.push(...periodPolls);
-                }
+            for (let i = 0; i < maxPoints; i++) {
+                const idx = Math.round(i * step);
+                result.push(sortedPolls[idx]);
             }
-            
             return result;
         }
         
@@ -3421,11 +3401,11 @@
         function getScreenSizeConfig() {
             const width = window.innerWidth;
             if (width < 768) {
-                return { pollPointDensity: 15, miniChartPoints: 20, pollCircleSize: 6 };
+                return { pollPointDensity: 30, miniChartPoints: 20, pollCircleSize: 6 };
             } else if (width < 1200) {
-                return { pollPointDensity: 25, miniChartPoints: 30, pollCircleSize: 8 };
+                return { pollPointDensity: 60, miniChartPoints: 30, pollCircleSize: 8 };
             } else {
-                return { pollPointDensity: 35, miniChartPoints: 40, pollCircleSize: 8 };
+                return { pollPointDensity: 90, miniChartPoints: 40, pollCircleSize: 8 };
             }
         }
         
@@ -4209,8 +4189,7 @@
                 p.date.getTime() <= endDateForAggregation.getTime()
             );
             
-            const timeRange = endDateForAggregation.getTime() - startDateForAggregation.getTime();
-            visiblePolls = adaptivePollPointDistribution(visiblePolls, maxPoints, timeRange);
+            visiblePolls = limitPollPoints(visiblePolls, maxPoints);
             
             aggregatedData.pollPoints = [];
             visiblePolls.forEach(poll => {
@@ -4818,9 +4797,12 @@
             highlightZoom.isHighlighting = true;
             highlightZoom.startX = x;
             highlightZoomRect.style.left = `${x}px`;
-            highlightZoomRect.style.top = `${margin.top}px`;
+            const heightRatio = (chartDimensions.yMax - chartDimensions.yMin) / (DEFAULT_Y_MAX - DEFAULT_Y_MIN);
+            const h = (height - margin.top - margin.bottom) * heightRatio;
+            const topOffset = margin.top + (height - margin.top - margin.bottom - h) / 2;
+            highlightZoomRect.style.top = `${topOffset}px`;
             highlightZoomRect.style.width = '0';
-            highlightZoomRect.style.height = `${height - margin.top - margin.bottom}px`;
+            highlightZoomRect.style.height = `${h}px`;
             highlightZoomRect.style.display = 'block';
             if(isTouch) event.preventDefault();
         }
@@ -4830,12 +4812,17 @@
             const isTouch = event.touches && event.touches.length > 0;
             const clientX = isTouch ? event.touches[0].clientX : event.clientX;
             const rect = pollChart.getBoundingClientRect();
-            const { margin, width } = chartDimensions;
+            const { margin, width, height, yMin, yMax } = chartDimensions;
             const currentX = Math.min(Math.max(margin.left, clientX - rect.left), width - margin.right);
             const left = Math.min(highlightZoom.startX, currentX);
             const w = Math.abs(currentX - highlightZoom.startX);
             highlightZoomRect.style.left = `${left}px`;
             highlightZoomRect.style.width = `${w}px`;
+            const heightRatio = (yMax - yMin) / (DEFAULT_Y_MAX - DEFAULT_Y_MIN);
+            const h = (height - margin.top - margin.bottom) * heightRatio;
+            const topOffset = margin.top + (height - margin.top - margin.bottom - h) / 2;
+            highlightZoomRect.style.top = `${topOffset}px`;
+            highlightZoomRect.style.height = `${h}px`;
             highlightZoomRect.style.display = w < 3 ? 'none' : 'block';
             if(isTouch) event.preventDefault();
         }
@@ -5669,14 +5656,7 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                     drawChart(false);
                 }
             });
-            
-            lineDetailSlider.addEventListener('input', (e) => {
-                currentLineDetail = parseInt(e.target.value);
-                if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
-                    loadPolls();
-                }
-            });
-    
+
             pollDensitySlider.addEventListener('input', (e) => {
                 if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
                     updateAggregation();
