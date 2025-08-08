@@ -2,9 +2,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>On Point Aggregate 2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="css/style.css" onload="this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="css/style.css"></noscript>
+    <link rel="preload" as="script" href="js/script.js">
 </head>
 <body class="dark-mode">
     <div class="loading-indicator" id="pageLoader">
@@ -167,7 +171,7 @@
                     </div>
                     <div class="toggle">
                         <i class="fas fa-circle-nodes"></i>
-                        <input type="range" id="pollDensitySlider" min="5" max="300" step="5" value="25" data-tooltip="Poll Point Density">
+
                     </div>
                 </div>
                 <div class="zoom-controls">
@@ -241,5 +245,5 @@
         <span class="theme-icon" id="minimalDarkIcon"><i class="fas fa-circle"></i></span>
     </div>
 
-    <script src="js/script.js"></script>
+    <script src="js/script.js" defer></script>
 </body></html>

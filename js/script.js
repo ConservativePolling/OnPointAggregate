@@ -3905,9 +3905,15 @@
             
             // Use idleCallback for non-critical UI updates
             idleCallback(() => {
-                applyFilters(); 
-                updateAggregation(); 
-                
+                applyFilters();
+                if (selectedPollster === 'all' && searchQuery.trim() === '' &&
+                    currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
+                    aggregatedData = JSON.parse(JSON.stringify(currentAggregate.precomputed[currentTerm]));
+                    isProcessing = false;
+                } else {
+                    updateAggregation();
+                }
+
                 // Progressive poll list rendering
                 renderPollList().then(() => {
                     if (aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
@@ -3941,7 +3947,7 @@
             emptyState.style.display = 'flex';
         }
 
-        function renderPollList(){ 
+        function renderPollList(){
             pollList.innerHTML = '';
             if(filteredPolls.length === 0){
                 noPolls.style.display = 'flex';
@@ -4221,6 +4227,43 @@
                 displayDate = aggregatedData.timestamps[aggregatedData.timestamps.length - 1];
             }
             currentDateEl.textContent = formatDisplayDate(displayDate);
+        }
+
+        function computeAggregatedSnapshot(polls, aggConfig, term) {
+            const prevAgg = currentAggregate;
+            const prevTerm = currentTerm;
+            const prevData = aggregatedData;
+            const prevUpdateDisplay = updateDisplay;
+            let result;
+            currentAggregate = aggConfig;
+            currentTerm = term;
+            aggregatedData = { timestamps: [], values: [[], []], spreads: [], current: [null, null], pollPoints: [] };
+            updateDisplay = () => {};
+            try {
+                computeAggregationData([...polls]);
+                result = JSON.parse(JSON.stringify(aggregatedData));
+            } finally {
+                currentAggregate = prevAgg;
+                currentTerm = prevTerm;
+                aggregatedData = prevData;
+                updateDisplay = prevUpdateDisplay;
+            }
+            return result;
+        }
+
+        function precomputeAllAggregates() {
+            AGGREGATES.forEach(agg => {
+                const terms = (agg.id === 'trump' && agg.firstTermPolls) ? ['first', 'second'] : ['second'];
+                agg.precomputed = {};
+                terms.forEach(term => {
+                    const polls = getCurrentTermPolls(agg, term);
+                    if (polls && polls.length > 0) {
+                        agg.precomputed[term] = computeAggregatedSnapshot(polls, agg, term);
+                    } else {
+                        agg.precomputed[term] = { timestamps: [], values: [[], []], spreads: [], current: [null, null], pollPoints: [] };
+                    }
+                });
+            });
         }
 
         function updateTitle(){
@@ -5703,9 +5746,7 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 } 
             }, 100));
 
-            setTimeout(() => {
-                pageLoader.classList.add('hidden');
-            }, 1500);
+            // Page loader is hidden after precomputations complete
         }
         
         function initTermSelector(){
@@ -5994,10 +6035,11 @@ For questions about methodology, contact: info@onpointaggregate.com`;
             pollTooltip.style.top = `${topPos}px`;
         }
     
-        document.addEventListener('DOMContentLoaded', () => {
-             pageLoader.classList.add('active');
-             setTimeout(() => {
-                 preprocessPollData();
-                 initApp();
-             }, 500);
+        document.addEventListener('DOMContentLoaded', async () => {
+            pageLoader.classList.add('active');
+            await document.fonts.ready;
+            preprocessPollData();
+            precomputeAllAggregates();
+            initApp();
+            pageLoader.classList.add('hidden');
         });
