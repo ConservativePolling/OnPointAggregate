@@ -3908,7 +3908,7 @@
                 applyFilters();
                 if (selectedPollster === 'all' && searchQuery.trim() === '' &&
                     currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
-                    aggregatedData = JSON.parse(JSON.stringify(currentAggregate.precomputed[currentTerm]));
+                    aggregatedData = cloneAggregatedData(currentAggregate.precomputed[currentTerm]);
                     isProcessing = false;
                 } else {
                     updateAggregation();
@@ -4231,6 +4231,20 @@
             currentDateEl.textContent = formatDisplayDate(displayDate);
         }
 
+        function cloneAggregatedData(data) {
+            if (typeof structuredClone === 'function') {
+                return structuredClone(data);
+            }
+            const clone = JSON.parse(JSON.stringify(data));
+            if (Array.isArray(clone.timestamps)) {
+                clone.timestamps = clone.timestamps.map(t => new Date(t));
+            }
+            if (Array.isArray(clone.pollPoints)) {
+                clone.pollPoints = clone.pollPoints.map(p => ({ ...p, date: new Date(p.date) }));
+            }
+            return clone;
+        }
+
         function computeAggregatedSnapshot(polls, aggConfig, term) {
             const prevAgg = currentAggregate;
             const prevTerm = currentTerm;
@@ -4243,7 +4257,7 @@
             updateDisplay = () => {};
             try {
                 computeAggregationData([...polls]);
-                result = JSON.parse(JSON.stringify(aggregatedData));
+                result = cloneAggregatedData(aggregatedData);
             } finally {
                 currentAggregate = prevAgg;
                 currentTerm = prevTerm;
