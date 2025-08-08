@@ -4188,7 +4188,9 @@
             );
             
             const screenConfig = getScreenSizeConfig();
-            const maxPoints = parseInt(pollDensitySlider.value) || screenConfig.pollPointDensity;
+            const maxPoints = pollDensitySlider
+                ? (parseInt(pollDensitySlider.value) || screenConfig.pollPointDensity)
+                : screenConfig.pollPointDensity;
             
             let visiblePolls = sortedPolls.filter(p => 
                 p.date.getTime() >= startDateForAggregation.getTime() && 
@@ -5700,12 +5702,14 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 }
             });
 
-            pollDensitySlider.addEventListener('input', (e) => {
-                if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
-                    updateAggregation();
-                    drawChart(false);
-                }
-            });
+            if (pollDensitySlider) {
+                pollDensitySlider.addEventListener('input', (e) => {
+                    if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
+                        updateAggregation();
+                        drawChart(false);
+                    }
+                });
+            }
             
             const createZoomAction = (actionFn) => () => {
                 if (!aggregatedData.timestamps || aggregatedData.timestamps.length === 0) return;
@@ -5733,14 +5737,16 @@ For questions about methodology, contact: info@onpointaggregate.com`;
             comparativeChart.addEventListener('mousemove', handleComparativeHover);
             comparativeChart.addEventListener('mouseleave', handleComparativeLeave);
             
-            window.addEventListener('resize', debounce(() => { 
-                pollDensitySlider.value = getScreenSizeConfig().pollPointDensity;
-                if (aggregatedData.timestamps && aggregatedData.timestamps.length > 0) { 
-                    drawChart(false); 
-                    drawComparativeChart(currentHoverIndex); 
-                    generateXAxisDates(true); 
+            window.addEventListener('resize', debounce(() => {
+                if (pollDensitySlider) {
+                    pollDensitySlider.value = getScreenSizeConfig().pollPointDensity;
+                }
+                if (aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
+                    drawChart(false);
+                    drawComparativeChart(currentHoverIndex);
+                    generateXAxisDates(true);
                     updateHoverState(currentHoverIndex);
-                } else { 
+                } else {
                     updateChartDimensions(); 
                     generateGrid(); 
                 } 
