@@ -3908,7 +3908,7 @@
                 applyFilters();
                 if (selectedPollster === 'all' && searchQuery.trim() === '' &&
                     currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
-                    aggregatedData = JSON.parse(JSON.stringify(currentAggregate.precomputed[currentTerm]));
+                    aggregatedData = cloneAggregatedData(currentAggregate.precomputed[currentTerm]);
                     isProcessing = false;
                 } else {
                     updateAggregation();
@@ -4188,7 +4188,9 @@
             );
             
             const screenConfig = getScreenSizeConfig();
-            const maxPoints = parseInt(pollDensitySlider.value) || screenConfig.pollPointDensity;
+            const maxPoints = pollDensitySlider
+                ? (parseInt(pollDensitySlider.value) || screenConfig.pollPointDensity)
+                : screenConfig.pollPointDensity;
             
             let visiblePolls = sortedPolls.filter(p => 
                 p.date.getTime() >= startDateForAggregation.getTime() && 
@@ -4229,6 +4231,20 @@
             currentDateEl.textContent = formatDisplayDate(displayDate);
         }
 
+        function cloneAggregatedData(data) {
+            if (typeof structuredClone === 'function') {
+                return structuredClone(data);
+            }
+            const clone = JSON.parse(JSON.stringify(data));
+            if (Array.isArray(clone.timestamps)) {
+                clone.timestamps = clone.timestamps.map(t => new Date(t));
+            }
+            if (Array.isArray(clone.pollPoints)) {
+                clone.pollPoints = clone.pollPoints.map(p => ({ ...p, date: new Date(p.date) }));
+            }
+            return clone;
+        }
+
         function computeAggregatedSnapshot(polls, aggConfig, term) {
             const prevAgg = currentAggregate;
             const prevTerm = currentTerm;
@@ -4241,7 +4257,7 @@
             updateDisplay = () => {};
             try {
                 computeAggregationData([...polls]);
-                result = JSON.parse(JSON.stringify(aggregatedData));
+                result = cloneAggregatedData(aggregatedData);
             } finally {
                 currentAggregate = prevAgg;
                 currentTerm = prevTerm;
@@ -5700,12 +5716,14 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 }
             });
 
-            pollDensitySlider.addEventListener('input', (e) => {
-                if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
-                    updateAggregation();
-                    drawChart(false);
-                }
-            });
+            if (pollDensitySlider) {
+                pollDensitySlider.addEventListener('input', (e) => {
+                    if(aggregatedData.timestamps && aggregatedData.timestamps.length > 0){
+                        updateAggregation();
+                        drawChart(false);
+                    }
+                });
+            }
             
             const createZoomAction = (actionFn) => () => {
                 if (!aggregatedData.timestamps || aggregatedData.timestamps.length === 0) return;
@@ -5733,14 +5751,16 @@ For questions about methodology, contact: info@onpointaggregate.com`;
             comparativeChart.addEventListener('mousemove', handleComparativeHover);
             comparativeChart.addEventListener('mouseleave', handleComparativeLeave);
             
-            window.addEventListener('resize', debounce(() => { 
-                pollDensitySlider.value = getScreenSizeConfig().pollPointDensity;
-                if (aggregatedData.timestamps && aggregatedData.timestamps.length > 0) { 
-                    drawChart(false); 
-                    drawComparativeChart(currentHoverIndex); 
-                    generateXAxisDates(true); 
+            window.addEventListener('resize', debounce(() => {
+                if (pollDensitySlider) {
+                    pollDensitySlider.value = getScreenSizeConfig().pollPointDensity;
+                }
+                if (aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
+                    drawChart(false);
+                    drawComparativeChart(currentHoverIndex);
+                    generateXAxisDates(true);
                     updateHoverState(currentHoverIndex);
-                } else { 
+                } else {
                     updateChartDimensions(); 
                     generateGrid(); 
                 } 
