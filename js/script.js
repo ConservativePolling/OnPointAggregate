@@ -5061,7 +5061,14 @@
                     dropdownOptions.appendChild(option);
                 });
             });
-    
+
+            // Add coming soon placeholder for NJ Gubernatorial Forecast
+            const njOption = document.createElement('div');
+            njOption.className = 'dropdown-option coming-soon';
+            njOption.innerHTML = `<i class="fas fa-chart-line option-icon"></i><span>NJ Gubernatorial Forecast</span>`;
+            njOption.setAttribute('data-tooltip', 'Coming Soon');
+            dropdownOptions.appendChild(njOption);
+
             dropdownSelected.addEventListener('click', () => {
                 dropdownSelected.classList.toggle('active');
                 dropdownOptions.classList.toggle('active');
