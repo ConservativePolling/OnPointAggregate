@@ -5032,6 +5032,7 @@
             animateZoom(chartDimensions.yMin, chartDimensions.yMax, newMin, newMax, 500);
         }
     
+
         function initMainDropdown(){
             dropdownOptions.innerHTML = '';
 
@@ -5055,10 +5056,11 @@
             }, {});
 
             Object.keys(groupedAggregates).sort().forEach(categoryName => {
-                const header = document.createElement('div');
+  const header = document.createElement('div');
                 header.className = 'dropdown-option-header';
                 header.textContent = categoryName;
                 dropdownOptions.appendChild(header);
+
 
                 groupedAggregates[categoryName].sort((a,b) => a.name.localeCompare(b.name)).forEach(aggregateConfig => {
                     const option = document.createElement('div');
@@ -5074,6 +5076,7 @@
                     dropdownOptions.appendChild(option);
                 });
             });
+
 
             dropdownSelected.addEventListener('click', () => {
                 dropdownSelected.classList.toggle('active');
