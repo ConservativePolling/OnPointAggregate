@@ -433,6 +433,20 @@
         .dropdown-option.selected::before {
             display: none;
         }
+
+        .dropdown-option.coming-soon {
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        .dropdown-option.coming-soon:hover {
+            background: none;
+            padding-left: 20px;
+        }
+
+        .dropdown-option.coming-soon::before {
+            display: none;
+        }
         
         .card { 
             background: var(--card-bg); 
