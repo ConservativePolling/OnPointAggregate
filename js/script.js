@@ -2868,12 +2868,12 @@
   { pollster: "I&I/TIPP",          date: "2024-08-02", sampleSize: 1326, approve: 45, disapprove: 46, quality: "A+" }
                 ]
             },
-            { 
-                id: 'generic_ballot', name: 'Generic Congressional Ballot', shortName: 'Generic Ballot', category: '2024 Election', isRace: true, 
-                candidates: ['Republican', 'Democrat'], pollFields: ['approve', 'disapprove'], 
-                colors: ['var(--trump-color)', 'var(--harris-color)'], directColors: ['#ef4444', '#3b82f6'], 
+            {
+                id: 'generic_ballot', name: '2026 Generic Ballot', shortName: '2026 Generic Ballot', category: '2026 Election', isRace: true,
+                candidates: ['Republican', 'Democrat'], pollFields: ['approve', 'disapprove'],
+                colors: ['var(--trump-color)', 'var(--harris-color)'], directColors: ['#ef4444', '#3b82f6'],
                 colorGlow: ['var(--trump-color-glow)', 'var(--harris-color-glow)'], directGlowColors: ['rgba(239,68,68,0.4)', 'rgba(59,130,246,0.4)'],
-                polls: [ 
+                polls: [
                     
   /* ========== Quantus Insights (RV, n = 1 000) ========== */
   { pollster: "Quantus Insights", date: "2025-07-16", sampleSize: 1000, approve: 42, disapprove: 44, quality: "A+" },
@@ -3222,6 +3222,7 @@
         let highlightZoom = { isHighlighting: false, startX: null };
         let lastTouchTime = 0;
         let touchHoverActive = false;
+        let pinchZoom = { active: false, startDistance: 0, lastDistance: 0 };
         let currentZoomSelection = { isActive: false, startDate: null, endDate: null };
         let previousZoomStateBeforeCurrent = null; 
         let searchQuery = ''; 
@@ -5031,8 +5032,21 @@
             animateZoom(chartDimensions.yMin, chartDimensions.yMax, newMin, newMax, 500);
         }
     
+
         function initMainDropdown(){
             dropdownOptions.innerHTML = '';
+
+            const header2025 = document.createElement('div');
+            header2025.className = 'dropdown-option-header';
+            header2025.textContent = '2025 Elections';
+            dropdownOptions.appendChild(header2025);
+
+            const njOption = document.createElement('div');
+            njOption.className = 'dropdown-option coming-soon';
+            njOption.innerHTML = `<i class="fas fa-chart-line option-icon"></i><span>NJ Gubernatorial Forecast</span>`;
+            njOption.setAttribute('data-tooltip', 'Coming Soon');
+            dropdownOptions.appendChild(njOption);
+
             const groupedAggregates = AGGREGATES.reduce((acc, agg) => {
                 if (agg.state) return acc;
                 const category = agg.category || 'General';
@@ -5040,34 +5054,29 @@
                 acc[category].push(agg);
                 return acc;
             }, {});
-    
-            Object.keys(groupedAggregates).forEach(categoryName => {
-                const header = document.createElement('div');
+
+            Object.keys(groupedAggregates).sort().forEach(categoryName => {
+  const header = document.createElement('div');
                 header.className = 'dropdown-option-header';
                 header.textContent = categoryName;
                 dropdownOptions.appendChild(header);
-    
-                groupedAggregates[categoryName].forEach(aggregateConfig => {
+
+
+                groupedAggregates[categoryName].sort((a,b) => a.name.localeCompare(b.name)).forEach(aggregateConfig => {
                     const option = document.createElement('div');
                     option.className = 'dropdown-option';
                     option.dataset.aggregate = aggregateConfig.id;
-                    
+
                     let iconClass = "fa-chart-line";
                     if(aggregateConfig.isRace) iconClass = "fa-flag-checkered";
                     else if(aggregateConfig.id.includes('approval')) iconClass = "fa-user-tie";
                     else if(aggregateConfig.id === 'direction') iconClass = "fa-compass";
-    
+
                     option.innerHTML = `<i class="fas ${iconClass} option-icon"></i><span>${aggregateConfig.name}</span><span class="option-badge"></span>`;
                     dropdownOptions.appendChild(option);
                 });
             });
 
-            // Add coming soon placeholder for NJ Gubernatorial Forecast
-            const njOption = document.createElement('div');
-            njOption.className = 'dropdown-option coming-soon';
-            njOption.innerHTML = `<i class="fas fa-chart-line option-icon"></i><span>NJ Gubernatorial Forecast</span>`;
-            njOption.setAttribute('data-tooltip', 'Coming Soon');
-            dropdownOptions.appendChild(njOption);
 
             dropdownSelected.addEventListener('click', () => {
                 dropdownSelected.classList.toggle('active');
@@ -5955,6 +5964,13 @@ For questions about methodology, contact: info@onpointaggregate.com`;
         }
 
         function handleTouchStart(e){
+            if(e.touches.length === 2){
+                pinchZoom.active = true;
+                pinchZoom.startDistance = getTouchDistance(e.touches[0], e.touches[1]);
+                pinchZoom.lastDistance = pinchZoom.startDistance;
+                e.preventDefault();
+                return;
+            }
             if(e.touches.length !== 1) return;
             const now = Date.now();
             if(now - lastTouchTime < 300){
@@ -5968,7 +5984,9 @@ For questions about methodology, contact: info@onpointaggregate.com`;
         }
 
         function handleTouchMoveWrapper(e){
-            if(highlightZoom.isHighlighting){
+            if(pinchZoom.active && e.touches.length === 2){
+                handlePinchZoom(e);
+            } else if(highlightZoom.isHighlighting){
                 updateZoomHighlight(e);
             } else if(touchHoverActive){
                 handleMouseMove(e);
@@ -5976,6 +5994,9 @@ For questions about methodology, contact: info@onpointaggregate.com`;
         }
 
         function handleTouchEnd(e){
+            if(pinchZoom.active && e.touches.length < 2){
+                pinchZoom.active = false;
+            }
             if(highlightZoom.isHighlighting){
                 endZoomHighlight(e);
             }
@@ -5985,6 +6006,22 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 pollTooltip.style.display = 'none';
                 touchHoverActive = false;
             }
+        }
+
+        function handlePinchZoom(e){
+            const currentDistance = getTouchDistance(e.touches[0], e.touches[1]);
+            const diff = currentDistance - pinchZoom.lastDistance;
+            if(Math.abs(diff) > 5){
+                if(diff > 0) zoomOut(); else zoomIn();
+                pinchZoom.lastDistance = currentDistance;
+            }
+            e.preventDefault();
+        }
+
+        function getTouchDistance(t1, t2){
+            const dx = t2.clientX - t1.clientX;
+            const dy = t2.clientY - t1.clientY;
+            return Math.hypot(dx, dy);
         }
         
         function xToDate(xPos) {
