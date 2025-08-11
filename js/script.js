@@ -3908,6 +3908,7 @@
             idleCallback(() => {
                 applyFilters();
                 if (selectedPollster === 'all' && searchQuery.trim() === '' &&
+                    !currentZoomSelection.isActive &&
                     currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
                     aggregatedData = cloneAggregatedData(currentAggregate.precomputed[currentTerm]);
                     isProcessing = false;
