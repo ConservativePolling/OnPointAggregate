@@ -11,12 +11,13 @@
     <link rel="preload" as="script" href="js/script.js">
 </head>
 <body class="dark-mode">
-    <div class="loading-indicator" id="pageLoader">
+    <div class="loading-indicator" id="pageLoader" role="dialog" aria-live="polite" aria-label="Loading On Point Aggregate">
         <div class="loading-logo">
             <span class="on">On</span><span class="point">Point</span>
             <span class="aggregate">Aggregate<span class="version">2.0</span></span>
         </div>
-        <div class="loading-text">Analyzing Political Sentiments...</div>
+        <div class="loading-text">Loading On Point Aggregate...</div>
+        <div class="loading-bar" role="progressbar" aria-valuetext="Loading"></div>
     </div>
     
     <div class="download-modal" id="downloadModal">
