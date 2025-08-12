@@ -4830,6 +4830,16 @@
         }
 
         function initHighlightZoom() {
+            // Clear any existing event listeners to prevent duplicates
+            pollChart.removeEventListener('mousedown', startZoomHighlight);
+            document.removeEventListener('mousemove', updateZoomHighlight);
+            document.removeEventListener('mouseup', endZoomHighlight);
+            pollChart.removeEventListener('touchstart', handleTouchStart);
+            pollChart.removeEventListener('touchmove', handleTouchMoveWrapper);
+            pollChart.removeEventListener('touchend', handleTouchEnd);
+            pollChart.removeEventListener('touchcancel', handleTouchEnd);
+            
+            // Add event listeners with proper binding
             pollChart.addEventListener('mousedown', startZoomHighlight);
             document.addEventListener('mousemove', updateZoomHighlight);
             document.addEventListener('mouseup', endZoomHighlight);
@@ -4837,26 +4847,53 @@
             pollChart.addEventListener('touchmove', handleTouchMoveWrapper, { passive: false });
             pollChart.addEventListener('touchend', handleTouchEnd);
             pollChart.addEventListener('touchcancel', handleTouchEnd);
+            
+            // Reset highlight zoom state
+            highlightZoom.isHighlighting = false;
+            highlightZoom.startX = null;
+            if (highlightZoomRect) {
+                highlightZoomRect.style.display = 'none';
+            }
         }
 
         function startZoomHighlight(event) {
             const isTouch = event.touches && event.touches.length > 0;
             const button = isTouch ? 0 : event.button;
             const clientX = isTouch ? event.touches[0].clientX : event.clientX;
+            
+            // Only allow left mouse button or touch
             if (button !== 0) return;
+            
+            // Check if we have data to work with
             if (!aggregatedData.timestamps || aggregatedData.timestamps.length === 0) return;
+            
+            // Get chart dimensions and position
             const rect = pollChart.getBoundingClientRect();
             const { margin, width, height } = chartDimensions;
             const x = clientX - rect.left;
+            
+            // Check if click is within chart area
             if (x < margin.left || x > width - margin.right) return;
+            
+            // Store previous zoom state for undo functionality
             previousZoomStateBeforeCurrent = {
                 yMin: chartDimensions.yMin,
                 yMax: chartDimensions.yMax,
                 startDate: currentZoomSelection.isActive ? currentZoomSelection.startDate : aggregatedData.timestamps[0],
                 endDate: currentZoomSelection.isActive ? currentZoomSelection.endDate : aggregatedData.timestamps.at(-1)
             };
+            
+            // Initialize highlight zoom
             highlightZoom.isHighlighting = true;
             highlightZoom.startX = x;
+            
+            // Ensure highlightZoomRect exists before using it
+            if (!highlightZoomRect) {
+                console.warn('Highlight zoom rectangle not found');
+                return;
+            }
+            
+            // Set initial position and size
             highlightZoomRect.style.left = `${x}px`;
             const heightRatio = (chartDimensions.yMax - chartDimensions.yMin) / (DEFAULT_Y_MAX - DEFAULT_Y_MIN);
             const h = (height - margin.top - margin.bottom) * heightRatio;
@@ -4865,44 +4902,76 @@
             highlightZoomRect.style.width = '0';
             highlightZoomRect.style.height = `${h}px`;
             highlightZoomRect.style.display = 'block';
-            if(isTouch) event.preventDefault();
+            
+            // Prevent default for touch events
+            if (isTouch) event.preventDefault();
         }
 
         function updateZoomHighlight(event) {
             if (!highlightZoom.isHighlighting) return;
+            
             const isTouch = event.touches && event.touches.length > 0;
             const clientX = isTouch ? event.touches[0].clientX : event.clientX;
             const rect = pollChart.getBoundingClientRect();
             const { margin, width, height, yMin, yMax } = chartDimensions;
+            
+            // Calculate current X position within chart bounds
             const currentX = Math.min(Math.max(margin.left, clientX - rect.left), width - margin.right);
             const left = Math.min(highlightZoom.startX, currentX);
             const w = Math.abs(currentX - highlightZoom.startX);
+            
+            // Ensure highlightZoomRect exists
+            if (!highlightZoomRect) return;
+            
+            // Update rectangle position and size
             highlightZoomRect.style.left = `${left}px`;
             highlightZoomRect.style.width = `${w}px`;
+            
+            // Update height and position based on current chart dimensions
             const heightRatio = (yMax - yMin) / (DEFAULT_Y_MAX - DEFAULT_Y_MIN);
             const h = (height - margin.top - margin.bottom) * heightRatio;
             const topOffset = margin.top + (height - margin.top - margin.bottom - h) / 2;
             highlightZoomRect.style.top = `${topOffset}px`;
             highlightZoomRect.style.height = `${h}px`;
+            
+            // Show/hide based on width threshold
             highlightZoomRect.style.display = w < 3 ? 'none' : 'block';
-            if(isTouch) event.preventDefault();
+            
+            // Prevent default for touch events
+            if (isTouch) event.preventDefault();
         }
 
         function endZoomHighlight(event) {
             if (!highlightZoom.isHighlighting) return;
+            
             const isTouch = event.changedTouches && event.changedTouches.length > 0;
             const clientX = isTouch ? event.changedTouches[0].clientX : event.clientX;
+            
+            // Reset highlighting state
             highlightZoom.isHighlighting = false;
+            
+            // Ensure highlightZoomRect exists
+            if (!highlightZoomRect) return;
+            
+            // Hide the highlight rectangle
             highlightZoomRect.style.display = 'none';
+            
+            // Get chart dimensions and calculate end position
             const rect = pollChart.getBoundingClientRect();
             const { margin, width } = chartDimensions;
             const endX = Math.min(Math.max(margin.left, clientX - rect.left), width - margin.right);
             const w = Math.abs(endX - highlightZoom.startX);
+            
+            // Only apply zoom if selection is large enough and we have data
             if (w < 10 || aggregatedData.timestamps.length <= 1) return;
+            
+            // Calculate date range and apply zoom
             const startDate = xToDate(Math.min(highlightZoom.startX, endX));
             const endDate = xToDate(Math.max(highlightZoom.startX, endX));
             applyZoomToRange(startDate, endDate);
-            if(isTouch) event.preventDefault();
+            
+            // Prevent default for touch events
+            if (isTouch) event.preventDefault();
         }
 
         function applyZoomToRange(startDate, endDate) { 
@@ -4913,13 +4982,18 @@
         }
 
         function undoLastZoomOrReset() { 
+            // If currently highlighting, cancel the highlight operation
             if (highlightZoom.isHighlighting) { 
                 highlightZoom.isHighlighting = false; 
-                highlightZoomRect.style.display = 'none'; 
+                if (highlightZoomRect) {
+                    highlightZoomRect.style.display = 'none'; 
+                }
                 previousZoomStateBeforeCurrent = null; 
                 return; 
             } 
-             if (previousZoomStateBeforeCurrent) {
+            
+            // Restore previous zoom state if available
+            if (previousZoomStateBeforeCurrent) {
                 if (previousZoomStateBeforeCurrent.startDate instanceof Date && previousZoomStateBeforeCurrent.endDate instanceof Date) {
                     currentZoomSelection.startDate = previousZoomStateBeforeCurrent.startDate;
                     currentZoomSelection.endDate = previousZoomStateBeforeCurrent.endDate;
@@ -4928,6 +5002,8 @@
                     if (polls.length > 0) {
                         const earliestPollDateOverall = polls[0].date;
                         const latestPollDateOverall = polls[polls.length - 1].date;
+                        
+                        // Check if we're restoring to full view
                         if (previousZoomStateBeforeCurrent.startDate.getTime() <= earliestPollDateOverall.getTime() &&
                             previousZoomStateBeforeCurrent.endDate.getTime() >= latestPollDateOverall.getTime() - MS_PER_DAY) {
                             currentZoomSelection.isActive = false;
@@ -4938,17 +5014,24 @@
                         currentZoomSelection.isActive = false;
                     }
 
+                    // Restore Y-axis zoom if available
                     const yMinToRestore = previousZoomStateBeforeCurrent.yMin; 
                     const yMaxToRestore = previousZoomStateBeforeCurrent.yMax; 
                     previousZoomStateBeforeCurrent = null; 
                     loadPolls();
-                    animateZoom(chartDimensions.yMin, chartDimensions.yMax, yMinToRestore, yMaxToRestore, 300);
+                    
+                    // Animate the zoom transition
+                    if (yMinToRestore !== undefined && yMaxToRestore !== undefined) {
+                        animateZoom(chartDimensions.yMin, chartDimensions.yMax, yMinToRestore, yMaxToRestore, 300);
+                    }
                 }
             } else if (currentZoomSelection.isActive) { 
+                // Reset to full view
                 currentZoomSelection.isActive = false; 
                 loadPolls();
                 smartZoom();
             } else if (chartDimensions.yMin !== DEFAULT_Y_MIN || chartDimensions.yMax !== DEFAULT_Y_MAX) { 
+                // Reset Y-axis zoom
                 smartZoom(); 
             } 
         }
@@ -5173,14 +5256,17 @@
         }
     
         function resetUIForNewAggregate(){ 
-
-            
+            // Reset zoom and highlighting state
             updateYAxisLabels(); 
             updateHoverState(null); 
             comparativeOverlay.style.display = 'none'; 
             drawComparativeChart();
             
+            // Cancel any active highlight zoom
             undoLastZoomOrReset();
+            
+            // Reinitialize highlight zoom for the new aggregate
+            initHighlightZoom();
     
             selectedPollster = 'all';
             pollSearch.value = '';
@@ -5710,6 +5796,15 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                     if (e.key === 'Escape') { e.preventDefault(); undoLastZoomOrReset(); } 
                 } 
             });
+            
+            // Handle window resize events that might affect highlight zoom
+            window.addEventListener('resize', () => {
+                if (highlightZoom.isHighlighting && highlightZoomRect) {
+                    highlightZoomRect.style.display = 'none';
+                    highlightZoom.isHighlighting = false;
+                    highlightZoom.startX = null;
+                }
+            });
 
             document.addEventListener('click', (e) => {
                 if (!e.target.closest('.dropdown-container')) {
@@ -5973,11 +6068,14 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 return;
             }
             if(e.touches.length !== 1) return;
+            
             const now = Date.now();
             if(now - lastTouchTime < 300){
+                // Double tap - start highlight zoom
                 startZoomHighlight(e);
                 touchHoverActive = false;
             } else {
+                // Single tap - enable hover mode
                 touchHoverActive = true;
                 handleMouseMove(e);
             }
@@ -5988,8 +6086,10 @@ For questions about methodology, contact: info@onpointaggregate.com`;
             if(pinchZoom.active && e.touches.length === 2){
                 handlePinchZoom(e);
             } else if(highlightZoom.isHighlighting){
+                // Update highlight zoom rectangle
                 updateZoomHighlight(e);
             } else if(touchHoverActive){
+                // Update hover state for single touch
                 handleMouseMove(e);
             }
         }
@@ -5999,12 +6099,16 @@ For questions about methodology, contact: info@onpointaggregate.com`;
                 pinchZoom.active = false;
             }
             if(highlightZoom.isHighlighting){
+                // Complete the highlight zoom operation
                 endZoomHighlight(e);
             }
             if(touchHoverActive){
+                // Clean up hover state
                 updateHoverState(null);
                 hoveredPollPoint = null;
-                pollTooltip.style.display = 'none';
+                if (pollTooltip) {
+                    pollTooltip.style.display = 'none';
+                }
                 touchHoverActive = false;
             }
         }
@@ -6106,5 +6210,13 @@ For questions about methodology, contact: info@onpointaggregate.com`;
             preprocessPollData();
             precomputeAllAggregates();
             initApp();
+            
+            // Ensure highlight zoom is properly initialized
+            setTimeout(() => {
+                if (highlightZoomRect && !highlightZoomRect.style.display) {
+                    highlightZoomRect.style.display = 'none';
+                }
+            }, 100);
+            
             pageLoader.classList.add('hidden');
         });
