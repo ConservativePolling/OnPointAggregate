@@ -1,0 +1,361 @@
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>On Point Aggregate 2.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="css/style.css" onload="this.rel='stylesheet'">
+    <style>
+      /* Critical styles for rollout overlay centering even if CSS not loaded yet */
+      .rollout-overlay{position:fixed;inset:0;background:rgba(8,8,12,.88);display:none;align-items:center;justify-content:center;z-index:100000;padding:24px;opacity:0;transition:opacity .35s ease;backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
+      .rollout-overlay.active{display:flex;opacity:1}
+      .rollout-modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.96);width:min(900px,95vw);max-height:92vh;display:flex;flex-direction:column;gap:12px;background:rgba(12,12,20,.42);border:1px solid rgba(255,255,255,.12);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55),inset 0 0 0 1px rgba(255,255,255,.06);padding:18px 18px 14px;color:#fff;transition:transform .35s cubic-bezier(.22,1,.36,1), box-shadow .35s ease;will-change:transform}
+      .rollout-overlay.active .rollout-modal{transform:translate(-50%,-50%) scale(1);box-shadow:0 24px 80px rgba(0,0,0,.45),inset 0 0 0 1px rgba(255,255,255,.05)}
+      .rollout-title{font-weight:800;font-size:1.2rem;letter-spacing:-.02em;margin:2px 4px 6px;text-align:center}
+      .rollout-player{position:relative;border-radius:14px;overflow:hidden;background:#000;border:1px solid rgba(255,255,255,.08)}
+      .rollout-player iframe{display:block;width:100%;height:clamp(300px,60vh,720px);border:0}
+      .rollout-summary{text-align:center;color:rgba(255,255,255,.85);margin:6px 8px 8px;line-height:1.65;font-size:1rem}
+      .rollout-summary strong{color:#fff}
+      .rollout-actions{display:flex;justify-content:center;padding-top:4px}
+      .rollout-btn{background:rgba(255,255,255,.06);color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:10px 16px;font-weight:700;cursor:pointer}
+    </style>
+    <noscript><link rel="stylesheet" href="css/style.css"></noscript>
+    <link rel="preload" as="script" href="js/script.js">
+</head>
+<body class="dark-mode">
+    <div class="loading-indicator" id="pageLoader">
+        <div class="wave-canvas" id="waveCanvas"></div>
+        <div class="loading-logo">
+            <span class="on">On</span><span class="point">Point</span>
+            <span class="aggregate">Aggregate<span class="version">2.0</span></span>
+        </div>
+        <div class="loading-text">Analyzing Political Polls...</div>
+        <div class="progress-fill"></div>
+    </div>
+    
+    <div class="download-modal" id="downloadModal">
+        <div class="download-modal-content">
+            <div class="download-modal-header">
+                <div class="download-modal-title">Download Data</div>
+                <button class="download-modal-close" id="downloadModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="download-options">
+                <div class="download-option" data-type="polls">
+                    <div class="download-option-icon">
+                        <i class="fas fa-poll"></i>
+                    </div>
+                    <div class="download-option-title">Individual Polls</div>
+                    <div class="download-option-desc">Raw polling data with pollster, dates, and sample sizes</div>
+                </div>
+                <div class="download-option" data-type="aggregated">
+                    <div class="download-option-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="download-option-title">Aggregated Data</div>
+                    <div class="download-option-desc">Processed trend data with our methodology applied</div>
+                </div>
+                <div class="download-option" data-type="margins">
+                    <div class="download-option-icon">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="download-option-title">Margins & Spreads</div>
+                    <div class="download-option-desc">Net approval margins and polling spreads over time</div>
+                </div>
+                <div class="download-option" data-type="methodology">
+                    <div class="download-option-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="download-option-title">Methodology Report</div>
+                    <div class="download-option-desc">Detailed explanation of our weighting and aggregation methods</div>
+                </div>
+            </div>
+            <div class="download-actions">
+                <button class="download-cancel-btn" id="downloadCancel">Cancel</button>
+                <button class="download-btn" id="downloadConfirm" disabled>Download</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="mini-aggregate-container" id="miniAggregateContainer">
+             <div id="miniAggregateScroller"></div>
+        </div>
+
+        <div class="main-title">
+            <div class="title-top"><span class="title-on">ON</span><span class="title-point">POINT</span></div>
+            <span class="title-aggregate">AGGREGATE<sup>2.0</sup></span>
+        </div>
+        
+        <header>
+            <div class="header-top-nav">
+                <button class="articles-nav-btn" id="articlesNavBtn">
+                    <i class="fas fa-newspaper"></i>
+                    <span>OnPoint Articles</span>
+                    <div class="btn-glow"></div>
+                </button>
+            </div>
+             <div class="selectors-wrapper">
+                <div class="dropdown-container" id="mainDropdownContainer">
+                    <div class="dropdown-selected" id="dropdownSelected">
+                        <span id="selectedOptionText">America's Direction</span>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </div>
+                    <div class="dropdown-options" id="dropdownOptions"></div>
+                </div>
+                <div class="dropdown-container" id="stateDropdownContainer" style="display: none; max-width: 240px; margin-left: -1px;">
+                     <div class="dropdown-selected" id="stateDropdownSelected">
+                        <span id="selectedStateText"></span>
+                        <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </div>
+                    <div class="dropdown-options" id="stateDropdownOptions"></div>
+                </div>
+            </div>
+             <div style="display: flex; justify-content: center; margin-bottom: 20px;">
+                <div class="term-selector" id="termSelector" style="display: none;">
+                    <div class="term-label">Term:</div>
+                    <div class="term-options">
+                        <div class="term-option" data-term="first">First</div>
+                        <div class="term-option selected" data-term="second">Second</div>
+                    </div>
+                </div>
+            </div>
+            <h1 id="poll-title"><span class="title-text"></span><span class="word-cycler"></span></h1>
+            <div class="filter-container">
+                <div class="pollster-filter">
+                    <div class="filter-label">Filter by Pollster</div>
+                    <div class="dropdown-container pollster-dropdown">
+                        <div class="dropdown-selected" id="pollsterDropdownSelected">
+                            <span id="selectedPollsterText">All Pollsters</span><i class="fas fa-chevron-down dropdown-icon"></i>
+                        </div>
+                        <div class="dropdown-options" id="pollsterDropdownOptions"></div>
+                    </div>
+                </div>
+                <div>
+                    <button class="reset-filters" id="resetFilters" data-tooltip="Clear filters & reset time range"><i class="fas fa-sync-alt"></i> Reset</button>
+                </div>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" id="pollSearch" placeholder="Search polls by pollster, date, quality, margin..." autocomplete="off">
+                <button class="clear-search" id="clearSearch" style="display: none;"><i class="fas fa-times"></i></button>
+                
+                <div class="search-suggestions" id="searchSuggestions" style="display: none;">
+                    <div class="suggestion-header">Search Suggestions</div>
+                    <div class="suggestions-list" id="suggestionsList"></div>
+                </div>
+                
+                <div class="search-help">
+                    <span>Quick filters:</span>
+                    <span class="search-tag" data-example="pollster:rasmussen">pollster:rasmussen</span>
+                    <span class="search-tag" data-example="sample:>=1000">sample:≥1000</span>
+                    <span class="search-tag" data-example="margin:>5">margin:>5</span>
+                    <span class="search-tag" data-example="date:december">date:december</span>
+                    <span class="search-tag" data-example="quality:a">quality:a</span>
+                </div>
+            </div>
+            <div class="filtered-mode-indicator" id="filteredModeIndicator">
+                <i class="fas fa-filter"></i><span id="filterIndicatorText"></span>
+            </div>
+            <div class="date-display"><span id="current-date"></span></div>
+        </header>
+
+        <div class="card chart-container">
+            <div class="loading-indicator" id="chartLoader"><div class="spinner"></div></div>
+            <div class="card-glow glow-1" id="cardGlow1"></div><div class="card-glow glow-2" id="cardGlow2"></div>
+            <div class="card-header">
+                <div class="card-title">Approval Trend <span class="poll-count-badge" id="pollCountBadge"></span></div>
+            </div>
+            <div id="pollChart" style="cursor: crosshair;">
+                <canvas id="chartCanvas"></canvas>
+                <canvas id="fadeCanvas"></canvas>
+                <canvas id="overlayCanvas"></canvas> 
+                <div id="pollTooltip"></div>
+                <div id="emptyState" style="display: none;"><i class="fas fa-chart-line"></i><div>No polling data available for the current selection.</div></div>
+                
+                <div id="hoverOverlayElements">
+                    <div class="hover-info-top-container">
+                        <div id="hoverInfoDate" class="hover-info-top-item"></div>
+                        <div id="hoverInfoSpread" class="hover-info-top-item"></div>
+                    </div>
+                </div>
+                <div id="highlightZoomRect"></div> 
+            </div>
+            <div id="comparativeChart">
+                <div class="comparative-divider"></div>
+                <div class="comparative-scale top"></div><div class="comparative-scale bottom"></div>
+                <canvas id="comparativeBarsCanvas"></canvas>
+                <div class="comparative-overlay" id="comparativeOverlay"></div>
+            </div>
+            <div class="legend"></div>
+            <div class="controls">
+                 <div class="toggle-group">
+                    <label class="toggle"><input type="checkbox" id="glowEffectToggle" checked=""><span>Glow Effect</span></label>
+                    <div class="toggle">
+                        <i class="fas fa-pen-ruler"></i>
+                        <input type="range" id="lineThicknessSlider" min="1" max="6" step="0.5" value="3" data-tooltip="Line Thickness">
+                    </div>
+                    <div class="toggle">
+                        <i class="fas fa-circle-nodes"></i>
+
+                    </div>
+                </div>
+                <div class="zoom-controls">
+                    <span id="yRangeDisplay"></span>
+                    <button class="zoom-btn" id="zoomInBtn" data-tooltip="Zoom In (+ key)"><i class="fas fa-search-plus"></i></button>
+                    <button class="zoom-btn" id="zoomOutBtn" data-tooltip="Zoom Out (- key)"><i class="fas fa-search-minus"></i></button>
+                    <button class="zoom-btn" id="resetZoomBtn" data-tooltip="Smart Fit Data (0 key)"><i class="fas fa-crosshairs"></i></button>
+                    <button class="zoom-btn" id="fullRangeBtn" data-tooltip="Full Range (0-100%)"><i class="fas fa-arrows-alt-v"></i></button>
+                </div>
+            </div>
+            
+            <div class="download-controls">
+                <button class="download-action-btn" id="downloadDataBtn">
+                    <i class="fas fa-download"></i>
+                    <span>Download Data</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="card poll-list-container">
+             <div class="poll-list-header">
+                <div class="section-title"><i class="fas fa-table"></i><span>All Included Polls</span></div>
+            </div>
+            <div class="poll-list-wrapper" id="pollListWrapper">
+                <table class="poll-list-table" id="pollListTable" style="display: none;">
+                    <thead>
+                        <tr>
+                            <th>Pollster</th><th>Date</th><th>Sample Size</th><th>Quality</th>
+                            <th id="mainTableValue1Header"></th>
+                            <th id="mainTableValue2Header"></th>
+                            <th id="mainTableMarginHeader"></th>
+                            <th style="font-size: 0.7rem;">Weight</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pollList"></tbody>
+                </table>
+                <div class="no-polls-message" id="noPolls" style="display: none;"><i class="fas fa-poll"></i><div>No polls available for this selection</div></div>
+            </div>
+        </div>
+
+        <div class="card" style="margin-bottom: 40px;">
+            <div class="card-header"><div class="card-title">About Us</div></div>
+            <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 0;">
+                <div class="main-title" style="transform: scale(0.8); margin: 0 0 30px 0;">
+                    <div class="title-top"><span class="title-on">ON</span><span class="title-point">POINT</span></div>
+                    <span class="title-aggregate">AGGREGATE<sup>2.0</sup></span>
+                </div>
+                <div style="max-width: 800px; text-align: center; padding: 0 20px;">
+                    <p style="margin-bottom: 20px; color: var(--text-secondary); line-height: 1.8;">On Point Aggregate is a premier political polling aggregator created to spotlight only the most accurate and methodologically sound pollsters in the nation. Born out of a need for clarity in an era of polling uncertainty, On Point was founded in response to the consistent failures of mainstream aggregators to capture voter sentiment—particularly during the Trump era.</p>
+                    <p style="margin-bottom: 20px; color: var(--text-secondary); line-height: 1.8;">Rather than reward volume or name recognition, On Point emphasizes proven accuracy, transparency, and insight. Every poll included has been vetted based on its track record and ability to not just get the numbers right, but to understand the "why" behind the trends.</p>
+                    <p style="color: var(--text-secondary); line-height: 1.8;">In a political landscape increasingly shaped by misreads and missed signals, On Point Aggregate exists to cut through the noise and elevate the pollsters who actually get it right.</p>
+                    <div style="margin-top: 30px; display: flex; justify-content: center; gap: 20px;">
+                        <a href="https://www.youtube.com/@OnPointPoliticsOfficial/featured" target="_blank" style="color: #ff0000; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 500; transition: all 0.2s;"><i class="fab fa-youtube" style="font-size: 24px;"></i><span>On Point Politics</span></a>
+                        <a href="https://app.minnect.com/expert/LesterTellez" target="_blank" style="color: #0092ff; text-decoration: none; display: flex; align-items: center; gap: 8px; font-weight: 500; transition: all 0.2s;"><i class="fas fa-user-tie" style="font-size: 20px;"></i><span>Minnect Profile</span></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <span>Last Updated: </span><span id="update-date"></span> | <span>OnPointAggregate v2.0.1 | General Bug Fixes.</span>
+        </footer>
+    </div>
+    <div class="theme-toggle-container">
+        <span class="theme-icon" id="darkModeIcon"><i class="fas fa-moon"></i></span>
+        <label class="theme-toggle">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+        </label>
+        <span class="theme-icon" id="lightModeIcon"><i class="fas fa-sun"></i></span>
+        <span class="theme-icon" id="minimalDarkIcon"><i class="fas fa-circle"></i></span>
+    </div>
+
+    <script src="js/script.js" defer></script>
+    
+    <!-- Rollout Overlay GUI -->
+    <div class="rollout-overlay" id="rolloutOverlay">
+        <div class="rollout-modal">
+            <div class="rollout-title">OnPointAggregator is Rolling Out to All Users</div>
+            <div class="rollout-player">
+                <iframe src="presentation.html#fit=contain&cam=soft" title="OnPointAggregator Presentation" allowfullscreen></iframe>
+            </div>
+            <div class="rollout-summary"><strong>The most powerful aggregation tool</strong> is now rolling out. We’ll let you know as soon as it’s enabled for you. Until then, this brief presentation shows how it reads the latest JSON polls, explains the timeframe, and adds context around shifts — all from a clean assistant in the lower‑right.</div>
+            <div class="rollout-actions"><button class="rollout-btn" id="rolloutDismiss">Got it!</button></div>
+        </div>
+    </div>
+    <script>
+    (function(){
+        const overlay = document.getElementById('rolloutOverlay');
+        const btn = document.getElementById('rolloutDismiss');
+        const modal = document.querySelector('#rolloutOverlay .rollout-modal');
+        function positionModal(){
+            const vv = window.visualViewport;
+            if (vv && modal) {
+                modal.style.left = (vv.pageLeft + vv.width / 2) + 'px';
+                modal.style.top = (vv.pageTop + vv.height / 2) + 'px';
+                modal.style.transform = 'translate(-50%, -50%)';
+            } else if (modal) {
+                modal.style.left = '50%';
+                modal.style.top = '50%';
+                modal.style.transform = 'translate(-50%, -50%)';
+            }
+        }
+        function showOverlay(){
+            if (!overlay.classList.contains('active')) {
+                overlay.classList.add('active');
+                positionModal();
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        function hideOverlay(){
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        // Wait for full load, then a short delay so it feels intentional
+        window.addEventListener('load', function(){
+            // Wait until the page loader fully hides, then show overlay
+            const tryAfterLoader = () => {
+                const loader = document.getElementById('pageLoader');
+                const hidden = loader && (loader.classList.contains('hidden') || loader.style.display === 'none');
+                if (hidden) { setTimeout(showOverlay, 800); return; }
+                setTimeout(tryAfterLoader, 250);
+            };
+            tryAfterLoader();
+        });
+        btn && btn.addEventListener('click', hideOverlay);
+        if (window.visualViewport) {
+            visualViewport.addEventListener('resize', positionModal);
+            visualViewport.addEventListener('scroll', positionModal);
+        }
+    })();
+    </script>
+    <script>
+    // About Us typing effect on visibility
+    (function(){
+        const aboutCard = document.querySelector('.card:nth-of-type(2)');
+        if (!aboutCard) return;
+        const paragraphs = Array.from(aboutCard.querySelectorAll('p'));
+        const original = paragraphs.map(p => p.textContent);
+        paragraphs.forEach(p => p.textContent = '');
+        function typeInto(p, text, speed){
+            let i = 0; const tick = () => { if (i <= text.length) { p.textContent = text.slice(0, i++); setTimeout(tick, speed); } };
+            tick();
+        }
+        let started = false;
+        const io = new IntersectionObserver((entries)=>{
+            entries.forEach(en => {
+                if (en.isIntersecting && !started) {
+                    started = true;
+                    paragraphs.forEach((p, idx) => setTimeout(()=> typeInto(p, original[idx], 8), idx*200));
+                    io.disconnect();
+                }
+            });
+        }, { threshold: 0.4 });
+        io.observe(aboutCard);
+    })();
+    </script>
+</body></html>

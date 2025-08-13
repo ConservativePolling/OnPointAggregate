@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>OnPointAggregator AI – Click-to-Send, Minimal Aggregate</title>
+<style>
+  :root{
+    --ease-in-out-cubic:cubic-bezier(0.65,0,0.35,1);
+    --ease-out-quad:cubic-bezier(0.25,0.46,0.45,0.94);
+    --approve-color:#4ade80;
+    --disapprove-color:#ff3d71;
+    --chart-grid:rgba(255,255,255,.12);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+    background:#000;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;color:#fff;
+    margin:0; padding:0;
+  }
+
+  .background-visuals{position:absolute;inset:0;overflow:hidden;}
+  .background-visuals::before{
+    content:'';position:absolute;width:200%;height:200%;top:-50%;left:-50%;
+    background:
+      radial-gradient(circle at 20% 80%,#3b82f6 0%,transparent 40%),
+      radial-gradient(circle at 80% 20%,#8b5cf6 0%,transparent 40%),
+      radial-gradient(circle at 45% 45%,#06b6d4 0%,transparent 40%),
+      radial-gradient(circle at 90% 70%,#ec4899 0%,transparent 40%);
+    animation:gradientShift 25s var(--ease-in-out-cubic) infinite;opacity:.15;z-index:-1;
+  }
+  @keyframes gradientShift{0%,100%{transform:rotate(0) scale(1)}50%{transform:rotate(180deg) scale(1.1)}}
+
+  .viewport{width:100%;height:100%;display:flex;align-items:center;justify-content:center;perspective:2000px;z-index:1}
+  .camera-wrapper{
+    position:relative;transform-style:preserve-3d;
+    animation:cinematicCamera 30s var(--ease-in-out-cubic) forwards;
+  }
+  @keyframes cinematicCamera{
+    0%,12% {transform:scale(1) translate(0,0) translateZ(0) rotateX(0deg)}
+    18%    {transform:scale(1.65) translateY(-235px) translateZ(120px) rotateX(-3deg)}
+    30%    {transform:scale(1.65) translateY(-235px) translateZ(120px) rotateX(-3deg)}
+    40%    {transform:scale(1) translate(0,0) translateZ(0) rotateX(0deg)}
+    50%    {transform:scale(1) translate(0,0) translateZ(0) rotateX(0deg)}
+    56%    {transform:scale(1.65) translateY(-235px) translateZ(120px) rotateX(-3deg)}
+    68%    {transform:scale(1.65) translateY(-235px) translateZ(120px) rotateX(-3deg)}
+    76%    {transform:scale(1) translate(0,0) translateZ(0) rotateX(0deg)}
+    100%   {transform:scale(1) translate(0,0) translateZ(0) rotateX(0deg)}
+  }
+
+  /* Enhanced realistic cursor */
+  .cursor{
+    position:absolute;width:24px;height:32px;pointer-events:none;z-index:9999;opacity:0;top:0;left:0;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.4)) drop-shadow(0 1px 2px rgba(0,0,0,.2));
+    animation:precisionCursorPath 30s var(--ease-in-out-cubic) forwards;
+  }
+  .cursor svg{width:100%;height:100%}
+  @keyframes precisionCursorPath{
+    0%   {opacity:0;transform:translate(450px,300px) scale(.5)}
+    12%  {opacity:1;transform:translate(430px,330px) scale(1)}
+    16%  {transform:translate(250px,545px) scale(1)}
+    18%  {transform:translate(250px,545px) scale(.9)}
+    18.1%{transform:translate(250px,545px) scale(1)}
+    19%  {opacity:0}
+    34%  {opacity:1;transform:translate(300px,545px) scale(1)}
+    39.5%{transform:translate(850px,545px) scale(1)}
+    40%  {transform:translate(850px,545px) scale(.85)}
+    40.2%{transform:translate(850px,545px) scale(1)}
+    41%  {opacity:0}
+
+    50%  {opacity:1;transform:translate(420px,340px) scale(1)}
+    56%  {transform:translate(250px,545px) scale(1)}
+    56.0%{transform:translate(250px,545px) scale(.9)}
+    56.1%{transform:translate(250px,545px) scale(1)}
+    57%  {opacity:0}
+    72%  {opacity:1;transform:translate(300px,545px) scale(1)}
+    75.5%{transform:translate(850px,545px) scale(1)}
+    76%  {transform:translate(850px,545px) scale(.85)}
+    76.2%{transform:translate(850px,545px) scale(1)}
+    77%  {opacity:0}
+    100% {opacity:0}
+  }
+
+  .ai-interface{
+    width:900px;height:600px;background:rgba(10,10,10,.6);
+    backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+    border:1px solid rgba(255,255,255,.12);border-radius:24px;box-shadow:0 16px 60px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08) inset;
+    display:flex;flex-direction:column;overflow:hidden;transform:translateZ(0);opacity:0;
+    animation:interface-reveal 1.5s var(--ease-out-quad) .3s forwards;
+  }
+
+  @keyframes interface-reveal{from{opacity:0;transform:scale(.95);filter:blur(8px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
+
+  .ai-header,.input-area{opacity:0;animation:UIMoveIn 1.2s var(--ease-out-quad) 1.2s forwards;z-index:2}
+  .ai-header{padding:20px 28px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:14px;--y-translate:-20px;}
+  .input-area{padding:20px 28px;border-top:1px solid rgba(255,255,255,.1);--y-translate:20px;}
+
+  @keyframes UIMoveIn{from{opacity:0;transform:translateY(var(--y-translate))}to{opacity:1;transform:translateY(0)}}
+
+  .status-indicator{width:9px;height:9px;background:#10f881;border-radius:50%;animation:statusGlow 2s ease-in-out infinite}
+  @keyframes statusGlow{0%,100%{box-shadow:0 0 8px #10f881,0 0 16px #10f881}50%{box-shadow:0 0 12px #10f881,0 0 24px #10f881}}
+
+  .header-title{font-size:15px;font-weight:500;}
+  .header-subtitle{color:rgba(255,255,255,.5);font-size:12px;margin-left:auto;letter-spacing:.05em;text-transform:uppercase;}
+
+  .chat-area{flex:1;padding:28px;overflow-y:auto;display:flex;flex-direction:column;gap:24px;scrollbar-width:none;-ms-overflow-style:none;}
+  .chat-area::-webkit-scrollbar{display:none;}
+  .message{display:flex;gap:14px;max-width:75%;align-items:flex-start;opacity:0}
+  .message.reveal{animation:message-reveal .8s var(--ease-out-quad) forwards}
+  @keyframes message-reveal{from{opacity:0;transform:translateY(15px) scale(.95);filter:blur(4px)}to{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}}
+  .message.user{align-self:flex-end;flex-direction:row-reverse}
+  .message.ai{align-self:flex-start;max-width:85%}
+  .avatar{width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0;border:1px solid rgba(255,255,255,.2);}
+  .user .avatar{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+  .ai .avatar{background:linear-gradient(135deg,#444,#222);color:#fff}
+  .message-bubble{padding:14px 20px;border-radius:18px;font-size:15px;line-height:1.6;}
+  .user .message-bubble{background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff}
+  .ai .message-bubble{background:rgba(255,255,255,.1);color:#f0f0f0}
+
+  .input-container{display:flex;align-items:center;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.15);border-radius:16px;padding:6px;transition:all .3s var(--ease-out-quad);position:relative}
+  .input-container.focused{border-color:rgba(59,130,246,.8);background:rgba(0,0,0,.2);box-shadow:0 0 0 3px rgba(59,130,246,.3)}
+  .input-field{flex:1;background:transparent;border:none;outline:none;color:#fff;font-size:15px;padding:12px 16px;}
+  .input-field::placeholder{color:rgba(255,255,255,.4);}
+
+  /* Hide placeholder when typing is active */
+  .input-field.typing::placeholder {
+    opacity: 0;
+  }
+
+  .typing-text{position:absolute;left:22px;top:50%;transform:translateY(-50%);color:#fff;font-size:15px;pointer-events:none;opacity:0;}
+  .typing-text.active{opacity:1}
+  .typing-cursor{display:inline-block;width:2px;height:18px;background:#3b82f6;margin-left:2px;animation:cursorPulse 1s infinite;vertical-align:middle}
+  @keyframes cursorPulse{0%,100%{opacity:1}50%{opacity:0}}
+  .send-button{width:42px;height:42px;background:#fff;border:none;border-radius:12px;display:flex;align-items:center;justify-content:center;}
+  .send-button.clicked{animation:buttonPulse .4s var(--ease-out-quad)}
+  @keyframes buttonPulse{0%{transform:scale(1)}50%{transform:scale(.9)}100%{transform:scale(1)}}
+  .send-button svg{width:20px;height:20px;fill:#111;}
+
+  .aggregate{
+    width:100%;padding:14px 16px;border-radius:12px;
+    background:rgba(255,255,255,.04);
+  }
+
+  .aggregate h4{
+    font-size:.95rem;font-weight:600;margin-bottom:8px;letter-spacing:.01em;
+  }
+
+  .aggregate .meta{
+    display:flex;gap:14px;align-items:center;font-size:.78rem;color:rgba(255,255,255,.75);margin-bottom:8px;
+  }
+
+  .dot{width:8px;height:8px;border-radius:50%}
+  .meta .pair{display:flex;gap:6px;align-items:center}
+  .chart{position:relative;height:132px;width:100%}
+  .chart svg{display:block;width:100%;height:100%;overflow:visible}
+  .grid{stroke:var(--chart-grid);stroke-width:1;stroke-dasharray:3 5}
+  .trend{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .summary{
+    margin-top:10px;font-size:.9rem;line-height:1.55;color:rgba(255,255,255,.9);
+  }
+
+  /* End screen styles */
+  .end-screen {position: fixed;inset:0;background:#fff;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;z-index:10000;transition:opacity 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)}
+  .end-screen.visible {opacity:1;pointer-events:all}
+  .end-message {font-size:3.5rem;font-weight:700;color:#000;text-align:center;letter-spacing:-0.03em;font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display',system-ui,sans-serif;line-height:1.1}
+
+  /* Recording controls (kept for completeness, unused in embed) */
+  .recording-controls{position:fixed;top:20px;right:20px;z-index:10000;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+  .recording-buttons{display:flex;gap:10px;align-items:center}
+  .record-btn,.crop-btn{padding:8px 16px;border:none;border-radius:8px;font-size:14px;font-weight:500}
+  .record-btn{background:#ef4444;color:#fff}
+  .crop-btn{background:#3b82f6;color:#fff}
+</style>
+</head>
+<body>
+  <div class="background-visuals"></div>
+  
+  <div class="viewport">
+    <div class="camera-wrapper">
+      <div class="cursor">
+        <svg viewBox="0 0 24 32" fill="none">
+          <path d="M2.5 2.5 L2.5 26.5 L8.5 20.5 L12 25 L15 23 L11.5 18.5 L18.5 18.5 L2.5 2.5 Z" fill="rgba(0,0,0,0.3)" transform="translate(1,1)"/>
+          <path d="M2 2 L2 26 L8 20 L11.5 24.5 L14.5 22.5 L11 18 L18 18 L2 2 Z" fill="#ffffff"/>
+          <path d="M2 2 L2 26 L8 20 L11.5 24.5 L14.5 22.5 L11 18 L18 18 L2 2 Z" fill="none" stroke="#000000" stroke-width="0.5"/>
+          <path d="M3 3 L3 23 L7.5 18.5 L10.5 22.5 L12.5 21.2 L9.8 17.5 L16 17.5 L3 3 Z" fill="rgba(255,255,255,0.8)"/>
+        </svg>
+      </div>
+
+      <div class="ai-interface">
+        <header class="ai-header">
+          <div class="status-indicator"></div>
+          <div class="header-title">OnPointAggregator AI</div>
+          <div class="header-subtitle">Neural Assistant</div>
+        </header>
+
+        <main class="chat-area" id="chatArea"></main>
+
+        <footer class="input-area">
+          <div class="input-container" id="inputContainer">
+            <input type="text" class="input-field" id="inputField" placeholder="Ask me anything..."/>
+            <div class="typing-text" id="typingText"></div>
+            <button class="send-button" id="sendBtn"><svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg></button>
+          </div>
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <div class="end-screen" id="endScreen">
+    <div class="end-message" id="endMessage"></div>
+  </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  // Fit/zoom flags from hash
+  const params = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const nozoom = params.get('nozoom') === '1';
+  const camMode = params.get('cam'); // 'soft' keeps camera animation; 'minimal' very subtle motion
+  const fit = params.get('fit');
+  const s = parseFloat(params.get('s') || '0'); // start fraction (0..1)
+  const e = parseFloat(params.get('e') || '1'); // end fraction (0..1)
+  const endMsg = params.get('msg') || '';
+  if (nozoom) {
+    const cam = document.querySelector('.camera-wrapper');
+    cam && (cam.style.animation = 'none');
+  }
+  if (camMode === 'soft' || camMode === 'minimal') {
+    // Apply a much wider, further camera while preserving motion
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes cinematicCamera{
+        0%,12% {transform:scale(0.72) translate(0,0) translateZ(0) rotateX(0deg)}
+        18%    {transform:scale(${camMode==='minimal' ? '0.78' : '0.82'}) translateY(-120px) translateZ(60px) rotateX(-2deg)}
+        30%    {transform:scale(${camMode==='minimal' ? '0.78' : '0.82'}) translateY(-120px) translateZ(60px) rotateX(-2deg)}
+        40%    {transform:scale(0.72) translate(0,0) translateZ(0) rotateX(0deg)}
+        50%    {transform:scale(0.72) translate(0,0) translateZ(0) rotateX(0deg)}
+        56%    {transform:scale(${camMode==='minimal' ? '0.78' : '0.82'}) translateY(-120px) translateZ(60px) rotateX(-2deg)}
+        68%    {transform:scale(${camMode==='minimal' ? '0.78' : '0.82'}) translateY(-120px) translateZ(60px) rotateX(-2deg)}
+        76%    {transform:scale(0.72) translate(0,0) translateZ(0) rotateX(0deg)}
+        100%   {transform:scale(0.72) translate(0,0) translateZ(0) rotateX(0deg)}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  if (fit === 'contain') {
+    const root = document.documentElement;
+    const iface = document.querySelector('.ai-interface');
+    function resize() {
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const targetW = 900, targetH = 600;
+      // fit within with generous letterboxing to ensure nothing crops
+      const scale = Math.min(vw/targetW, (vh*0.9)/targetH);
+      iface.style.transform = `translateZ(0) scale(${scale})`;
+      iface.style.transformOrigin = 'center center';
+    }
+    resize();
+    window.addEventListener('resize', resize);
+  }
+
+  const TOTAL_BASE = 30000; // 30s master timeline
+  const startMs = Math.max(0, Math.min(1, isNaN(s)?0:s)) * TOTAL_BASE;
+  const endMs = Math.max(0, Math.min(1, isNaN(e)?1:e)) * TOTAL_BASE;
+  const SEGMENT_MS = Math.max(800, endMs - startMs);
+  const Z1 = { inEnd:.18, holdEnd:.30, outEnd:.40 };
+  const Z2 = { inEnd:.56, holdEnd:.68, outEnd:.76 };
+  const FOCUS1=Z1.inEnd, TYPE1_START=Z1.inEnd+.005, TYPE1_END=Z1.holdEnd, SEND1_CLICK=Z1.outEnd;
+  const GREETING=.46;
+  const FOCUS2=Z2.inEnd, TYPE2_START=Z2.inEnd+.005, TYPE2_END=Z2.holdEnd, SEND2_CLICK=Z2.outEnd;
+  const THINKING=.80, AGG_RESULT=.86, SUMMARY_COMPLETE=.91, END_TRANSITION=.93;
+  const t = p => {
+    const ms = Math.round(p * TOTAL_BASE - startMs);
+    return Math.max(0, Math.min(SEGMENT_MS, ms));
+  };
+  const el = {
+    chat: document.getElementById('chatArea'),
+    inputWrap: document.getElementById('inputContainer'),
+    inputField: document.getElementById('inputField'),
+    typing: document.getElementById('typingText'),
+    send: document.getElementById('sendBtn'),
+    endScreen: document.getElementById('endScreen'),
+    endMessage: document.getElementById('endMessage')
+  };
+
+  function createMessage(type, html){
+    const node = document.createElement('div');
+    node.className = `message ${type}`;
+    node.innerHTML = `<div class="avatar">${type==='user'?'U':'AI'}</div><div class="message-bubble">${html}</div>`;
+    el.chat.appendChild(node);
+    requestAnimationFrame(() => {
+      node.classList.add('reveal');
+      el.chat.scrollTop = el.chat.scrollHeight;
+    });
+    return node;
+  }
+
+  function typewriter(element, text, speed, useCursor=false){
+    let i = 0; element.innerHTML = '';
+    const cursor = useCursor ? '<span class="typing-cursor"></span>' : '';
+    (function loop(){
+      if(i < text.length){
+        element.innerHTML = text.slice(0, ++i) + cursor;
+        setTimeout(loop, speed);
+      }else if(useCursor){
+        element.innerHTML = text + cursor;
+      }
+    })();
+  }
+
+  function cleanTypewriter(element, text, speed) {
+    let i = 0;
+    element.textContent = '';
+    function type() {
+      if (i < text.length) {
+        element.textContent += text.charAt(i);
+        i++;
+        setTimeout(type, speed);
+      }
+    }
+    type();
+  }
+
+  // jump to start segment and loop within [s,e]
+  let started = false;
+  function beginSegment(){
+    if (started) return; started = true;
+    try { window.scrollTo(0,0); } catch(_){}
+    const delay = Math.max(0, startMs);
+    // Fast-forward: simulate by delaying initial actions to align
+    // We only adjust camera animation start by disabling it when nozoom; otherwise keep visuals
+  }
+  beginSegment();
+
+  setTimeout(() => { el.inputWrap.classList.add('focused'); el.typing.classList.add('active'); el.inputField.classList.add('typing'); }, t(FOCUS1));
+  setTimeout(() => { typewriter(el.typing, 'Hello OnPointAggregator!', 80, true); }, t(TYPE1_START));
+  setTimeout(() => {
+    el.send.classList.add('clicked');
+    el.inputWrap.classList.remove('focused');
+    createMessage('user','Hello OnPointAggregator!');
+    el.typing.innerHTML = '';
+    el.typing.classList.remove('active');
+    el.inputField.classList.remove('typing');
+  }, t(SEND1_CLICK));
+
+  setTimeout(() => { const ai = createMessage('ai',''); typewriter(ai.querySelector('.message-bubble'), 'Hello! How may I assist you today?', 50, false); }, t(GREETING));
+
+  setTimeout(() => { el.inputWrap.classList.add('focused'); el.typing.classList.add('active'); el.inputField.classList.add('typing'); }, t(FOCUS2));
+  setTimeout(() => { typewriter(el.typing, "What has Trump's approval been like for the last 20 days?", 35, true); }, t(TYPE2_START));
+  setTimeout(() => {
+    el.send.classList.add('clicked');
+    el.inputWrap.classList.remove('focused');
+    createMessage('user',"What has Trump's approval been like for the last 20 days?");
+    el.typing.innerHTML = '';
+    el.typing.classList.remove('active');
+    el.inputField.classList.remove('typing');
+  }, t(SEND2_CLICK));
+
+  setTimeout(() => { const thinking = createMessage('ai','<div class="thinking-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>'); thinking.id = 'thinking'; }, t(THINKING));
+
+  setTimeout(() => {
+    document.getElementById('thinking')?.remove();
+    const card = createMessage('ai', `
+      <div class="aggregate">
+        <h4>Trump Approval Rating · Last 20 Days</h4>
+        <div class="meta">
+          <div class="pair"><span class="dot" style="background:var(--approve-color)"></span><span>Approve</span></div>
+          <div class="pair"><span class="dot" style="background:var(--disapprove-color)"></span><span>Disapprove</span></div>
+        </div>
+        <div class="chart">
+          <svg viewBox="0 0 500 132" preserveAspectRatio="none">
+            <line class="grid" x1="0" y1="33"  x2="500" y2="33"></line>
+            <line class="grid" x1="0" y1="66"  x2="500" y2="66"></line>
+            <line class="grid" x1="0" y1="99"  x2="500" y2="99"></line>
+            <path d="M0,65 C50,70 100,60 150,65 S250,75 300,70 S400,60 450,55 S500,50" class="trend" stroke="var(--approve-color)"></path>
+            <path d="M0,55 C50,50 100,58 150,55 S250,45 300,50 S400,58 450,62 S500,65" class="trend" stroke="var(--disapprove-color)"></path>
+          </svg>
+        </div>
+        <div class="summary" id="summaryText"></div>
+      </div>
+    `);
+
+    const svg = card.querySelector('svg');
+    [...svg.querySelectorAll('.trend')].forEach(p=>{
+      p.style.strokeDasharray = '1000';
+      p.style.strokeDashoffset = '1000';
+      p.style.transition = 'stroke-dashoffset 1.8s ease-out';
+      requestAnimationFrame(()=>{ p.style.strokeDashoffset = '0'; });
+    });
+
+    setTimeout(()=>{
+      const s = "Over the past 20 days, approval drifted slightly lower while disapproval edged up, with only minor day-to-day movement.";
+      const elSum = card.querySelector('#summaryText');
+      let i = 0;
+      (function typeChar(){
+        if (i <= s.length) {
+          elSum.textContent = s.slice(0, i);
+          i++;
+          if (i <= s.length) setTimeout(typeChar, 18);
+          else window.summaryComplete = true;
+        }
+      })();
+    }, 250);
+  }, t(AGG_RESULT));
+
+  // Loop segment: when segment time elapses, reload to restart this slice
+  setTimeout(() => {
+    const end = document.getElementById('endScreen');
+    const msg = document.getElementById('endMessage');
+    end.classList.add('visible');
+    setTimeout(() => { cleanTypewriter(msg, endMsg || 'OnPointAggregator Now Rolling Out', 60); }, 400);
+    // Dwell longer on the final chapter so the white screen and text fully land
+    const isFinalChapter = e >= 0.999;
+    const dwellMs = isFinalChapter ? 4200 : 2200;
+    setTimeout(() => { location.reload(); }, dwellMs);
+  }, SEGMENT_MS);
+});
+</script>
+</body>
+</html>
