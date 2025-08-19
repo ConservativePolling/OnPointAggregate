@@ -418,6 +418,13 @@
             padding: 0 32px 100px;
         }
 
+        /* Responsive grid for article cards */
+        .article-grid {
+            display: grid;
+            gap: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        }
+
         .featured-article {
             background: var(--card-bg);
             border: 1px solid var(--glass-border);
@@ -462,8 +469,8 @@
 
         .article-image-wrapper {
             position: relative;
-            height: 400px;
             overflow: hidden;
+            aspect-ratio: 16 / 9;
         }
 
         .article-image {
@@ -718,6 +725,11 @@
                 font-size: 2rem;
             }
 
+            .article-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
             .article-full-title {
                 font-size: 2.2rem;
             }
@@ -872,27 +884,73 @@
 
     <!-- Article Showcase -->
     <div class="article-showcase">
-        <article class="featured-article" onclick="openArticle()">
-            <div class="article-image-wrapper">
-                <div class="article-gradient" aria-hidden="true"></div>
-                <span class="article-category-badge">OnPointAggregator AI</span>
-            </div>
-            <div class="article-content">
-                <div class="article-date">August 12, 2025</div>
-                <h2 class="article-title">Introducing OnPointAggregator AI</h2>
-                <p class="article-excerpt">Now rolling out: a neural assistant that reads the latest JSON polling feeds, visualizes aggregates, and adds context around shifts — all from the lower‑right corner of your screen.</p>
-                <div class="article-meta">
-                    <div class="article-author">
-                        <div class="author-avatar">OP</div>
-                        <div class="author-info">
-                            <div class="author-name">OnPoint Team</div>
-                            <div class="read-time">5 min read</div>
-                        </div>
-                    </div>
-                    <div class="coming-soon-badge">More Coming Soon</div>
+        <div class="article-grid">
+            <article class="featured-article" onclick="openArticle()">
+                <div class="article-image-wrapper">
+                    <div class="article-gradient" aria-hidden="true"></div>
+                    <span class="article-category-badge">OnPointAggregator AI</span>
                 </div>
-            </div>
-        </article>
+                <div class="article-content">
+                    <div class="article-date">August 12, 2025</div>
+                    <h2 class="article-title">Introducing OnPointAggregator AI</h2>
+                    <p class="article-excerpt">Now rolling out: a neural assistant that reads the latest JSON polling feeds, visualizes aggregates, and adds context around shifts — all from the lower‑right corner of your screen.</p>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar">OP</div>
+                            <div class="author-info">
+                                <div class="author-name">OnPoint Team</div>
+                                <div class="read-time">5 min read</div>
+                            </div>
+                        </div>
+                        <div class="coming-soon-badge">More Coming Soon</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="featured-article">
+                <div class="article-image-wrapper">
+                    <div class="article-gradient" aria-hidden="true"></div>
+                    <span class="article-category-badge">Polling Methodology</span>
+                </div>
+                <div class="article-content">
+                    <div class="article-date">August 5, 2025</div>
+                    <h2 class="article-title">How We Weight National vs State Polls</h2>
+                    <p class="article-excerpt">A quick tour through the math that powers every chart on the site, tuned for clarity and mobile screens.</p>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar">AN</div>
+                            <div class="author-info">
+                                <div class="author-name">Alex Nguyen</div>
+                                <div class="read-time">4 min read</div>
+                            </div>
+                        </div>
+                        <div class="coming-soon-badge">Coming Soon</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="featured-article">
+                <div class="article-image-wrapper">
+                    <div class="article-gradient" aria-hidden="true"></div>
+                    <span class="article-category-badge">Design Update</span>
+                </div>
+                <div class="article-content">
+                    <div class="article-date">July 28, 2025</div>
+                    <h2 class="article-title">Building a Responsive Presentation UI</h2>
+                    <p class="article-excerpt">We rebuilt our presentation layer to scale from phones to 4K projectors with zero configuration.</p>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar">LM</div>
+                            <div class="author-info">
+                                <div class="author-name">Lena Martinez</div>
+                                <div class="read-time">6 min read</div>
+                            </div>
+                        </div>
+                        <div class="coming-soon-badge">Coming Soon</div>
+                    </div>
+                </div>
+            </article>
+        </div>
     </div>
 
     <!-- Article View Overlay -->
