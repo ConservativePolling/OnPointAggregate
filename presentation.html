@@ -16,8 +16,8 @@
   html{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
   body{
     font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
-    background:#000;height:100vh;overflow:hidden;display:flex;align-items:center;justify-content:center;position:relative;color:#fff;
-    margin:0; padding:0;
+    background:#000;min-height:100vh;overflow:auto;display:flex;align-items:center;justify-content:center;position:relative;color:#fff;
+    margin:0;padding:0;
   }
 
   .background-visuals{position:absolute;inset:0;overflow:hidden;}
@@ -82,13 +82,18 @@
     100% {opacity:0}
   }
 
-  .ai-interface{
-    width:900px;height:600px;background:rgba(10,10,10,.6);
-    backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
-    border:1px solid rgba(255,255,255,.12);border-radius:24px;box-shadow:0 16px 60px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08) inset;
-    display:flex;flex-direction:column;overflow:hidden;transform:translateZ(0);opacity:0;
-    animation:interface-reveal 1.5s var(--ease-out-quad) .3s forwards;
-  }
+    .ai-interface{
+      width:clamp(320px,95vw,900px);height:clamp(480px,85vh,600px);background:rgba(10,10,10,.6);
+      backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+      border:1px solid rgba(255,255,255,.12);border-radius:24px;box-shadow:0 16px 60px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.08) inset;
+      display:flex;flex-direction:column;overflow:hidden;transform:translateZ(0);opacity:0;
+      animation:interface-reveal 1.5s var(--ease-out-quad) .3s forwards;
+    }
+
+    @media (max-width:600px){
+      .ai-interface{border-radius:16px;height:90vh;}
+      .ai-header,.input-area{padding:16px 20px;}
+    }
 
   @keyframes interface-reveal{from{opacity:0;transform:scale(.95);filter:blur(8px)}to{opacity:1;transform:scale(1);filter:blur(0)}}
 

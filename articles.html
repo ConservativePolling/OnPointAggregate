@@ -418,6 +418,16 @@
             padding: 0 32px 100px;
         }
 
+        /* Responsive grid for article cards */
+        .article-grid {
+            display: grid;
+            gap: 40px;
+            justify-content: center;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
         .featured-article {
             background: var(--card-bg);
             border: 1px solid var(--glass-border);
@@ -427,6 +437,8 @@
             transition: all 0.6s var(--transition-ease);
             position: relative;
             animation: revealCard 0.8s ease 0.4s backwards;
+            max-width: 700px;
+            width: 100%;
         }
 
         @keyframes revealCard {
@@ -455,15 +467,15 @@
         }
 
         .featured-article:hover {
-            transform: translateY(-12px) scale(1.02);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
-            border-color: rgba(123, 97, 255, 0.3);
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
+            border-color: rgba(123, 97, 255, 0.4);
         }
 
         .article-image-wrapper {
             position: relative;
-            height: 400px;
             overflow: hidden;
+            aspect-ratio: 16 / 9;
         }
 
         .article-image {
@@ -718,6 +730,11 @@
                 font-size: 2rem;
             }
 
+            .article-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
             .article-full-title {
                 font-size: 2.2rem;
             }
@@ -872,27 +889,29 @@
 
     <!-- Article Showcase -->
     <div class="article-showcase">
-        <article class="featured-article" onclick="openArticle()">
-            <div class="article-image-wrapper">
-                <div class="article-gradient" aria-hidden="true"></div>
-                <span class="article-category-badge">OnPointAggregator AI</span>
-            </div>
-            <div class="article-content">
-                <div class="article-date">August 12, 2025</div>
-                <h2 class="article-title">Introducing OnPointAggregator AI</h2>
-                <p class="article-excerpt">Now rolling out: a neural assistant that reads the latest JSON polling feeds, visualizes aggregates, and adds context around shifts — all from the lower‑right corner of your screen.</p>
-                <div class="article-meta">
-                    <div class="article-author">
-                        <div class="author-avatar">OP</div>
-                        <div class="author-info">
-                            <div class="author-name">OnPoint Team</div>
-                            <div class="read-time">5 min read</div>
-                        </div>
-                    </div>
-                    <div class="coming-soon-badge">More Coming Soon</div>
+        <div class="article-grid">
+            <article class="featured-article" onclick="openArticle()">
+                <div class="article-image-wrapper">
+                    <div class="article-gradient" aria-hidden="true"></div>
+                    <span class="article-category-badge">OnPointAggregator AI</span>
                 </div>
-            </div>
-        </article>
+                <div class="article-content">
+                    <div class="article-date">August 12, 2025</div>
+                    <h2 class="article-title">Introducing OnPointAggregator AI</h2>
+                    <p class="article-excerpt">Now rolling out: a neural assistant that reads the latest JSON polling feeds, visualizes aggregates, and adds context around shifts — all from the lower‑right corner of your screen.</p>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar">OP</div>
+                            <div class="author-info">
+                                <div class="author-name">OnPoint Team</div>
+                                <div class="read-time">5 min read</div>
+                            </div>
+                        </div>
+                        <div class="coming-soon-badge">More Coming Soon</div>
+                    </div>
+                </div>
+            </article>
+        </div>
     </div>
 
     <!-- Article View Overlay -->
