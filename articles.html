@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnPoint Articles</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -17,18 +18,18 @@
         }
 
         .dark-mode {
-            --background: #0a0a0f;
-            --background-gradient: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(123, 97, 255, 0.15), transparent),
-                                  radial-gradient(ellipse 100% 60% at 80% 80%, rgba(255, 61, 113, 0.08), transparent);
-            --card-bg: #16161f;
-            --card-bg-hover: #1d1d2a;
-            --text-primary: #fafafa;
-            --text-secondary: #b8bdd6;
-            --text-muted: #6c7293;
-            --accent: #2a2a3e;
-            --accent-hover: #363648;
-            --primary-gradient: linear-gradient(135deg, #7b61ff 0%, #8f4ddb 100%);
-            --secondary-gradient: linear-gradient(135deg, #295e9e 0%, #3498db 100%);
+            --background: #08090c;
+            --background-gradient: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(0, 212, 255, 0.15), transparent),
+                                  radial-gradient(ellipse 100% 60% at 80% 80%, rgba(0, 255, 163, 0.08), transparent);
+            --card-bg: #14151d;
+            --card-bg-hover: #1c1d27;
+            --text-primary: #f5f5f7;
+            --text-secondary: #b7bfd6;
+            --text-muted: #7b81a2;
+            --accent: #222433;
+            --accent-hover: #31344a;
+            --primary-gradient: linear-gradient(135deg, #00d4ff 0%, #0077ff 100%);
+            --secondary-gradient: linear-gradient(135deg, #00ffa3 0%, #00d4ff 100%);
             --border-light: rgba(255, 255, 255, 0.06);
             --glass-bg: rgba(255, 255, 255, 0.02);
             --glass-border: rgba(255, 255, 255, 0.08);
@@ -45,7 +46,7 @@
             background-image: var(--background-gradient);
             background-attachment: fixed;
             color: var(--text-primary);
-            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
             font-size: 16px;
             font-weight: 400;
@@ -89,7 +90,7 @@
             color: var(--text-primary);
         }
         .transition-logo .point {
-            background: linear-gradient(90deg, #0092ff, #00d4ff, #0092ff);
+            background: linear-gradient(90deg, #00ffa3, #00d4ff, #00ffa3);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -219,7 +220,7 @@
         }
 
         .logo-point {
-            background: linear-gradient(90deg, #0092ff, #00d4ff, #0092ff);
+            background: linear-gradient(90deg, #00ffa3, #00d4ff, #00ffa3);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -422,10 +423,12 @@
         .article-grid {
             display: grid;
             gap: 40px;
+
             justify-content: center;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             max-width: 800px;
             margin: 0 auto;
+
         }
 
         .featured-article {
@@ -911,6 +914,8 @@
                     </div>
                 </div>
             </article>
+
+
         </div>
     </div>
 
