@@ -53,7 +53,8 @@
 
         .dark-mode-minimal {
             --background: #000000;
-            --background-gradient: none;
+            --background-gradient: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(123, 97, 255, 0.06), transparent),
+                                  radial-gradient(ellipse 100% 60% at 80% 80%, rgba(255, 61, 113, 0.03), transparent);
             --card-bg: #111111;
             --card-bg-hover: #1a1a1a;
             --text-primary: #ffffff;
