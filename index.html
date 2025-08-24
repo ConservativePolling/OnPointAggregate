@@ -2,11 +2,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>On Point Aggregate 2.1</title>
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" onload="this.rel='stylesheet'">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" onload="this.rel='stylesheet'">
     <link rel="preload" as="style" href="css/style.css" onload="this.rel='stylesheet'">
+
     <style>
       /* Critical styles for rollout overlay centering even if CSS not loaded yet */
       .rollout-overlay{position:fixed;inset:0;background:rgba(8,8,12,.88);display:none;align-items:center;justify-content:center;z-index:100000;padding:24px;opacity:0;transition:opacity .35s ease;backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
@@ -79,7 +82,19 @@
             </div>
         </div>
     </div>
-    
+
+    <nav class="nav">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-on">ON</span><span class="logo-point">POINT</span><span class="logo-aggregate">AGGREGATE</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#" class="nav-link" id="articlesNavBtn">Articles</a>
+                <a href="#about" class="nav-link">About</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="container">
         <div class="mini-aggregate-container" id="miniAggregateContainer">
              <div id="miniAggregateScroller"></div>
@@ -91,13 +106,6 @@
         </div>
         
         <header>
-            <div class="header-top-nav">
-                <button class="articles-nav-btn" id="articlesNavBtn">
-                    <i class="fas fa-newspaper"></i>
-                    <span>OnPoint Articles</span>
-                    <div class="btn-glow"></div>
-                </button>
-            </div>
              <div class="selectors-wrapper">
                 <div class="dropdown-container" id="mainDropdownContainer">
                     <div class="dropdown-selected" id="dropdownSelected">
@@ -241,7 +249,7 @@
             </div>
         </div>
 
-        <div class="card" style="margin-bottom: 40px;">
+        <div class="card" id="about" style="margin-bottom: 40px;">
             <div class="card-header"><div class="card-title">About Us</div></div>
             <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 0;">
                 <div class="main-title" style="transform: scale(0.8); margin: 0 0 30px 0;">

@@ -12,19 +12,19 @@
         }
 
         .dark-mode {
-            --background: #0a0a0f;
-            --background-gradient: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(123, 97, 255, 0.15), transparent),
-                                  radial-gradient(ellipse 100% 60% at 80% 80%, rgba(255, 61, 113, 0.08), transparent);
-            --card-bg: #16161f;
-            --card-bg-hover: #1d1d2a;
-            --text-primary: #fafafa;
-            --text-secondary: #b8bdd6;
-            --text-muted: #6c7293;
-            --accent: #2a2a3e;
-            --accent-hover: #363648;
+            --background: #08090c;
+            --background-gradient: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(0, 212, 255, 0.15), transparent),
+                                  radial-gradient(ellipse 100% 60% at 80% 80%, rgba(0, 255, 163, 0.08), transparent);
+            --card-bg: #14151d;
+            --card-bg-hover: #1c1d27;
+            --text-primary: #f5f5f7;
+            --text-secondary: #b7bfd6;
+            --text-muted: #7b81a2;
+            --accent: #222433;
+            --accent-hover: #31344a;
             --shadow: rgba(0, 0, 0, 0.6);
-            --primary-gradient: linear-gradient(135deg, #7b61ff 0%, #8f4ddb 100%);
-            --secondary-gradient: linear-gradient(135deg, #295e9e 0%, #3498db 100%);
+            --primary-gradient: linear-gradient(135deg, #00d4ff 0%, #0077ff 100%);
+            --secondary-gradient: linear-gradient(135deg, #00ffa3 0%, #00d4ff 100%);
             --border-light: rgba(255, 255, 255, 0.06);
             --scrollbar-track: rgba(255, 255, 255, 0.02);
             --scrollbar-thumb: rgba(255, 255, 255, 0.1);
@@ -32,18 +32,18 @@
             --chart-grid: rgba(255, 255, 255, 0.04);
             --chart-overlay: rgba(16, 16, 31, 0.75);
             --zoom-hint-color: rgba(123, 97, 255, 0.3);
-            --approve-color: #4ade80;
-            --disapprove-color: #ff3d71;
-            --approve-color-glow: rgba(74, 222, 128, 0.4);
-            --disapprove-color-glow: rgba(255, 61, 113, 0.4);
-            --favorable-color: #a855f7;
-            --unfavorable-color: #f97316;
-            --favorable-color-glow: rgba(168, 85, 247, 0.4);
-            --unfavorable-color-glow: rgba(249, 115, 22, 0.4);
-            --trump-color: #ef4444;
-            --harris-color: #3b82f6;
-            --trump-color-glow: rgba(239, 68, 68, 0.4);
-            --harris-color-glow: rgba(59, 130, 246, 0.4);
+            --approve-color: #34d399;
+            --disapprove-color: #f87171;
+            --approve-color-glow: rgba(52, 211, 153, 0.4);
+            --disapprove-color-glow: rgba(248, 113, 113, 0.4);
+            --favorable-color: #38bdf8;
+            --unfavorable-color: #f59e0b;
+            --favorable-color-glow: rgba(56, 189, 248, 0.4);
+            --unfavorable-color-glow: rgba(245, 158, 11, 0.4);
+            --trump-color: #f97316;
+            --harris-color: #6366f1;
+            --trump-color-glow: rgba(249, 115, 22, 0.4);
+            --harris-color-glow: rgba(99, 102, 241, 0.4);
             --highlight-zoom-border: #8b5cf6;
             --highlight-zoom-bg: rgba(139, 92, 246, 0.15);
             --glass-bg: rgba(255, 255, 255, 0.02);
@@ -137,20 +137,20 @@
             padding: 0; 
         }
         
-        body { 
-            background-color: var(--background); 
-            background-image: var(--background-gradient); 
+        body {
+            background-color: var(--background);
+            background-image: var(--background-gradient);
             background-attachment: fixed;
-            color: var(--text-primary); 
-            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            line-height: 1.6; 
-            font-size: 16px; 
-            font-weight: 400; 
-            min-height: 100vh; 
-            overflow-x: hidden; 
-            transition: background-color var(--transition-speed) var(--transition-ease), 
+            color: var(--text-primary);
+            font-family: 'Poppins', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            font-size: 16px;
+            font-weight: 400;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background-color var(--transition-speed) var(--transition-ease),
                         color var(--transition-speed) var(--transition-ease);
-            padding: 20px;
+            padding: 0;
         }
 
         body.loading {
@@ -161,6 +161,92 @@
         @keyframes gradientShift {
             0%, 100% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 200% 50%; }
+        }
+
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 64px;
+            background: rgba(10, 10, 15, 0.7);
+            backdrop-filter: blur(20px) saturate(1.8);
+            -webkit-backdrop-filter: blur(20px) saturate(1.8);
+            border-bottom: 1px solid var(--glass-border);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 32px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.6rem;
+            font-weight: 900;
+            letter-spacing: -0.04em;
+            display: flex;
+            align-items: baseline;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo-on {
+            color: var(--text-primary);
+        }
+
+        .logo-point {
+            background: linear-gradient(90deg, #00ffa3, #00d4ff, #00ffa3);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+
+        .logo-aggregate {
+            background: linear-gradient(90deg, #0077ff, #00d4ff, #0077ff);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 0.6em;
+            letter-spacing: 0.15em;
+            margin-left: 10px;
+            opacity: 0.9;
+            animation: shimmer 3s linear infinite reverse;
+        }
+
+        .nav-menu {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
         }
 
         .main-title { 
@@ -175,7 +261,7 @@
             align-items: center; 
             max-width: 500px; 
             text-transform: uppercase; 
-            font-family: 'Inter', sans-serif; 
+            font-family: 'Poppins', 'Inter', sans-serif;
             position: relative;
             z-index: 1;
         }
@@ -543,7 +629,7 @@
             gap: 10px;
             box-shadow: var(--shadow-elevation-1);
             overflow: hidden;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', 'Inter', sans-serif;
         }
 
         .articles-nav-btn::before {
@@ -599,15 +685,15 @@
         }
 
         
-        .container { 
-            max-width: 1400px; 
-            margin: 0 auto; 
-            padding: 0 15px; 
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 15px 0;
         }
         
         .theme-toggle-container { 
             position: fixed; 
-            top: 20px; 
+            top: 80px;
             right: 20px; 
             z-index: 999; 
             display: flex; 
@@ -2483,7 +2569,7 @@
         }
         
         #pageLoader .loading-logo {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Poppins', 'Inter', sans-serif;
             font-size: 4rem;
             font-weight: 900;
             text-transform: uppercase;
