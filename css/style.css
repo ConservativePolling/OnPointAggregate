@@ -151,6 +151,7 @@
             transition: background-color var(--transition-speed) var(--transition-ease),
                         color var(--transition-speed) var(--transition-ease);
             padding: 0;
+
             position: relative;
         }
 
@@ -169,6 +170,7 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+
         }
 
         body.loading {
@@ -198,6 +200,7 @@
             border-bottom: 1px solid var(--glass-border);
             z-index: 1000;
             transition: all 0.3s ease;
+
             overflow: hidden;
         }
 
@@ -216,6 +219,7 @@
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
+
         }
 
         .nav-container {
