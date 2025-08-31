@@ -151,6 +151,26 @@
             transition: background-color var(--transition-speed) var(--transition-ease),
                         color var(--transition-speed) var(--transition-ease);
             padding: 0;
+
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(120deg, rgba(123,97,255,0.12), rgba(0,212,255,0.12), rgba(0,255,163,0.12), rgba(123,97,255,0.12));
+            background-size: 400% 400%;
+            animation: bodyGradient 30s ease infinite;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        @keyframes bodyGradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+
         }
 
         body.loading {
@@ -180,6 +200,26 @@
             border-bottom: 1px solid var(--glass-border);
             z-index: 1000;
             transition: all 0.3s ease;
+
+            overflow: hidden;
+        }
+
+        .nav::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, #7b61ff, #00d4ff, #00ffa3, #ff3d71, #7b61ff);
+            background-size: 400% 400%;
+            opacity: 0.15;
+            animation: navGlow 25s ease infinite;
+            pointer-events: none;
+        }
+
+        @keyframes navGlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+
         }
 
         .nav-container {
