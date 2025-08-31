@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OnPoint Articles</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
@@ -18,18 +17,18 @@
         }
 
         .dark-mode {
-            --background: #08090c;
-            --background-gradient: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(0, 212, 255, 0.15), transparent),
-                                  radial-gradient(ellipse 100% 60% at 80% 80%, rgba(0, 255, 163, 0.08), transparent);
-            --card-bg: #14151d;
-            --card-bg-hover: #1c1d27;
-            --text-primary: #f5f5f7;
-            --text-secondary: #b7bfd6;
-            --text-muted: #7b81a2;
-            --accent: #222433;
-            --accent-hover: #31344a;
-            --primary-gradient: linear-gradient(135deg, #00d4ff 0%, #0077ff 100%);
-            --secondary-gradient: linear-gradient(135deg, #00ffa3 0%, #00d4ff 100%);
+            --background: #0a0a0f;
+            --background-gradient: radial-gradient(ellipse 120% 80% at 50% -30%, rgba(123, 97, 255, 0.15), transparent),
+                                  radial-gradient(ellipse 100% 60% at 80% 80%, rgba(255, 61, 113, 0.08), transparent);
+            --card-bg: #16161f;
+            --card-bg-hover: #1d1d2a;
+            --text-primary: #fafafa;
+            --text-secondary: #b8bdd6;
+            --text-muted: #6c7293;
+            --accent: #2a2a3e;
+            --accent-hover: #363648;
+            --primary-gradient: linear-gradient(135deg, #7b61ff 0%, #8f4ddb 100%);
+            --secondary-gradient: linear-gradient(135deg, #295e9e 0%, #3498db 100%);
             --border-light: rgba(255, 255, 255, 0.06);
             --glass-bg: rgba(255, 255, 255, 0.02);
             --glass-border: rgba(255, 255, 255, 0.08);
@@ -46,30 +45,12 @@
             background-image: var(--background-gradient);
             background-attachment: fixed;
             color: var(--text-primary);
-            font-family: 'Poppins', 'Inter', system-ui, -apple-system, sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             line-height: 1.6;
             font-size: 16px;
             font-weight: 400;
             min-height: 100vh;
             overflow-x: hidden;
-            position: relative;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background: linear-gradient(120deg, rgba(123,97,255,0.12), rgba(0,212,255,0.12), rgba(0,255,163,0.12), rgba(123,97,255,0.12));
-            background-size: 400% 400%;
-            animation: bodyGradient 30s ease infinite;
-            pointer-events: none;
-            z-index: -1;
-        }
-
-        @keyframes bodyGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
 
         /* Page Loading Screen */
@@ -108,7 +89,7 @@
             color: var(--text-primary);
         }
         .transition-logo .point {
-            background: linear-gradient(90deg, #00ffa3, #00d4ff, #00ffa3);
+            background: linear-gradient(90deg, #0092ff, #00d4ff, #0092ff);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -206,24 +187,6 @@
             border-bottom: 1px solid var(--glass-border);
             z-index: 1000;
             transition: all 0.3s ease;
-            overflow: hidden;
-        }
-
-        .nav::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, #7b61ff, #00d4ff, #00ffa3, #ff3d71, #7b61ff);
-            background-size: 400% 400%;
-            opacity: 0.15;
-            animation: navGlow 25s ease infinite;
-            pointer-events: none;
-        }
-
-        @keyframes navGlow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
 
         .nav-container {
@@ -256,7 +219,7 @@
         }
 
         .logo-point {
-            background: linear-gradient(90deg, #00ffa3, #00d4ff, #00ffa3);
+            background: linear-gradient(90deg, #0092ff, #00d4ff, #0092ff);
             background-size: 200% 100%;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -459,12 +422,7 @@
         .article-grid {
             display: grid;
             gap: 40px;
-
-            justify-content: center;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            max-width: 800px;
-            margin: 0 auto;
-
         }
 
         .featured-article {
@@ -476,8 +434,6 @@
             transition: all 0.6s var(--transition-ease);
             position: relative;
             animation: revealCard 0.8s ease 0.4s backwards;
-            max-width: 700px;
-            width: 100%;
         }
 
         @keyframes revealCard {
@@ -506,9 +462,9 @@
         }
 
         .featured-article:hover {
-            transform: translateY(-12px) scale(1.03);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.35);
-            border-color: rgba(123, 97, 255, 0.4);
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            border-color: rgba(123, 97, 255, 0.3);
         }
 
         .article-image-wrapper {
@@ -951,7 +907,49 @@
                 </div>
             </article>
 
+            <article class="featured-article">
+                <div class="article-image-wrapper">
+                    <div class="article-gradient" aria-hidden="true"></div>
+                    <span class="article-category-badge">Polling Methodology</span>
+                </div>
+                <div class="article-content">
+                    <div class="article-date">August 5, 2025</div>
+                    <h2 class="article-title">How We Weight National vs State Polls</h2>
+                    <p class="article-excerpt">A quick tour through the math that powers every chart on the site, tuned for clarity and mobile screens.</p>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar">AN</div>
+                            <div class="author-info">
+                                <div class="author-name">Alex Nguyen</div>
+                                <div class="read-time">4 min read</div>
+                            </div>
+                        </div>
+                        <div class="coming-soon-badge">Coming Soon</div>
+                    </div>
+                </div>
+            </article>
 
+            <article class="featured-article">
+                <div class="article-image-wrapper">
+                    <div class="article-gradient" aria-hidden="true"></div>
+                    <span class="article-category-badge">Design Update</span>
+                </div>
+                <div class="article-content">
+                    <div class="article-date">July 28, 2025</div>
+                    <h2 class="article-title">Building a Responsive Presentation UI</h2>
+                    <p class="article-excerpt">We rebuilt our presentation layer to scale from phones to 4K projectors with zero configuration.</p>
+                    <div class="article-meta">
+                        <div class="article-author">
+                            <div class="author-avatar">LM</div>
+                            <div class="author-info">
+                                <div class="author-name">Lena Martinez</div>
+                                <div class="read-time">6 min read</div>
+                            </div>
+                        </div>
+                        <div class="coming-soon-badge">Coming Soon</div>
+                    </div>
+                </div>
+            </article>
         </div>
     </div>
 
