@@ -2902,6 +2902,7 @@
   { pollster: "NYT/Siena College", date: "2025-04-24", sampleSize:  913, approve: 44, disapprove: 47, quality: "A+" },
 
   /* ========== Fabrizio &&nbsp;Anzalone (RV) ========== */
+
   { pollster: "Fabrizio & Anzalone", date: "2025-02-01", sampleSize: 3000, approve: 43, disapprove: 43, quality: "A+" }
                 ]
             },
@@ -2919,6 +2920,7 @@
                 ]
             }
         ];
+
         
         const swingStates = {
             'PA': 'Pennsylvania', 'MI': 'Michigan', 'AZ': 'Arizona',
@@ -3226,7 +3228,9 @@
         let currentLineDetail = 3; // 1-5 scale for line detail/sampling
         let animationFrameId = null;
         let wordCyclerInterval = null;
+
         let aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+
         let pollPointGrid = {}; 
         let hoverDisplayState = { active: false, xChart: 0, date: null, points: [], spreadsInfo: [] };
         let chartDimensions = { margin: { top: 50, right: 30, bottom: 40, left: 30 }, width: 0, height: 0, yMin: DEFAULT_Y_MIN, yMax: DEFAULT_Y_MAX };
@@ -3347,6 +3351,7 @@
 
         // --- Sampling & Rendering Helpers ---
         
+
         function computeBasePollWeight(poll) {
             if (poll.starRating !== undefined) {
                 return Math.sqrt(poll.sampleSize || 0) * (poll.starRating / 3.0);
@@ -3374,6 +3379,7 @@
                 return p;
             });
 
+
             AGGREGATES.forEach(agg => {
                 if(Array.isArray(agg.polls)){
                     agg.polls = processPollArray(agg.polls);
@@ -3388,11 +3394,13 @@
             const pollDate = poll.date.getTime();
             const daysDiff = (referenceDate.getTime() - pollDate) / MS_PER_DAY;
             if (daysDiff < 0) return 0;
+
             const decay = poll.decay || (poll.starRating !== undefined ? 90 : HALF_LIFE);
             const recencyWeight = Math.exp(-daysDiff / decay);
             const baseWeight = poll.baseWeight ?? computeBasePollWeight(poll);
             return baseWeight * recencyWeight;
         }
+
         
         function optimizedSampling(totalDays, lineDetail) {
             // lineDetail: 1 (very smooth) to 5 (very detailed)
@@ -4081,6 +4089,7 @@
 
             let approveClass, disapproveClass;
             switch(currentAggregate.baseId || currentAggregate.id){
+
                 case 'generic_ballot':
                     approveClass = 'poll-percentage republican';
                     disapproveClass = 'poll-percentage democrat';
@@ -4098,21 +4107,25 @@
                     disapproveClass = 'poll-percentage disapprove';
                     break;
             }
+
             
             tableRow.innerHTML = `<td><div class="pollster-name"><div class="pollster-logo">${initials}</div>${displayPollster}</div></td><td class="poll-date">${displayDate}</td><td class="poll-info">${displaySampleSize}</td><td><div class="poll-quality">${formatQualityStars(poll.quality)}</div></td><td class="${approveClass}">${displayApprove}</td><td class="${disapproveClass}">${displayDisapprove}</td>${marginHtml}<td class="poll-info">${weight.toFixed(3)}</td>`;
             return tableRow;
         }
+
 
         function calculateSeriesValues(sortedPolls, timestamps, field1, field2) {
             const values1 = [], values2 = [], moes = [];
             let pollIdx = 0;
             let active = [];
 
+
             for (let i = 0; i < timestamps.length; i++) {
                 const currentDate = timestamps[i];
 
                 while (pollIdx < sortedPolls.length && sortedPolls[pollIdx].date.getTime() <= currentDate.getTime()) {
                     const p = sortedPolls[pollIdx];
+
                     active.push({
                         date: p.date,
                         baseWeight: p.baseWeight ?? computeBasePollWeight(p),
@@ -4160,6 +4173,7 @@
 
             return [values1, values2, moes];
         }
+
         
         function updateAggregation() {
             if (isProcessing) return; // Prevent concurrent processing
@@ -4171,7 +4185,9 @@
             pollCountBadge.textContent = `${countForBadge} poll${countForBadge !== 1 ? 's' : ''}`;
 
             function setEmptyAggData() {
+
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+
                 updateDisplay();
                 isProcessing = false;
             }
@@ -4209,7 +4225,9 @@
             latestPollDateOverall = new Date(Math.min(latestPollDateOverall.getTime(), referenceDate.getTime()));
 
             if (earliestPollDateOverall.getTime() > latestPollDateOverall.getTime()) { 
+
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+
                 updateDisplay();
                 isProcessing = false;
                 return;
@@ -4224,7 +4242,9 @@
             }
             
             if (startDateForAggregation.getTime() > endDateForAggregation.getTime()) { 
+
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+
                 updateDisplay();
                 isProcessing = false;
                 return; 
@@ -4252,7 +4272,9 @@
             }
             
             if (timestamps.length === 0) { 
+
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+
                 updateDisplay();
                 isProcessing = false;
                 return;
@@ -4263,6 +4285,7 @@
             const field2 = currentAggregate.pollFields[1];
             aggregatedData.values = [[], []];
 
+
             const [vals1, vals2, moes] = calculateSeriesValues(sortedPolls, timestamps, field1, field2);
             aggregatedData.values[0] = vals1;
             aggregatedData.values[1] = vals2;
@@ -4270,6 +4293,7 @@
 
             aggregatedData.current = [ aggregatedData.values[0].at(-1), aggregatedData.values[1].at(-1) ];
             aggregatedData.currentMoe = aggregatedData.moes.at(-1);
+
             aggregatedData.spreads = aggregatedData.timestamps.map((_, i) => 
                 (aggregatedData.values[0][i] === null || aggregatedData.values[1][i] === null) 
                     ? null 
@@ -4342,7 +4366,9 @@
             let result;
             currentAggregate = aggConfig;
             currentTerm = term;
+
             aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+
             updateDisplay = () => {};
             try {
                 computeAggregationData([...polls]);
@@ -4365,7 +4391,9 @@
                     if (polls && polls.length > 0) {
                         agg.precomputed[term] = computeAggregatedSnapshot(polls, agg, term);
                     } else {
+
                         agg.precomputed[term] = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+
                     }
                 });
             });
@@ -4389,6 +4417,7 @@
             let cyclingWordsData = [];
             
             let animClass1, animClass2;
+
             switch(currentAggregate.baseId || currentAggregate.id) {
                 case 'race2024':
                     animClass1 = 'trump';
@@ -4481,6 +4510,7 @@
             cardGlow1.style.backgroundColor = getComputedColor(currentAggregate.colors[0]);
             cardGlow2.style.backgroundColor = getComputedColor(currentAggregate.colors[1]);
         }
+
 
         function updateLegend(){
             const legendElement = document.querySelector('.legend');
@@ -4653,6 +4683,7 @@
                 linePaths.push({ path: path2d, length: tempPathEl.getTotalLength() });
             }
             
+
             const drawFullChart = (progress = 1) => {
                 clear(ctx);
                 generateGrid();
@@ -4687,6 +4718,7 @@
                     if (!lineData) return;
                     ctx.save();
                     ctx.strokeStyle = getComputedColor(currentAggregate.colors[lineIdx]);
+
                     ctx.lineWidth = currentLineWidth;
                     ctx.lineJoin = 'round'; ctx.lineCap = 'round';
                     if (glowEffectToggle.checked) {
