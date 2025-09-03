@@ -4408,9 +4408,15 @@
             }
             const animClasses = [animClass1, animClass2];
             
+            let customRaceTitle = false;
             if (isRace) {
-                titlePrefix += `: ${candidates[0]} vs`;
-                cyclingWordsData = [{ word: candidates[1], class: animClasses[1], animationType: 'fade-in' }];
+                if ((currentAggregate.baseId || currentAggregate.id) === 'race2028') {
+                    customRaceTitle = true;
+                    titlePrefix += ':';
+                } else {
+                    titlePrefix += `: ${candidates[0]} vs`;
+                    cyclingWordsData = [{ word: candidates[1], class: animClasses[1], animationType: 'fade-in' }];
+                }
             } else {
                 titlePrefix += `:`;
                 cyclingWordsData = [
@@ -4420,27 +4426,50 @@
             }
 
             titleTextEl.textContent = titlePrefix;
-            
-            wordCyclerEl.innerHTML = '';
-            cyclingWordsData.forEach(data => {
-                const span = document.createElement('span');
-                span.className = `animate-word ${data.class} ${data.animationType}`;
-                span.textContent = data.word;
-                wordCyclerEl.appendChild(span);
-            });
 
-            const words = wordCyclerEl.querySelectorAll('.animate-word');
-            if (words.length > 1) {
-                let currentIndex = 0;
-                words[currentIndex].classList.add('visible');
-                
-                wordCyclerInterval = setInterval(() => {
-                    words[currentIndex].classList.remove('visible');
-                    currentIndex = (currentIndex + 1) % words.length;
+            wordCyclerEl.innerHTML = '';
+            if (customRaceTitle) {
+                const c1 = document.createElement('span');
+                c1.className = `animate-word inline ${animClasses[0]} pop-in`;
+                c1.textContent = candidates[0];
+
+                const vs = document.createElement('span');
+                vs.textContent = ' vs ';
+
+                const c2 = document.createElement('span');
+                c2.className = `animate-word inline ${animClasses[1]} pop-in`;
+                c2.textContent = candidates[1];
+                c2.style.transitionDelay = '0.2s';
+
+                wordCyclerEl.appendChild(c1);
+                wordCyclerEl.appendChild(vs);
+                wordCyclerEl.appendChild(c2);
+
+                requestAnimationFrame(() => {
+                    c1.classList.add('visible');
+                    c2.classList.add('visible');
+                });
+            } else {
+                cyclingWordsData.forEach(data => {
+                    const span = document.createElement('span');
+                    span.className = `animate-word ${data.class} ${data.animationType}`;
+                    span.textContent = data.word;
+                    wordCyclerEl.appendChild(span);
+                });
+
+                const words = wordCyclerEl.querySelectorAll('.animate-word');
+                if (words.length > 1) {
+                    let currentIndex = 0;
                     words[currentIndex].classList.add('visible');
-                }, 3000);
-            } else if (words.length === 1) {
-                 words[0].classList.add('visible');
+
+                    wordCyclerInterval = setInterval(() => {
+                        words[currentIndex].classList.remove('visible');
+                        currentIndex = (currentIndex + 1) % words.length;
+                        words[currentIndex].classList.add('visible');
+                    }, 3000);
+                } else if (words.length === 1) {
+                     words[0].classList.add('visible');
+                }
             }
 
             cardGlow1.style.backgroundColor = getComputedColor(currentAggregate.colors[0]);
