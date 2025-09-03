@@ -285,6 +285,18 @@
             height: 1.1em;
         }
 
+        #poll-title .word-cycler.inline-flex {
+            display: inline-flex;
+            align-items: baseline;
+            width: auto;
+            height: auto;
+        }
+
+        #poll-title .word-cycler.inline-flex .vs {
+            margin: 0 4px;
+            font-weight: 700;
+        }
+
 
       
 
