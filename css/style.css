@@ -42,8 +42,12 @@
             --unfavorable-color-glow: rgba(249, 115, 22, 0.4);
             --trump-color: #ef4444;
             --harris-color: #3b82f6;
+            --vance-color: #dc2626;
+            --newsom-color: #2563eb;
             --trump-color-glow: rgba(239, 68, 68, 0.4);
             --harris-color-glow: rgba(59, 130, 246, 0.4);
+            --vance-color-glow: rgba(220, 38, 38, 0.4);
+            --newsom-color-glow: rgba(37, 99, 235, 0.4);
             --highlight-zoom-border: #8b5cf6;
             --highlight-zoom-bg: rgba(139, 92, 246, 0.15);
             --glass-bg: rgba(255, 255, 255, 0.02);
@@ -81,8 +85,12 @@
             --unfavorable-color-glow: rgba(249, 115, 22, 0.4);
             --trump-color: #ef4444;
             --harris-color: #3b82f6;
+            --vance-color: #dc2626;
+            --newsom-color: #2563eb;
             --trump-color-glow: rgba(239, 68, 68, 0.4);
             --harris-color-glow: rgba(59, 130, 246, 0.4);
+            --vance-color-glow: rgba(220, 38, 38, 0.4);
+            --newsom-color-glow: rgba(37, 99, 235, 0.4);
             --highlight-zoom-border: #8b5cf6;
             --highlight-zoom-bg: rgba(139, 92, 246, 0.15);
             --glass-bg: rgba(255, 255, 255, 0.05);
@@ -121,8 +129,12 @@
             --unfavorable-color-glow: rgba(245, 158, 11, 0.3);
             --trump-color: #dc2626;
             --harris-color: #2563eb;
+            --vance-color: #b91c1c;
+            --newsom-color: #1e3a8a;
             --trump-color-glow: rgba(220, 38, 38, 0.3);
             --harris-color-glow: rgba(37, 99, 235, 0.3);
+            --vance-color-glow: rgba(185, 28, 28, 0.3);
+            --newsom-color-glow: rgba(30, 58, 138, 0.3);
             --highlight-zoom-border: #7c3aed;
             --highlight-zoom-bg: rgba(124, 58, 237, 0.1);
             --glass-bg: rgba(0, 0, 0, 0.01);
@@ -310,6 +322,8 @@
         .animate-word.republican { color: var(--trump-color); }
         .animate-word.harris { color: var(--harris-color); }
         .animate-word.democrat { color: var(--harris-color); }
+        .animate-word.vance { color: var(--vance-color); }
+        .animate-word.newsom { color: var(--newsom-color); }
 
         .selectors-wrapper { 
             display: flex; 
@@ -2150,6 +2164,8 @@
         .poll-percentage.harris { color: var(--harris-color); }
         .poll-percentage.republican { color: var(--trump-color); }
         .poll-percentage.democrat { color: var(--harris-color); }
+        .poll-percentage.vance { color: var(--vance-color); }
+        .poll-percentage.newsom { color: var(--newsom-color); }
         
         .poll-date { 
             color: var(--text-secondary);
@@ -2414,6 +2430,8 @@
         .unfavorable-line { filter: drop-shadow(0 0 4px var(--unfavorable-color-glow)); }
         .trump-line { filter: drop-shadow(0 0 4px var(--trump-color-glow)); }
         .harris-line { filter: drop-shadow(0 0 4px var(--harris-color-glow)); }
+        .vance-line { filter: drop-shadow(0 0 4px var(--vance-color-glow)); }
+        .newsom-line { filter: drop-shadow(0 0 4px var(--newsom-color-glow)); }
         
         .mini-aggregate-display::after { 
             content: ''; 
