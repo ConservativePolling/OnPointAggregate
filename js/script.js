@@ -2912,10 +2912,14 @@
                 colorGlow: ['var(--vance-color-glow)', 'var(--newsom-color-glow)'], directGlowColors: ['rgba(220,38,38,0.4)', 'rgba(37,99,235,0.4)'],
                 lineClasses: ['vance-line', 'newsom-line'],
                 polls: [
-  { pollster: "Overton Insights", date: "2025-06-26", sampleSize: 1200, approve: 46, disapprove: 43, moe: 2.8, decay: 90, baseWeight: 34.641, quality: "B" },
+
   { pollster: "Emerson College Polling", date: "2025-07-22", sampleSize: 1400, approve: 45, disapprove: 42, moe: 2.5, decay: 90, baseWeight: 37.417, quality: "B" },
   { pollster: "OnPoint/SoCal Strategies", date: "2025-08-18", sampleSize: 700, approve: 37, disapprove: 39, moe: 3.7, decay: 90, baseWeight: 6.614, quality: "D" },
   { pollster: "Emerson College Polling", date: "2025-08-26", sampleSize: 1000, approve: 44, disapprove: 44, moe: 3.0, decay: 90, baseWeight: 31.623, quality: "B" }
+
+                 
+
+
                 ]
             }
         ];
