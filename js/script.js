@@ -3251,7 +3251,7 @@
             cancelled: false,
             touchId: null,
             threshold: {
-                time: 100, // minimum drag time in ms
+                time: 0, // minimum drag time in ms
                 distance: 15 // minimum distance in pixels
             }
         };
@@ -3804,6 +3804,19 @@
             return filtered;
         }
 
+        function getPrimaryPollsForAggregation() {
+            return _filterPollsForLineCalc(
+                getCurrentTermPolls(currentAggregate, currentTerm),
+                selectedPollster,
+                searchQuery
+            );
+        }
+
+        function updatePollCountBadge(polls) {
+            const count = polls.length;
+            pollCountBadge.textContent = `${count} poll${count !== 1 ? 's' : ''}`;
+        }
+
         function parseSearchQuery(query) {
             const fieldRegex = /(pollster|date|sample|quality|margin):((?:>=|<=|>|<)?[\w\s+.-]+)/g;
             let fieldFilters = [];
@@ -3969,6 +3982,7 @@
                     !currentZoomSelection.isActive &&
                     currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
                     aggregatedData = cloneAggregatedData(currentAggregate.precomputed[currentTerm]);
+                    updatePollCountBadge(getPrimaryPollsForAggregation());
                     isProcessing = false;
                 } else {
                     updateAggregation();
@@ -4178,11 +4192,9 @@
         function updateAggregation() {
             if (isProcessing) return; // Prevent concurrent processing
             isProcessing = true;
-            
-            let primaryPollsForLine = _filterPollsForLineCalc(getCurrentTermPolls(currentAggregate, currentTerm), selectedPollster, searchQuery);
-            
-            let countForBadge = primaryPollsForLine.length; 
-            pollCountBadge.textContent = `${countForBadge} poll${countForBadge !== 1 ? 's' : ''}`;
+
+            let primaryPollsForLine = getPrimaryPollsForAggregation();
+            updatePollCountBadge(primaryPollsForLine);
 
             function setEmptyAggData() {
 
@@ -5237,10 +5249,11 @@
             
             // Clean up visual state
             cleanupZoomHighlight();
-            
+
             // Exit early if zoom was cancelled or invalid
             if (wasCancelled || !wasValid || !wasDragging) {
                 console.log('Zoom aborted:', { wasCancelled, wasValid, wasDragging });
+                previousZoomStateBeforeCurrent = null;
                 return;
             }
             
@@ -5368,6 +5381,7 @@
                 !currentZoomSelection.isActive &&
                 currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
                 aggregatedData = cloneAggregatedData(currentAggregate.precomputed[currentTerm]);
+                updatePollCountBadge(getPrimaryPollsForAggregation());
             } else {
                 updateAggregation();
             }
