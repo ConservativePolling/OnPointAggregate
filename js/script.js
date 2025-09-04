@@ -3806,11 +3806,14 @@
         }
 
         function getPrimaryPollsForAggregation() {
+
             let polls = _filterPollsForLineCalc(
+
                 getCurrentTermPolls(currentAggregate, currentTerm),
                 selectedPollster,
                 searchQuery
             );
+
 
             if (currentZoomSelection.isActive && currentZoomSelection.startDate && currentZoomSelection.endDate) {
                 const start = currentZoomSelection.startDate.getTime();
@@ -3822,6 +3825,7 @@
             }
 
             return polls;
+
         }
 
         function updatePollCountBadge(polls) {
@@ -4202,6 +4206,7 @@
 
         
         function updateAggregation() {
+
             const primaryPollsForLine = getPrimaryPollsForAggregation();
             updatePollCountBadge(primaryPollsForLine);
 
@@ -4247,6 +4252,7 @@
                 finalize();
             }, { timeout: 100 });
         }
+
         
         function computeAggregationData(primaryPollsForLine) {
             const sortedPolls = primaryPollsForLine.sort((a,b) => a.date.getTime() - b.date.getTime());
