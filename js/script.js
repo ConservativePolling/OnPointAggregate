@@ -3251,7 +3251,7 @@
             cancelled: false,
             touchId: null,
             threshold: {
-                time: 100, // minimum drag time in ms
+                time: 0, // minimum drag time in ms
                 distance: 15 // minimum distance in pixels
             }
         };
@@ -3266,9 +3266,10 @@
         let scrollerAnimationId = null;
         let isScrollerPaused = false;
         let currentTheme = 'dark';
-        
+
         // Performance state
         let isProcessing = false;
+        let pendingAggregation = false;
         let renderQueue = [];
         let lastRenderTime = 0;
         let offscreenCanvas = null;
@@ -3804,6 +3805,30 @@
             return filtered;
         }
 
+        function getPrimaryPollsForAggregation() {
+            let polls = _filterPollsForLineCalc(
+                getCurrentTermPolls(currentAggregate, currentTerm),
+                selectedPollster,
+                searchQuery
+            );
+
+            if (currentZoomSelection.isActive && currentZoomSelection.startDate && currentZoomSelection.endDate) {
+                const start = currentZoomSelection.startDate.getTime();
+                const end = currentZoomSelection.endDate.getTime();
+                polls = polls.filter(p => {
+                    const t = p.date.getTime();
+                    return t >= start && t <= end;
+                });
+            }
+
+            return polls;
+        }
+
+        function updatePollCountBadge(polls) {
+            const count = polls.length;
+            pollCountBadge.textContent = `${count} poll${count !== 1 ? 's' : ''}`;
+        }
+
         function parseSearchQuery(query) {
             const fieldRegex = /(pollster|date|sample|quality|margin):((?:>=|<=|>|<)?[\w\s+.-]+)/g;
             let fieldFilters = [];
@@ -3969,6 +3994,7 @@
                     !currentZoomSelection.isActive &&
                     currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
                     aggregatedData = cloneAggregatedData(currentAggregate.precomputed[currentTerm]);
+                    updatePollCountBadge(getPrimaryPollsForAggregation());
                     isProcessing = false;
                 } else {
                     updateAggregation();
@@ -4176,25 +4202,38 @@
 
         
         function updateAggregation() {
-            if (isProcessing) return; // Prevent concurrent processing
-            isProcessing = true;
-            
-            let primaryPollsForLine = _filterPollsForLineCalc(getCurrentTermPolls(currentAggregate, currentTerm), selectedPollster, searchQuery);
-            
-            let countForBadge = primaryPollsForLine.length; 
-            pollCountBadge.textContent = `${countForBadge} poll${countForBadge !== 1 ? 's' : ''}`;
+            const primaryPollsForLine = getPrimaryPollsForAggregation();
+            updatePollCountBadge(primaryPollsForLine);
 
-            function setEmptyAggData() {
-
-                aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
-
-                updateDisplay();
-                isProcessing = false;
+            if (isProcessing) {
+                pendingAggregation = true;
+                return;
             }
+            isProcessing = true;
 
-            if (primaryPollsForLine.length === 0) { 
-                setEmptyAggData(); 
-                return; 
+            const finalize = () => {
+                if (aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
+                    emptyState.style.display = 'none';
+                    generateXAxisDates(true);
+                    drawChart(true);
+                    drawComparativeChart();
+                } else {
+                    clearChart();
+                    emptyState.style.display = 'flex';
+                }
+                updateHoverState(currentHoverIndex);
+                isProcessing = false;
+                if (pendingAggregation) {
+                    pendingAggregation = false;
+                    updateAggregation();
+                }
+            };
+
+            if (primaryPollsForLine.length === 0) {
+                aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+                updateDisplay();
+                finalize();
+                return;
             }
 
             idleCallback(() => {
@@ -4202,8 +4241,10 @@
                     computeAggregationData(primaryPollsForLine);
                 } catch (error) {
                     console.error('Aggregation computation failed:', error);
-                    setEmptyAggData();
+                    aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+                    updateDisplay();
                 }
+                finalize();
             }, { timeout: 100 });
         }
         
@@ -4229,7 +4270,6 @@
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
 
                 updateDisplay();
-                isProcessing = false;
                 return;
             }
 
@@ -4246,8 +4286,7 @@
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
 
                 updateDisplay();
-                isProcessing = false;
-                return; 
+                return;
             }
             
             const totalDays = Math.max(0, Math.ceil((endDateForAggregation.getTime() - startDateForAggregation.getTime()) / MS_PER_DAY)) + 1;
@@ -4276,7 +4315,6 @@
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
 
                 updateDisplay();
-                isProcessing = false;
                 return;
             }
 
@@ -4331,7 +4369,6 @@
             });
             
             updateDisplay();
-            isProcessing = false;
         }
 
         function updateDisplay() {
@@ -5237,10 +5274,11 @@
             
             // Clean up visual state
             cleanupZoomHighlight();
-            
+
             // Exit early if zoom was cancelled or invalid
             if (wasCancelled || !wasValid || !wasDragging) {
                 console.log('Zoom aborted:', { wasCancelled, wasValid, wasDragging });
+                previousZoomStateBeforeCurrent = null;
                 return;
             }
             
@@ -5368,6 +5406,7 @@
                 !currentZoomSelection.isActive &&
                 currentAggregate.precomputed && currentAggregate.precomputed[currentTerm]) {
                 aggregatedData = cloneAggregatedData(currentAggregate.precomputed[currentTerm]);
+                updatePollCountBadge(getPrimaryPollsForAggregation());
             } else {
                 updateAggregation();
             }
