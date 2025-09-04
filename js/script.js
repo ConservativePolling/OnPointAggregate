@@ -3266,9 +3266,10 @@
         let scrollerAnimationId = null;
         let isScrollerPaused = false;
         let currentTheme = 'dark';
-        
+
         // Performance state
         let isProcessing = false;
+        let pendingAggregation = false;
         let renderQueue = [];
         let lastRenderTime = 0;
         let offscreenCanvas = null;
@@ -3805,11 +3806,26 @@
         }
 
         function getPrimaryPollsForAggregation() {
-            return _filterPollsForLineCalc(
+
+            let polls = _filterPollsForLineCalc(
+
                 getCurrentTermPolls(currentAggregate, currentTerm),
                 selectedPollster,
                 searchQuery
             );
+
+
+            if (currentZoomSelection.isActive && currentZoomSelection.startDate && currentZoomSelection.endDate) {
+                const start = currentZoomSelection.startDate.getTime();
+                const end = currentZoomSelection.endDate.getTime();
+                polls = polls.filter(p => {
+                    const t = p.date.getTime();
+                    return t >= start && t <= end;
+                });
+            }
+
+            return polls;
+
         }
 
         function updatePollCountBadge(polls) {
@@ -4190,23 +4206,39 @@
 
         
         function updateAggregation() {
-            if (isProcessing) return; // Prevent concurrent processing
-            isProcessing = true;
 
-            let primaryPollsForLine = getPrimaryPollsForAggregation();
+            const primaryPollsForLine = getPrimaryPollsForAggregation();
             updatePollCountBadge(primaryPollsForLine);
 
-            function setEmptyAggData() {
-
-                aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
-
-                updateDisplay();
-                isProcessing = false;
+            if (isProcessing) {
+                pendingAggregation = true;
+                return;
             }
+            isProcessing = true;
 
-            if (primaryPollsForLine.length === 0) { 
-                setEmptyAggData(); 
-                return; 
+            const finalize = () => {
+                if (aggregatedData.timestamps && aggregatedData.timestamps.length > 0) {
+                    emptyState.style.display = 'none';
+                    generateXAxisDates(true);
+                    drawChart(true);
+                    drawComparativeChart();
+                } else {
+                    clearChart();
+                    emptyState.style.display = 'flex';
+                }
+                updateHoverState(currentHoverIndex);
+                isProcessing = false;
+                if (pendingAggregation) {
+                    pendingAggregation = false;
+                    updateAggregation();
+                }
+            };
+
+            if (primaryPollsForLine.length === 0) {
+                aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+                updateDisplay();
+                finalize();
+                return;
             }
 
             idleCallback(() => {
@@ -4214,10 +4246,13 @@
                     computeAggregationData(primaryPollsForLine);
                 } catch (error) {
                     console.error('Aggregation computation failed:', error);
-                    setEmptyAggData();
+                    aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
+                    updateDisplay();
                 }
+                finalize();
             }, { timeout: 100 });
         }
+
         
         function computeAggregationData(primaryPollsForLine) {
             const sortedPolls = primaryPollsForLine.sort((a,b) => a.date.getTime() - b.date.getTime());
@@ -4241,7 +4276,6 @@
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
 
                 updateDisplay();
-                isProcessing = false;
                 return;
             }
 
@@ -4258,8 +4292,7 @@
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
 
                 updateDisplay();
-                isProcessing = false;
-                return; 
+                return;
             }
             
             const totalDays = Math.max(0, Math.ceil((endDateForAggregation.getTime() - startDateForAggregation.getTime()) / MS_PER_DAY)) + 1;
@@ -4288,7 +4321,6 @@
                 aggregatedData = { timestamps: [], values: [[], []], spreads: [], moes: [], current: [null, null], currentMoe: null, pollPoints: [] };
 
                 updateDisplay();
-                isProcessing = false;
                 return;
             }
 
@@ -4343,7 +4375,6 @@
             });
             
             updateDisplay();
-            isProcessing = false;
         }
 
         function updateDisplay() {
