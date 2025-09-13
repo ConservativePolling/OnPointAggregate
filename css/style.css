@@ -1205,6 +1205,7 @@
                 max-height: 0;
                 opacity: 0;
                 transform: translateY(-8px) scaleY(0.8);
+
         }
     }
 
@@ -1294,6 +1295,7 @@
             50% { background-position: 100% 50%; }
             100% { background-position: 0% 50%; }
         }
+
 
         .search-suggestions.visible {
             max-height: 140px;
