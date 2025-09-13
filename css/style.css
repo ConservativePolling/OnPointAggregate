@@ -636,20 +636,20 @@
             padding: 0 15px; 
         }
         
-        .theme-toggle-container { 
-            position: fixed; 
-            top: 20px; 
-            right: 20px; 
-            z-index: 999; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
-            background: var(--glass-bg); 
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1200;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-radius: 30px; 
-            padding: 8px 12px; 
-            box-shadow: var(--shadow-elevation-2); 
+            border-radius: 30px;
+            padding: 8px 12px;
+            box-shadow: var(--shadow-elevation-2);
             border: 1px solid var(--glass-border);
             transition: all 0.3s ease;
         }
@@ -1205,7 +1205,63 @@
                 max-height: 0;
                 opacity: 0;
                 transform: translateY(-8px) scaleY(0.8);
-            }
+        }
+    }
+
+        .presentation-banner {
+            position: sticky;
+            top: 0;
+            z-index: 900;
+            background: var(--card-bg);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .presentation-banner .banner-content {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 8px 16px;
+            max-width: 960px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .presentation-banner .banner-logo {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .presentation-banner .title-top {
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        .presentation-banner .title-aggregate {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-top: 2px;
+            background: linear-gradient(90deg, #0ea5e9, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .presentation-banner .title-aggregate sup {
+            font-size: 0.55em;
+        }
+
+        .presentation-banner .banner-message {
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.015em;
+            color: var(--text-primary);
         }
 
         .search-suggestions.visible {
