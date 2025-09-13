@@ -25,7 +25,17 @@
     <link rel="preload" as="script" href="js/script.js">
 </head>
 <body class="dark-mode">
-    <div id="presentationBanner" class="presentation-banner"></div>
+
+    <div id="presentationBanner" class="presentation-banner">
+        <div class="banner-content">
+            <div class="banner-logo">
+                <div class="title-top"><span class="title-on">ON</span><span class="title-point">POINT</span></div>
+                <span class="title-aggregate">AGGREGATE<sup>2.1</sup></span>
+            </div>
+            <span class="banner-message" id="presentationBannerMessage"></span>
+        </div>
+    </div>
+
     <div class="loading-indicator" id="pageLoader">
         <div class="wave-canvas" id="waveCanvas"></div>
         <div class="loading-logo">
@@ -361,13 +371,15 @@
     </script>
     <script>
     (function(){
-        const banner = document.getElementById('presentationBanner');
-        if (!banner) return;
+
+        const msg = document.getElementById('presentationBannerMessage');
+        if (!msg) return;
         const now = new Date();
         if (now.getMonth() === 8 && now.getDate() === 13) {
-            banner.textContent = 'OnPointAggregate 2.1 Presentation will be today';
+            msg.textContent = 'Presentation will be today';
         } else {
-            banner.textContent = 'OnPointAggregate 2.1 Presentation will be tomorrow';
+            msg.textContent = 'Presentation will be tomorrow';
+
         }
     })();
     </script>
