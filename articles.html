@@ -6,6 +6,31 @@
     <title>OnPoint Articles</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif']
+            },
+            colors: {
+              brand: {
+                DEFAULT: '#7b61ff',
+                foreground: '#f8fafc'
+              },
+              'brand-accent': '#38bdf8'
+            },
+            boxShadow: {
+              'glow-brand': '0 25px 80px rgba(123, 97, 255, 0.25)',
+              'glow-accent': '0 20px 70px rgba(56, 189, 248, 0.25)'
+            }
+          }
+        }
+      };
+    </script>
     <style>
         :root {
             --border-radius: 16px;
@@ -842,7 +867,13 @@
         }
     </style>
 </head>
-<body class="dark-mode">
+<body class="dark-mode antialiased bg-slate-950 text-slate-100 overflow-x-hidden">
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute left-[12%] top-[-25%] h-[500px] w-[500px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(123,97,255,0.45),_transparent_65%)] blur-[120px]"></div>
+        <div class="absolute right-[-10%] top-[35%] h-[540px] w-[540px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.4),_transparent_65%)] blur-[120px]"></div>
+        <div class="absolute bottom-[-20%] left-1/2 h-[580px] w-[580px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(14,165,233,0.2),_transparent_65%)] blur-[110px]"></div>
+    </div>
+    <div class="relative z-10 flex min-h-screen flex-col">
     <!-- Page Loading Screen -->
     <div class="page-transition" id="pageTransition">
         <div class="transition-logo">
@@ -855,7 +886,7 @@
 
     <!-- Navigation -->
     <nav class="nav">
-        <div class="nav-container">
+        <div class="nav-container mx-auto w-full max-w-6xl px-4">
             <div class="logo">
                 <span class="logo-on">ON</span><span class="logo-point">POINT</span>
                 <span class="logo-articles">ARTICLES</span>
@@ -870,20 +901,24 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <div class="hero-label">
+    <section class="hero relative mx-auto w-full max-w-6xl px-4 pb-20 pt-24">
+        <div class="hero-content relative z-10 flex flex-col items-center text-center">
+            <div class="hero-label inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-5 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-violet-200 shadow-[0_20px_60px_rgba(124,58,237,0.35)] backdrop-blur">
                 <i class="fas fa-star"></i>
                 <span>Now Available</span>
             </div>
-            <h1 class="hero-title">OnPoint Articles</h1>
-            <p class="hero-subtitle">Premium political analysis, polling insights, and data-driven commentary from OnPointPolitics.</p>
-            
+            <h1 class="hero-title text-white drop-shadow-[0_30px_90px_rgba(15,23,42,0.6)]">OnPoint Articles</h1>
+            <p class="hero-subtitle max-w-3xl text-balance text-slate-300">Premium political analysis, polling insights, and data-driven commentary from OnPointPolitics.</p>
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-3 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-200">
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"><i class="fas fa-chart-line text-sky-300"></i> Aggregates</span>
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"><i class="fas fa-newspaper text-violet-300"></i> Briefings</span>
+                <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"><i class="fas fa-microchip text-emerald-300"></i> AI Insight</span>
+            </div>
         </div>
     </section>
 
     <!-- Article Showcase -->
-    <div class="article-showcase">
+    <div class="article-showcase mx-auto w-full max-w-6xl px-4">
         <div class="article-grid">
             <article class="featured-article" onclick="openArticle()">
                 <div class="article-image-wrapper">
@@ -1165,5 +1200,6 @@
             // Placeholder: no token required here; keeping stub for future use
         })();
     </script>
+    </div>
 </body>
 </html>
