@@ -2,19 +2,153 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>2028 Presidential Polling: Newsom vs Vance</title>
-  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#7b61ff',
+              foreground: '#f8fafc'
+            },
+            'brand-accent': '#38bdf8'
+          },
+          boxShadow: {
+            'glow-brand': '0 35px 120px rgba(123, 97, 255, 0.35)',
+            'glow-panel': '0 45px 120px rgba(15, 23, 42, 0.65)'
+          }
+        }
+      }
+    };
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script type="module" src="js/newsom-vance-2028.js"></script>
 </head>
-<body>
-  <div class="dropdown-container" style="margin:20px;">
-    <select class="dropdown-selected">
-      <option selected>2028 Presidential Race (Newsom vs Vance)</option>
-    </select>
+<body class="antialiased bg-slate-950 text-slate-100">
+  <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div class="absolute left-[10%] top-[-20%] h-[520px] w-[520px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(123,97,255,0.45),_transparent_65%)] blur-[120px]"></div>
+    <div class="absolute right-[-12%] top-[30%] h-[580px] w-[580px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.4),_transparent_65%)] blur-[120px]"></div>
+    <div class="absolute bottom-[-25%] left-1/2 h-[640px] w-[640px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.25),_transparent_65%)] blur-[120px]"></div>
   </div>
-  <div id="pollChart" style="position:relative;height:400px;margin:0 20px;">
-    <canvas id="newsomVanceChart"></canvas>
+  <div class="relative z-10 flex min-h-screen flex-col">
+    <main class="relative mx-auto w-full max-w-6xl px-4 pb-16 pt-14 sm:px-8 lg:px-12">
+      <div class="flex flex-col gap-12">
+        <header class="flex flex-col gap-8">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-col gap-3">
+              <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-violet-200 shadow-[0_18px_60px_rgba(124,58,237,0.35)] backdrop-blur">
+                <span class="inline-flex h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_12px_rgba(124,58,237,0.9)]"></span>
+                Weighted Snapshot
+              </span>
+              <h1 class="text-3xl font-semibold text-white sm:text-4xl">Newsom vs. Vance — 2028 Pulse</h1>
+              <p class="max-w-2xl text-sm leading-relaxed text-slate-300 sm:text-base">
+                Confidence-weighted aggregation across trusted pollsters. Updated the moment new interviews clear our methodology.
+              </p>
+            </div>
+            <a href="index.html" class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-slate-200 transition hover:border-white/30 hover:text-white">
+              <i class="fas fa-arrow-left-long text-violet-300"></i>
+              Back to Dashboard
+            </a>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-6 rounded-3xl border border-white/10 bg-white/5 px-6 py-4 shadow-[0_25px_80px_rgba(15,23,42,0.55)] backdrop-blur-xl">
+            <div class="flex flex-col">
+              <span class="text-xs uppercase tracking-[0.35em] text-slate-400">Scenario</span>
+              <span class="mt-2 text-sm font-semibold text-slate-100 sm:text-base">2028 Presidential Race</span>
+            </div>
+            <div class="w-full max-w-xs">
+              <label class="text-xs uppercase tracking-[0.35em] text-slate-400">Comparison Lens</label>
+              <div class="relative mt-3">
+                <select class="w-full appearance-none rounded-full border border-white/10 bg-white/10 px-5 py-3 text-sm font-semibold text-slate-100 shadow-[0_20px_60px_rgba(15,23,42,0.55)] outline-none transition focus:border-brand focus:ring-2 focus:ring-brand/40">
+                  <option selected>2028 Presidential Race (Newsom vs Vance)</option>
+                </select>
+                <span class="pointer-events-none absolute inset-y-0 right-5 flex items-center text-slate-400">
+                  <i class="fas fa-chevron-down"></i>
+                </span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <section class="rounded-3xl border border-white/10 bg-white/5 p-8 shadow-glow-panel backdrop-blur-xl">
+          <div class="flex flex-wrap items-center justify-between gap-4">
+            <div class="flex flex-col">
+              <span class="text-xs uppercase tracking-[0.35em] text-slate-400">Latest Weighted Snapshot</span>
+              <span id="aggregateDate" class="mt-2 text-sm font-semibold text-slate-200">—</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-3">
+              <span id="leadingBadge" class="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-500/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200 transition">
+                <i class="fas fa-arrow-trend-up"></i>
+                <span id="leadingText">Lead Pending</span>
+              </span>
+              <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-slate-200">
+                <i class="fas fa-database text-violet-300"></i>
+                <span><span id="pollCountValue">0</span> Polls</span>
+              </span>
+              <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-slate-200">
+                <i class="fas fa-users text-sky-300"></i>
+                <span><span id="totalSampleValue">0</span> Interviews</span>
+              </span>
+            </div>
+          </div>
+
+          <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-6 text-center shadow-[0_20px_60px_rgba(15,23,42,0.45)]">
+              <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Vance Avg</p>
+              <div class="mt-3 flex items-baseline justify-center gap-2 text-white">
+                <span id="vanceAverage" class="text-3xl font-semibold">--</span>
+                <span class="text-sm font-medium text-slate-400">%</span>
+              </div>
+              <p class="mt-2 text-xs text-slate-500">Adjusted for pollster house effects.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-6 text-center shadow-[0_20px_60px_rgba(15,23,42,0.45)]">
+              <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Newsom Avg</p>
+              <div class="mt-3 flex items-baseline justify-center gap-2 text-white">
+                <span id="newsomAverage" class="text-3xl font-semibold">--</span>
+                <span class="text-sm font-medium text-slate-400">%</span>
+              </div>
+              <p class="mt-2 text-xs text-slate-500">Weighted across recency, sample depth, and quality.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-6 text-center shadow-[0_20px_60px_rgba(15,23,42,0.45)]">
+              <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Net Spread</p>
+              <div class="mt-3 flex items-baseline justify-center gap-2 text-white">
+                <span id="marginValue" class="text-3xl font-semibold">--</span>
+                <span class="text-sm font-medium text-slate-400">pts</span>
+              </div>
+              <p id="marginDescriptor" class="mt-2 text-xs text-slate-500">Advantage recalculated with each poll.</p>
+            </div>
+            <div class="rounded-2xl border border-white/10 bg-white/5 px-5 py-6 text-center shadow-[0_20px_60px_rgba(15,23,42,0.45)]">
+              <p class="text-xs uppercase tracking-[0.35em] text-slate-400">Confidence Window</p>
+              <div class="mt-3 flex items-baseline justify-center gap-2 text-white">
+                <span id="moeValue" class="text-3xl font-semibold">±0.0</span>
+                <span class="text-sm font-medium text-slate-400">pts</span>
+              </div>
+              <p class="mt-2 text-xs text-slate-500">Weighted margin of error at 95% confidence.</p>
+            </div>
+          </div>
+
+          <div class="mt-8 rounded-3xl border border-white/10 bg-slate-950/50 p-6 shadow-[0_25px_80px_rgba(15,23,42,0.5)]">
+            <div class="relative h-[360px] sm:h-[420px]">
+              <canvas id="newsomVanceChart" class="h-full w-full"></canvas>
+            </div>
+          </div>
+          <p class="mt-6 text-sm text-slate-400">
+            Confidence intervals reflect OnPoint weighting of pollster accuracy, sample size, and field recency.
+          </p>
+        </section>
+      </div>
+    </main>
   </div>
 </body>
 </html>

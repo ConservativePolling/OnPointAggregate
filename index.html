@@ -7,6 +7,34 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css" rel="stylesheet">
     <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" onload="this.rel='stylesheet'">
     <link rel="preload" as="style" href="css/style.css" onload="this.rel='stylesheet'">
+    <script src="https://cdn.tailwindcss.com?plugins=typography,forms"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+              display: ['Space Grotesk', 'Inter', 'system-ui', 'sans-serif']
+            },
+            colors: {
+              brand: {
+                DEFAULT: '#7b61ff',
+                foreground: '#f8fafc'
+              },
+              'brand-accent': '#38bdf8'
+            },
+            boxShadow: {
+              'glow-brand': '0 25px 80px rgba(123, 97, 255, 0.25)',
+              'glow-accent': '0 20px 70px rgba(56, 189, 248, 0.25)'
+            },
+            backgroundImage: {
+              'grid-glow': 'radial-gradient(circle at center, rgba(148, 163, 184, 0.05) 0%, transparent 65%)'
+            }
+          }
+        }
+      };
+    </script>
     <style>
       /* Critical styles for rollout overlay centering even if CSS not loaded yet */
       .rollout-overlay{position:fixed;inset:0;background:rgba(8,8,12,.88);display:none;align-items:center;justify-content:center;z-index:100000;padding:24px;opacity:0;transition:opacity .35s ease;backdrop-filter:blur(16px) saturate(160%);-webkit-backdrop-filter:blur(16px) saturate(160%)}
@@ -25,33 +53,39 @@
     <link rel="preload" as="script" href="js/script.js">
 
 </head>
-<body class="dark-mode">
-    <div id="presentationBanner" class="presentation-banner">
-        <div class="banner-content">
-            <div class="banner-logo">
-                <div class="title-top"><span class="title-on">ON</span><span class="title-point">POINT</span></div>
-                <span class="title-aggregate">AGGREGATE<sup>2.1</sup></span>
-            </div>
+<body class="dark-mode antialiased bg-slate-950 text-slate-100 overflow-x-hidden">
+    <div class="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div class="absolute left-[8%] top-[-25%] h-[540px] w-[540px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(123,97,255,0.55),_transparent_65%)] blur-[120px]"></div>
+        <div class="absolute right-[-10%] top-[30%] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle_at_center,_rgba(56,189,248,0.45),_transparent_65%)] blur-[120px]"></div>
+        <div class="absolute bottom-[-30%] left-1/2 h-[640px] w-[640px] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_center,_rgba(16,185,129,0.25),_transparent_65%)] blur-[120px]"></div>
+    </div>
+    <div class="relative z-10 flex min-h-screen flex-col">
+        <div id="presentationBanner" class="presentation-banner">
+            <div class="banner-content">
+                <div class="banner-logo">
+                    <div class="title-top"><span class="title-on">ON</span><span class="title-point">POINT</span></div>
+                    <span class="title-aggregate">AGGREGATE<sup>2.1</sup></span>
+                </div>
             <span class="banner-message" id="presentationBannerMessage"></span>
         </div>
     </div>
-    <div class="loading-indicator" id="pageLoader">
+        <div class="loading-indicator" id="pageLoader">
 
-        <div class="wave-canvas" id="waveCanvas"></div>
-        <div class="loading-logo">
-            <span class="on">On</span><span class="point">Point</span>
-            <span class="aggregate">Aggregate<span class="version">2.0</span></span>
+            <div class="wave-canvas" id="waveCanvas"></div>
+            <div class="loading-logo">
+                <span class="on">On</span><span class="point">Point</span>
+                <span class="aggregate">Aggregate<span class="version">2.0</span></span>
+            </div>
+            <div class="loading-text">Analyzing Political Polls...</div>
+            <div class="progress-fill"></div>
         </div>
-        <div class="loading-text">Analyzing Political Polls...</div>
-        <div class="progress-fill"></div>
-    </div>
-    
-    <div class="download-modal" id="downloadModal">
-        <div class="download-modal-content">
-            <div class="download-modal-header">
-                <div class="download-modal-title">Download Data</div>
-                <button class="download-modal-close" id="downloadModalClose">
-                    <i class="fas fa-times"></i>
+
+        <div class="download-modal" id="downloadModal">
+            <div class="download-modal-content">
+                <div class="download-modal-header">
+                    <div class="download-modal-title">Download Data</div>
+                    <button class="download-modal-close" id="downloadModalClose">
+                        <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="download-options">
@@ -91,23 +125,37 @@
         </div>
     </div>
     
-    <div class="container">
+        <div class="container mx-auto w-full max-w-6xl px-4 pb-20 pt-16 lg:px-12">
         <div class="mini-aggregate-container" id="miniAggregateContainer">
              <div id="miniAggregateScroller"></div>
         </div>
 
-        <div class="main-title">
+        <div class="main-title drop-shadow-[0_25px_80px_rgba(123,97,255,0.35)]">
             <div class="title-top"><span class="title-on">ON</span><span class="title-point">POINT</span></div>
             <span class="title-aggregate">AGGREGATE<sup>2.0</sup></span>
         </div>
         
-        <header>
+        <header class="relative z-10 mt-10 flex flex-col gap-10">
             <div class="header-top-nav">
                 <button class="articles-nav-btn" id="articlesNavBtn">
                     <i class="fas fa-newspaper"></i>
                     <span>OnPoint Articles</span>
                     <div class="btn-glow"></div>
                 </button>
+            </div>
+            <div class="premium-hero-intro mx-auto flex max-w-4xl flex-col items-center text-center">
+                <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em] text-violet-200 shadow-[0_15px_45px_rgba(124,58,237,0.35)] backdrop-blur">
+                    <span class="h-2 w-2 rounded-full bg-violet-300 shadow-[0_0_12px_rgba(124,58,237,0.8)]"></span>
+                    Live Beta Access
+                </div>
+                <p class="mt-6 max-w-3xl text-base leading-relaxed text-slate-300 md:text-lg">
+                    OnPointAggregate distills thousands of polling micro-signals into a cinematic workspace that feels handcrafted for campaign rooms. Every chart, filter, and micro-interaction has been tuned for clarity so you can read the trendline in seconds and brief the room in minutes.
+                </p>
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-3 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-200">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"><i class="fas fa-wave-square text-violet-300"></i> Adaptive Trendlines</span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"><i class="fas fa-shield-check text-sky-300"></i> Premium Pollset</span>
+                    <span class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 backdrop-blur"><i class="fas fa-robot text-emerald-300"></i> AI Context</span>
+                </div>
             </div>
              <div class="selectors-wrapper">
                 <div class="dropdown-container" id="mainDropdownContainer">
@@ -174,7 +222,72 @@
             <div class="date-display"><span id="current-date"></span></div>
         </header>
 
-        <div class="card chart-container">
+        <section class="premium-highlights relative mt-12">
+            <div class="mx-auto grid max-w-6xl gap-6 sm:grid-cols-2 xl:grid-cols-4">
+                <article class="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-6 py-6 shadow-[0_30px_90px_rgba(15,23,42,0.55)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-white/20">
+                    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-80"></div>
+                    <div class="inline-flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-300">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/80 to-sky-500/80 text-white shadow-[0_0_35px_rgba(124,58,237,0.45)]">
+                            <i class="fas fa-wave-square text-xs"></i>
+                        </span>
+                        Core Engine
+                    </div>
+                    <h2 class="mt-5 text-lg font-semibold text-white transition duration-500 group-hover:text-violet-200">Confidence Weighted Aggregation</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-300/90">Multi-factor weighting fuses pollster accuracy, sample depth, and recency so the composite line tracks the race—not the noise.</p>
+                    <span class="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-violet-200">
+                        Learn More
+                        <i class="fas fa-arrow-right text-[0.75rem]"></i>
+                    </span>
+                </article>
+                <article class="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-6 py-6 shadow-[0_30px_90px_rgba(15,23,42,0.55)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-white/20">
+                    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-80"></div>
+                    <div class="inline-flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-300">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500/70 to-cyan-500/70 text-white shadow-[0_0_35px_rgba(16,185,129,0.35)]">
+                            <i class="fas fa-robot text-xs"></i>
+                        </span>
+                        Insight Layer
+                    </div>
+                    <h2 class="mt-5 text-lg font-semibold text-white transition duration-500 group-hover:text-emerald-200">Narratives written by our AI brief</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-300/90">Surface the “why” behind the swing. Our assistant watches every update, annotates the movement, and frames it for stakeholders instantly.</p>
+                    <span class="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200">
+                        View Assistant
+                        <i class="fas fa-arrow-right text-[0.75rem]"></i>
+                    </span>
+                </article>
+                <article class="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-6 py-6 shadow-[0_30px_90px_rgba(15,23,42,0.55)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-white/20">
+                    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-80"></div>
+                    <div class="inline-flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-300">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-sky-500/80 to-indigo-500/80 text-white shadow-[0_0_35px_rgba(59,130,246,0.4)]">
+                            <i class="fas fa-filter text-xs"></i>
+                        </span>
+                        Precision Filters
+                    </div>
+                    <h2 class="mt-5 text-lg font-semibold text-white transition duration-500 group-hover:text-sky-200">Zero-latency drill downs</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-300/90">Segment by battleground state, pollster pedigree, or sampling universe with chips that feel as responsive as a native app.</p>
+                    <span class="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-sky-200">
+                        Filter Toolkit
+                        <i class="fas fa-arrow-right text-[0.75rem]"></i>
+                    </span>
+                </article>
+                <article class="group relative overflow-hidden rounded-3xl border border-white/10 bg-white/5 px-6 py-6 shadow-[0_30px_90px_rgba(15,23,42,0.55)] backdrop-blur-xl transition duration-500 hover:-translate-y-1 hover:border-white/20">
+                    <div class="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent opacity-80"></div>
+                    <div class="inline-flex items-center gap-2 text-[0.65rem] font-semibold uppercase tracking-[0.35em] text-slate-300">
+                        <span class="inline-flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-orange-500/70 to-pink-500/70 text-white shadow-[0_0_35px_rgba(249,115,22,0.4)]">
+                            <i class="fas fa-download text-xs"></i>
+                        </span>
+                        Exports
+                    </div>
+                    <h2 class="mt-5 text-lg font-semibold text-white transition duration-500 group-hover:text-orange-200">Executive-ready downloads</h2>
+                    <p class="mt-3 text-sm leading-relaxed text-slate-300/90">One click delivers the current aggregation, raw polls, and spread analysis with hero-ready formatting and metadata.</p>
+                    <span class="mt-5 inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-orange-200">
+                        Download Suite
+                        <i class="fas fa-arrow-right text-[0.75rem]"></i>
+                    </span>
+                </article>
+            </div>
+        </section>
+
+        <div class="card chart-container ring-1 ring-white/10 shadow-[0_45px_120px_rgba(15,23,42,0.65)]">
             <div class="loading-indicator" id="chartLoader"><div class="spinner"></div></div>
             <div class="card-glow glow-1" id="cardGlow1"></div><div class="card-glow glow-2" id="cardGlow2"></div>
             <div class="card-header">
@@ -231,7 +344,7 @@
             </div>
         </div>
 
-        <div class="card poll-list-container">
+        <div class="card poll-list-container ring-1 ring-white/10 shadow-[0_45px_120px_rgba(15,23,42,0.65)]">
              <div class="poll-list-header">
                 <div class="section-title"><i class="fas fa-table"></i><span>All Included Polls</span></div>
             </div>
@@ -252,7 +365,7 @@
             </div>
         </div>
 
-        <div class="card" style="margin-bottom: 40px;">
+        <div class="card ring-1 ring-white/10 shadow-[0_45px_120px_rgba(15,23,42,0.65)]" style="margin-bottom: 40px;">
             <div class="card-header"><div class="card-title">About Us</div></div>
             <div style="display: flex; flex-direction: column; align-items: center; padding: 20px 0;">
                 <div class="main-title" style="transform: scale(0.8); margin: 0 0 30px 0;">
@@ -382,5 +495,6 @@
         }
     })();
     </script>
+    </div>
 </body></html>
 
