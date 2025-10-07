@@ -316,11 +316,13 @@
             }
 
             .right-panel {
-                min-height: 600px;
+                min-height: auto;
+                height: auto;
             }
 
             .map-container {
                 min-height: 400px;
+                height: 400px;
             }
         }
 
@@ -347,6 +349,10 @@
                 padding-right: 1rem !important;
             }
 
+            .p-8 {
+                padding: 1rem !important;
+            }
+
             /* Smaller header text */
             .text-3xl {
                 font-size: 1.5rem !important;
@@ -366,12 +372,31 @@
 
             /* County table - horizontal scroll */
             .county-table-wrapper {
-                overflow-x: auto;
+                overflow-x: auto !important;
+                overflow-y: visible !important;
                 -webkit-overflow-scrolling: touch;
+                display: block;
+                border-radius: 0.5rem;
+                position: relative;
+            }
+
+            /* Scroll indicator shadow */
+            .county-table-wrapper::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                width: 30px;
+                background: linear-gradient(to left, var(--bg-primary), transparent);
+                pointer-events: none;
+                opacity: 0.8;
             }
 
             .county-table {
-                min-width: 800px;
+                min-width: 650px;
+                display: table;
+                border-collapse: collapse;
             }
 
             /* Reduce table padding */
@@ -390,9 +415,29 @@
                 display: none;
             }
 
-            /* Smaller map heights */
+            /* Fix maps on mobile - need explicit heights */
+            .right-panel > div {
+                flex: none !important;
+                height: auto !important;
+            }
+
             .map-container {
-                min-height: 300px !important;
+                min-height: 350px !important;
+                height: 350px !important;
+                flex: none !important;
+            }
+
+            #map-dem,
+            #map-rep {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            #map-dem svg,
+            #map-rep svg {
+                width: 100% !important;
+                height: 100% !important;
+                display: block;
             }
 
             /* Reduce gap between maps */
@@ -445,7 +490,17 @@
 
             /* Even more compact table */
             .county-table {
-                min-width: 700px;
+                min-width: 550px;
+            }
+
+            /* Tighter table padding */
+            .county-table th,
+            .county-table td {
+                padding-left: 0.5rem !important;
+                padding-right: 0.5rem !important;
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+                font-size: 0.7rem !important;
             }
 
             /* Hide county column when county is selected (redundant) */
@@ -469,6 +524,12 @@
 
             .candidate-name {
                 font-size: 0.875rem !important;
+            }
+
+            /* Smaller maps on very small phones */
+            .map-container {
+                min-height: 280px !important;
+                height: 280px !important;
             }
         }
 
@@ -612,7 +673,7 @@
                 </div>
             </div>
 
-            <div class="rounded-lg overflow-hidden county-table-wrapper" style="border: 1px solid var(--border-color);">
+            <div class="rounded-lg county-table-wrapper" style="border: 1px solid var(--border-color);">
                 <table class="county-table w-full">
                     <thead>
                         <tr class="text-xs uppercase tracking-wider" style="color: var(--text-tertiary);">
