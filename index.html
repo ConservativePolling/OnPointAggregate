@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TN-07 Election Results</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v3.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #000000;
+            --bg-secondary: #0a0a0a;
+            --bg-tertiary: #1a1a1a;
+            --bg-map: #050505;
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255,255,255,0.7);
+            --text-tertiary: rgba(255,255,255,0.4);
+            --border-color: rgba(255,255,255,0.1);
+        }
+
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f5f5f5;
+            --bg-tertiary: #e5e5e5;
+            --bg-map: #fafafa;
+            --text-primary: #000000;
+            --text-secondary: rgba(0,0,0,0.7);
+            --text-tertiary: rgba(0,0,0,0.4);
+            --border-color: rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .county {
+            stroke: #666;
+            stroke-width: 0.3;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="light"] .county {
+            stroke: #999;
+        }
+
+        .county.district-7 {
+            stroke: #999;
+            stroke-width: 1;
+            cursor: pointer;
+        }
+
+        [data-theme="light"] .county.district-7 {
+            stroke: #444;
+        }
+
+        .county:hover {
+            opacity: 0.8;
+            stroke-width: 2;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            padding: 12px 14px;
+            border-radius: 6px;
+            pointer-events: none;
+            display: none;
+            font-size: 12px;
+            z-index: 1000;
+            min-width: 200px;
+            max-width: 280px;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+
+        .tooltip::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .tooltip::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .tooltip::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+        }
+
+        .theme-toggle:hover {
+            opacity: 0.8;
+        }
+
+        .reporting-badge {
+            background: #3b82f6;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        /* Delta/change indicator animations */
+        .percent-delta {
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            animation: fadeInSlide 0.4s ease-out, fadeOut 4s ease-in 3s forwards;
+        }
+
+        .percent-delta.positive {
+            color: #10b981;
+        }
+
+        .percent-delta.negative {
+            color: #ef4444;
+        }
+
+        @keyframes fadeInSlide {
+            from {
+                opacity: 0;
+                transform: translateY(-3px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Smooth rank transitions */
+        .candidate-row {
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* County Results Section */
+        .county-results-section {
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-primary);
+        }
+
+        .party-badge {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 10px;
+            color: white;
+        }
+
+        .result-bar-container {
+            width: 100%;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .result-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        .margin-badge {
+            background: #8b5cf6;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+
+        select {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .county-table {
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .county-table thead th {
+            background: var(--bg-secondary);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .county-table tbody tr {
+            transition: all 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        .county-table tbody tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        /* Rank change animations */
+        @keyframes slideDown {
+            from {
+                transform: translateY(-100%);
+                opacity: 0.5;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0.5;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .rank-moving-up {
+            animation: slideUp 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+            background: rgba(16, 185, 129, 0.1) !important;
+        }
+
+        .rank-moving-down {
+            animation: slideDown 0.8s cubic-bezier(0.4, 0.0, 0.2, 1);
+            background: rgba(239, 68, 68, 0.1) !important;
+        }
+
+        .rank-leader {
+            font-weight: 600;
+            background: var(--bg-secondary);
+        }
+
+        .county-name-cell {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .party-separator-row {
+            height: 16px;
+        }
+
+        .party-separator-row td {
+            padding: 0 !important;
+            border: none !important;
+            position: relative;
+        }
+
+        .party-separator-row td::after {
+            content: '';
+            position: absolute;
+            left: 3%;
+            right: 3%;
+            top: 50%;
+            height: 1.5px;
+            background: linear-gradient(to right, transparent, var(--border-color) 15%, var(--border-color) 85%, transparent);
+            opacity: 0.6;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <button class="theme-toggle" onclick="toggleTheme()">
+        <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+    </button>
+
+    <div class="flex h-screen w-screen">
+        <!-- Left Panel: Candidates -->
+        <div class="w-2/5 flex flex-col" style="border-right: 1px solid var(--border-color);">
+            <div class="px-12 py-8" style="border-bottom: 1px solid var(--border-color);">
+                <h1 class="text-3xl font-light tracking-tight mb-1">Tennessee 7th District</h1>
+                <p class="text-sm font-light" style="color: var(--text-tertiary);">Special Primary • October 7, 2025</p>
+            </div>
+
+            <div class="px-12 py-8" style="border-bottom: 1px solid var(--border-color);">
+                <div class="flex items-baseline gap-3">
+                    <span class="text-6xl font-light tracking-tight" id="percent-reporting-total">0%</span>
+                    <span class="text-sm uppercase tracking-wider" style="color: var(--text-tertiary);">Overall Reporting</span>
+                </div>
+                <p class="text-sm mt-2" style="color: var(--text-tertiary);" id="votes-counted">0 votes</p>
+            </div>
+
+            <div class="flex-1 overflow-y-auto px-12 py-8">
+                <div class="mb-12">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-5 bg-blue-500"></div>
+                            <h2 class="text-sm font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Democratic Primary</h2>
+                        </div>
+                        <span class="reporting-badge" id="dem-reporting">0% reporting</span>
+                    </div>
+                    <div id="democratic-candidates" class="space-y-6">
+                        <p style="color: var(--text-tertiary);" class="text-sm">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="mb-12">
+                    <div class="flex items-center justify-between mb-6">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-5 bg-red-500"></div>
+                            <h2 class="text-sm font-medium uppercase tracking-wider" style="color: var(--text-secondary);">Republican Primary</h2>
+                        </div>
+                        <span class="reporting-badge" style="background: #ef4444;" id="rep-reporting">0% reporting</span>
+                    </div>
+                    <div id="republican-candidates" class="space-y-6">
+                        <p style="color: var(--text-tertiary);" class="text-sm">Loading...</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-12 py-4" style="border-top: 1px solid var(--border-color);">
+                <p class="text-xs" style="color: var(--text-tertiary);" id="last-updated">Last updated: --</p>
+            </div>
+        </div>
+
+        <!-- Right Panel: Two Maps -->
+        <div class="flex-1 flex flex-col p-8 gap-6">
+            <!-- Democratic Map -->
+            <div class="flex-1 flex flex-col">
+                <div class="mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1 h-4 bg-blue-500"></div>
+                        <h2 class="text-lg font-light tracking-tight">Democratic Primary - County Results</h2>
+                    </div>
+                </div>
+                <div class="flex-1 relative rounded-lg overflow-hidden" style="background: var(--bg-map);">
+                    <div id="map-dem" class="w-full h-full"></div>
+                </div>
+            </div>
+
+            <!-- Republican Map -->
+            <div class="flex-1 flex flex-col">
+                <div class="mb-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-1 h-4 bg-red-500"></div>
+                        <h2 class="text-lg font-light tracking-tight">Republican Primary - County Results</h2>
+                    </div>
+                </div>
+                <div class="flex-1 relative rounded-lg overflow-hidden" style="background: var(--bg-map);">
+                    <div id="map-rep" class="w-full h-full"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <!-- County Results Section -->
+    <div class="county-results-section">
+        <div class="max-w-7xl mx-auto px-12 py-12">
+            <div class="mb-8">
+                <h2 class="text-3xl font-light tracking-tight mb-2">Counties Results</h2>
+                <p class="text-sm" style="color: var(--text-tertiary);">Note some counties appear whole on the map, while only partial parts are in the district.</p>
+            </div>
+
+            <div class="mb-6 flex gap-4">
+                <div class="flex-1">
+                    <select id="county-select" class="px-4 py-3 rounded-lg text-sm w-full">
+                        <option value="">Select a county...</option>
+                    </select>
+                </div>
+                <div style="min-width: 200px;">
+                    <select id="party-filter" class="px-4 py-3 rounded-lg text-sm w-full">
+                        <option value="both">Both Primaries</option>
+                        <option value="democratic">Democrats Only</option>
+                        <option value="republican">Republicans Only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="rounded-lg overflow-hidden" style="border: 1px solid var(--border-color);">
+                <table class="county-table w-full">
+                    <thead>
+                        <tr class="text-xs uppercase tracking-wider" style="color: var(--text-tertiary);">
+                            <th class="text-left px-6 py-4 font-medium">County</th>
+                            <th class="text-left px-6 py-4 font-medium">Party</th>
+                            <th class="text-left px-6 py-4 font-medium">Candidate</th>
+                            <th class="text-right px-6 py-4 font-medium">Votes</th>
+                            <th class="text-left px-6 py-4 font-medium" style="min-width: 200px;">Bar</th>
+                            <th class="text-right px-6 py-4 font-medium">Percentage</th>
+                            <th class="text-right px-6 py-4 font-medium">Margin</th>
+                        </tr>
+                    </thead>
+                    <tbody id="county-results-tbody">
+                        <tr>
+                            <td colspan="7" class="px-6 py-12 text-center" style="color: var(--text-tertiary);">
+                                Select a county to view results
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const tn07Counties = [
+            "Stewart", "Montgomery", "Robertson", "Houston", "Dickson",
+            "Cheatham", "Hickman", "Humphreys", "Decatur", "Perry",
+            "Wayne", "Davidson", "Williamson", "Benton"
+        ];
+
+        // Candidate color assignments for visual distinction
+        const candidateColors = {
+            'Aftyn Behn': '#3b82f6',      // Blue
+            'Darden Copeland': '#8b5cf6',  // Purple
+            'Vincent Dixie': '#06b6d4',    // Cyan
+            'Bo Mitchell': '#10b981',      // Green
+            'Jody Barrett': '#ef4444',     // Red
+            'Gino Bulso': '#f59e0b',       // Amber
+            'Stuart Cooper': '#ec4899',    // Pink
+            'Adolph Dagan': '#f97316',     // Orange
+            'Mason Foley': '#84cc16',      // Lime
+            'Jason Knight': '#14b8a6',     // Teal
+            'Joe Leurs': '#a855f7',        // Violet
+            'Stewart Parks': '#f43f5e',    // Rose
+            'Lee Reeves': '#dc2626',       // Dark Red
+            'Matt Van Epps': '#ea580c',    // Dark Orange
+            'Tres Wittum': '#d97706'       // Dark Amber
+        };
+
+        // Candidate titles (API doesn't provide these, so we maintain them)
+        const candidateTitles = {
+            'Aftyn Behn': 'State Representative, District 51',
+            'Darden Copeland': 'Public Affairs Firm Founder',
+            'Vincent Dixie': 'State Representative, District 54',
+            'Bo Mitchell': 'State Representative, District 50',
+            'Jody Barrett': 'State Representative, District 69',
+            'Gino Bulso': 'State Representative, District 61',
+            'Stuart Cooper': 'Business Professional',
+            'Mason Foley': 'Former Legislative Correspondent',
+            'Stewart Parks': 'Realtor',
+            'Lee Reeves': 'State Representative, District 65',
+            'Matt Van Epps': 'Former TN Commissioner of General Services',
+            'Tres Wittum': 'Legislative Policy Analyst'
+        };
+
+        const API_BASE_URL = 'https://civicapi.org/api/v2';
+        const REFRESH_INTERVAL = 30000;
+
+        let democraticRaceId = null;
+        let republicanRaceId = null;
+        let demCountyData = {};
+        let repCountyData = {};
+        let demReporting = 0;
+        let repReporting = 0;
+        let demTotalVotes = 0;
+        let repTotalVotes = 0;
+
+        // Track previous percentages for delta display
+        let previousPercents = {
+            democratic: {},
+            republican: {}
+        };
+
+        let lastApiUpdateTimes = {
+            democratic: null,
+            republican: null
+        };
+        let lastRefreshTime = null;
+
+        // Track previous county rankings for animation
+        let previousCountyRankings = {};
+
+        function sanitizePercent(value) {
+            const numeric = Number(value);
+            if (!Number.isFinite(numeric)) return 0;
+            if (numeric < 0) return 0;
+            if (numeric > 100) return 100;
+            return Math.round(numeric);
+        }
+
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', newTheme);
+
+            document.getElementById('theme-icon').textContent = newTheme === 'light' ? '🌙' : '☀️';
+            document.getElementById('theme-text').textContent = newTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+
+            localStorage.setItem('theme', newTheme);
+
+            // Reload maps with new theme colors
+            updateMapTheme();
+        }
+
+        // Update map colors when theme changes
+        function updateMapTheme() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const isDark = theme !== 'light';
+
+            d3.selectAll('.county').each(function() {
+                const county = d3.select(this);
+                const countyName = county.attr('data-county');
+                const party = county.attr('data-party');
+
+                if (!tn07Counties.includes(countyName)) {
+                    // Non-TN-07 counties - always gray
+                    county.attr('fill', isDark ? '#0a0a0a' : '#f5f5f5');
+                } else {
+                    // TN-07 counties - check if we have data
+                    const countyDataStore = party === 'democratic' ? demCountyData : repCountyData;
+                    const countyData = countyDataStore[countyName];
+
+                    if (!countyData || countyData.length === 0 || countyData[0].votes === 0) {
+                        // NO DATA - use theme-appropriate gray
+                        county.attr('fill', isDark ? '#1a1a1a' : '#e5e5e5');
+                    } else {
+                        // HAS DATA - recalculate color with new theme opacity
+                        const leading = countyData[0];
+                        const second = countyData[1];
+                        const margin = leading.percent - (second ? second.percent : 0);
+                        const baseColor = candidateColors[leading.name] || (party === 'democratic' ? '#3b82f6' : '#ef4444');
+
+                        const rgb = baseColor.match(/\w\w/g).map(x => parseInt(x, 16));
+
+                        let opacity;
+                        if (margin < 10) {
+                            opacity = isDark ? 0.5 : 0.35;
+                        } else if (margin < 25) {
+                            opacity = isDark ? 0.75 : 0.65;
+                        } else {
+                            opacity = 1.0;
+                        }
+
+                        const color = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
+                        county.attr('fill', color);
+                    }
+                }
+            });
+        }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme') || 'dark';
+        if (savedTheme === 'light') {
+            document.documentElement.setAttribute('data-theme', 'light');
+            document.getElementById('theme-icon').textContent = '🌙';
+            document.getElementById('theme-text').textContent = 'Dark Mode';
+        }
+
+        async function init() {
+            await loadMap('map-dem', 'democratic');
+            await loadMap('map-rep', 'republican');
+            await searchRaces();
+            startAutoRefresh();
+        }
+
+        async function loadMap(containerId, party) {
+            const container = document.getElementById(containerId);
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            const svg = d3.select(`#${containerId}`)
+                .append('svg')
+                .attr('width', width)
+                .attr('height', height);
+
+            try {
+                const us = await d3.json('https://cdn.jsdelivr.net/npm/us-atlas@3/counties-10m.json');
+                const tnCounties = topojson.feature(us, us.objects.counties).features
+                    .filter(d => d.id.toString().startsWith('47'));
+
+                const countyNames = {
+                    '47001': 'Anderson', '47003': 'Bedford', '47005': 'Benton', '47007': 'Bledsoe',
+                    '47009': 'Blount', '47011': 'Bradley', '47013': 'Campbell', '47015': 'Cannon',
+                    '47017': 'Carroll', '47019': 'Carter', '47021': 'Cheatham', '47023': 'Chester',
+                    '47025': 'Claiborne', '47027': 'Clay', '47029': 'Cocke', '47031': 'Coffee',
+                    '47033': 'Crockett', '47035': 'Cumberland', '47037': 'Davidson', '47039': 'Decatur',
+                    '47041': 'DeKalb', '47043': 'Dickson', '47045': 'Dyer', '47047': 'Fayette',
+                    '47049': 'Fentress', '47051': 'Franklin', '47053': 'Gibson', '47055': 'Giles',
+                    '47057': 'Grainger', '47059': 'Greene', '47061': 'Grundy', '47063': 'Hamblen',
+                    '47065': 'Hamilton', '47067': 'Hancock', '47069': 'Hardeman', '47071': 'Hardin',
+                    '47073': 'Hawkins', '47075': 'Haywood', '47077': 'Henderson', '47079': 'Henry',
+                    '47081': 'Hickman', '47083': 'Houston', '47085': 'Humphreys', '47087': 'Jackson',
+                    '47089': 'Jefferson', '47091': 'Johnson', '47093': 'Knox', '47095': 'Lake',
+                    '47097': 'Lauderdale', '47099': 'Lawrence', '47101': 'Lewis', '47103': 'Lincoln',
+                    '47105': 'Loudon', '47107': 'McMinn', '47109': 'McNairy', '47111': 'Macon',
+                    '47113': 'Madison', '47115': 'Marion', '47117': 'Marshall', '47119': 'Maury',
+                    '47121': 'Meigs', '47123': 'Monroe', '47125': 'Montgomery', '47127': 'Moore',
+                    '47129': 'Morgan', '47131': 'Obion', '47133': 'Overton', '47135': 'Perry',
+                    '47137': 'Pickett', '47139': 'Polk', '47141': 'Putnam', '47143': 'Rhea',
+                    '47145': 'Roane', '47147': 'Robertson', '47149': 'Rutherford', '47151': 'Scott',
+                    '47153': 'Sequatchie', '47155': 'Sevier', '47157': 'Shelby', '47159': 'Smith',
+                    '47161': 'Stewart', '47163': 'Sullivan', '47165': 'Sumner', '47167': 'Tipton',
+                    '47169': 'Trousdale', '47171': 'Unicoi', '47173': 'Union', '47175': 'Van Buren',
+                    '47177': 'Warren', '47179': 'Washington', '47181': 'Wayne', '47183': 'Weakley',
+                    '47185': 'White', '47187': 'Williamson', '47189': 'Wilson'
+                };
+
+                const projection = d3.geoAlbers()
+                    .fitSize([width, height], { type: 'FeatureCollection', features: tnCounties });
+
+                const path = d3.geoPath().projection(projection);
+
+                svg.selectAll('path')
+                    .data(tnCounties)
+                    .enter()
+                    .append('path')
+                    .attr('d', path)
+                    .attr('class', d => {
+                        const countyName = countyNames[d.id];
+                        return tn07Counties.includes(countyName) ? 'county district-7' : 'county';
+                    })
+                    .attr('fill', d => {
+                        const countyName = countyNames[d.id];
+                        const theme = document.documentElement.getAttribute('data-theme');
+                        if (tn07Counties.includes(countyName)) {
+                            // Start as white/light gray - will be colored when data comes in
+                            return theme === 'light' ? '#e5e5e5' : '#1a1a1a';
+                        }
+                        return theme === 'light' ? '#f5f5f5' : '#0a0a0a';
+                    })
+                    .attr('data-county', d => countyNames[d.id])
+                    .attr('data-party', party)
+                    .on('click', function(event, d) {
+                        const countyName = countyNames[d.id];
+                        if (!tn07Counties.includes(countyName)) return;
+
+                        // Update county select dropdown
+                        const countySelect = document.getElementById('county-select');
+                        const partyFilter = document.getElementById('party-filter');
+
+                        if (countySelect && partyFilter) {
+                            countySelect.value = countyName;
+                            // Set party filter based on which map was clicked
+                            partyFilter.value = party; // 'democratic' or 'republican'
+                            displayCountyResults();
+
+                            // Scroll to county results section
+                            const countySection = document.querySelector('.county-results-section');
+                            if (countySection) {
+                                countySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            }
+                        }
+                    })
+                    .on('mouseover', function(event, d) {
+                        const countyName = countyNames[d.id];
+                        if (!tn07Counties.includes(countyName)) return;
+
+                        const countyData = party === 'democratic' ? demCountyData[countyName] : repCountyData[countyName];
+                        const tooltip = d3.select('#tooltip');
+
+                        if (countyData && countyData.length > 0) {
+                            // Show ALL candidates, not just top 3
+                            const html = `
+                                <div class="font-semibold mb-3">${countyName} County</div>
+                                <div class="text-xs mb-2" style="color: var(--text-tertiary);">All Candidates:</div>
+                                ${countyData.map((c, i) => {
+                                    const color = candidateColors[c.name] || '#666';
+                                    // Calculate margin for leading candidate
+                                    const margin = (i === 0 && countyData.length > 1)
+                                        ? (c.percent - countyData[1].percent).toFixed(1)
+                                        : null;
+                                    const percentDisplay = margin
+                                        ? `${c.percent.toFixed(1)}% (+${margin})`
+                                        : `${c.percent.toFixed(1)}%`;
+                                    return `
+                                        <div class="flex justify-between gap-6 ${i > 0 ? 'mt-2' : ''}">
+                                            <div class="flex items-center gap-2">
+                                                <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
+                                                <span style="color: var(--text-secondary);">${c.name}</span>
+                                            </div>
+                                            <div class="text-right">
+                                                <div class="font-semibold">${percentDisplay}</div>
+                                                <div class="text-xs" style="color: var(--text-tertiary);">${(c.votes || 0).toLocaleString()}</div>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            `;
+                            tooltip.style('display', 'block').html(html);
+                            positionTooltip(event, tooltip);
+                        } else {
+                            tooltip.style('display', 'block')
+                                .html(`<div class="font-medium">${countyName} County</div><div class="text-xs mt-1" style="color: var(--text-tertiary);">No results yet</div>`);
+                            positionTooltip(event, tooltip);
+                        }
+                    })
+                    .on('mousemove', function(event) {
+                        const tooltip = d3.select('#tooltip');
+                        positionTooltip(event, tooltip);
+                    })
+                    .on('mouseout', function() {
+                        d3.select('#tooltip').style('display', 'none');
+                    });
+
+            } catch (error) {
+                console.error('Error loading map:', error);
+            }
+        }
+
+        async function searchRaces() {
+            try {
+                const params = new URLSearchParams({
+                    query: 'Tennessee',
+                    startDate: '2025-10-07',
+                    endDate: '2025-10-07',
+                    country: 'US',
+                    limit: 100
+                });
+
+                const response = await fetch(`${API_BASE_URL}/race/search?${params}`);
+                const data = await response.json();
+
+                data.races.forEach(race => {
+                    // Filter for 7th Congressional District races
+                    if (race.election_name && race.election_name.includes('7th Congressional District')) {
+                        if (race.election_name.includes('Democratic')) {
+                            democraticRaceId = race.id;
+                        } else if (race.election_name.includes('Republican')) {
+                            republicanRaceId = race.id;
+                        }
+                    }
+                });
+
+                await updateResults();
+            } catch (error) {
+                console.error('Error searching races:', error);
+                displayFallbackCandidates();
+            }
+        }
+
+        async function updateResults() {
+            if (democraticRaceId) {
+                await updateRace(democraticRaceId, 'democratic');
+            } else {
+                displayFallbackCandidates('democratic');
+            }
+
+            if (republicanRaceId) {
+                await updateRace(republicanRaceId, 'republican');
+            } else {
+                displayFallbackCandidates('republican');
+            }
+
+            // Update overall reporting (average of both)
+            const availablePercentages = [];
+            if (democraticRaceId !== null) availablePercentages.push(demReporting);
+            if (republicanRaceId !== null) availablePercentages.push(repReporting);
+
+            const overall = availablePercentages.length
+                ? Math.round(availablePercentages.reduce((sum, value) => sum + value, 0) / availablePercentages.length)
+                : 0;
+
+            document.getElementById('percent-reporting-total').textContent = `${overall}%`;
+
+            // Update combined vote count (Dem + Rep)
+            const totalVotes = demTotalVotes + repTotalVotes;
+            document.getElementById('votes-counted').textContent = `${totalVotes.toLocaleString()} votes`;
+        }
+
+        async function updateRace(raceId, party) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/race/${raceId}`);
+                const data = await response.json();
+
+                // Store individual reporting percentage
+                const reporting = sanitizePercent(data.percent_reporting);
+                if (party === 'democratic') {
+                    demReporting = reporting;
+                    document.getElementById('dem-reporting').textContent = `${reporting}% reporting`;
+                } else {
+                    repReporting = reporting;
+                    document.getElementById('rep-reporting').textContent = `${reporting}% reporting`;
+                }
+
+                displayCandidates(data.candidates, party);
+
+                // Store vote totals for combined display
+                const totalVotes = data.candidates.reduce((sum, c) => sum + (c.votes || 0), 0);
+                if (party === 'democratic') {
+                    demTotalVotes = totalVotes;
+                } else {
+                    repTotalVotes = totalVotes;
+                }
+
+                updateMapColors(data.region_results, party);
+
+                if (data.last_updated) {
+                    lastApiUpdateTimes[party] = new Date(data.last_updated);
+                } else {
+                    lastApiUpdateTimes[party] = new Date();
+                }
+                lastRefreshTime = new Date();
+                updateLastUpdatedDisplay();
+
+            } catch (error) {
+                console.error(`Error updating ${party} race:`, error);
+            }
+        }
+
+        function getMostRecentUpdateTimestamp() {
+            const apiTimes = Object.values(lastApiUpdateTimes)
+                .filter(Boolean)
+                .map(date => date.getTime());
+
+            if (apiTimes.length === 0) {
+                return lastRefreshTime ? lastRefreshTime.getTime() : null;
+            }
+
+            return Math.max(...apiTimes);
+        }
+
+        function formatRelativeTime(timestampMs) {
+            if (!timestampMs) return null;
+
+            const diffSeconds = Math.max(0, Math.floor((Date.now() - timestampMs) / 1000));
+            if (diffSeconds < 10) return 'just now';
+            if (diffSeconds < 60) return `${diffSeconds}s ago`;
+
+            const diffMinutes = Math.floor(diffSeconds / 60);
+            if (diffMinutes < 60) return `${diffMinutes}m ago`;
+
+            const diffHours = Math.floor(diffMinutes / 60);
+            if (diffHours < 24) return `${diffHours}h ago`;
+
+            const diffDays = Math.floor(diffHours / 24);
+            return `${diffDays}d ago`;
+        }
+
+        function updateLastUpdatedDisplay() {
+            const label = document.getElementById('last-updated');
+            if (!label) return;
+
+            const latestTimestamp = getMostRecentUpdateTimestamp();
+            const relative = formatRelativeTime(latestTimestamp);
+
+            label.textContent = relative ? `Updated ${relative}` : 'Updated --';
+        }
+
+        function positionTooltip(event, tooltip) {
+            if (!tooltip || !tooltip.node()) return;
+
+            const padding = 12;
+            const tooltipNode = tooltip.node();
+            const rect = tooltipNode.getBoundingClientRect();
+
+            let left = event.pageX + 12;
+            let top = event.pageY - 20;
+
+            const viewportLeft = window.scrollX + padding;
+            const viewportRight = window.scrollX + window.innerWidth - padding;
+            const viewportTop = window.scrollY + padding;
+            const viewportBottom = window.scrollY + window.innerHeight - padding;
+
+            if (left + rect.width > viewportRight) {
+                left = Math.max(viewportLeft, event.pageX - rect.width - 12);
+            }
+            if (left < viewportLeft) {
+                left = viewportLeft;
+            }
+
+            if (top + rect.height > viewportBottom) {
+                top = Math.max(viewportTop, viewportBottom - rect.height);
+            }
+            if (top < viewportTop) {
+                top = viewportTop;
+            }
+
+            tooltip.style('left', `${left}px`).style('top', `${top}px`);
+        }
+
+        // PROJECTION LOGIC: Determine if race is callable
+        function isProjectedWinner(candidate, allCandidates, reporting, index) {
+            // OFFICIAL API CALL: If API marks candidate as winner, always show it
+            if (candidate.winner === true) return true;
+
+            // Must be leading for our projection logic
+            if (index !== 0) return false;
+
+            // No projection at 0% reporting
+            if (reporting === 0) return false;
+
+            const leading = candidate;
+            const second = allCandidates[1];
+            if (!second) return true; // Only candidate
+
+            const margin = leading.percent - second.percent;
+
+            // OUR PROJECTION CRITERIA (AP-style logic):
+            // Use this when API hasn't called race yet
+            // - 100% reporting = final result (always callable)
+            // - Margin > 15% AND reporting > 70% = very likely winner
+            // - Margin > 10% AND reporting > 85% = likely winner
+            // - Margin > 5% AND reporting > 95% = almost certain winner
+
+            if (reporting === 100) return true;
+            if (margin > 15 && reporting > 70) return true;
+            if (margin > 10 && reporting > 85) return true;
+            if (margin > 5 && reporting > 95) return true;
+
+            return false;
+        }
+
+        function displayCandidates(candidates, party) {
+            const container = document.getElementById(`${party}-candidates`);
+
+            if (!candidates || candidates.length === 0) {
+                displayFallbackCandidates(party);
+                return;
+            }
+
+            // Sort by votes (leader at top, last at bottom)
+            candidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+            // Get reporting % for projection logic
+            const reporting = party === 'democratic' ? demReporting : repReporting;
+
+            container.innerHTML = candidates.map((candidate, index) => {
+                const color = candidateColors[candidate.name] || (party === 'democratic' ? '#3b82f6' : '#ef4444');
+                const isWinner = isProjectedWinner(candidate, candidates, reporting, index);
+
+                // Parse RGB for background highlight
+                const rgb = color.match(/\w\w/g).map(x => parseInt(x, 16));
+                const highlightBg = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.08)`;
+                const borderColor = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, 0.4)`;
+
+                // Calculate percentage point delta
+                const currentPercent = candidate.percent || 0;
+                const previousPercent = previousPercents[party][candidate.name] || 0;
+                const delta = currentPercent - previousPercent;
+
+                // Update previous percentages for next comparison
+                previousPercents[party][candidate.name] = currentPercent;
+
+                // Create delta indicator HTML (percentage points)
+                // Only show if there's a meaningful change (> 0.05 percentage points)
+                let deltaHTML = '';
+                if (delta > 0.05) {
+                    deltaHTML = `<div class="percent-delta positive">+${delta.toFixed(1)}</div>`;
+                } else if (delta < -0.05) {
+                    deltaHTML = `<div class="percent-delta negative">${delta.toFixed(1)}</div>`;
+                }
+
+                return `
+                    <div class="candidate-row flex items-baseline justify-between group" style="${isWinner ? `background: ${highlightBg}; border-left: 3px solid ${borderColor}; padding-left: 12px; margin-left: -15px; padding-right: 8px; border-radius: 6px;` : ''}">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-0.5">
+                                <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
+                                <div class="text-base font-medium" style="color: ${index === 0 ? 'var(--text-primary)' : 'var(--text-secondary)'};">${candidate.name}</div>
+                                ${isWinner ? `<div style="color: ${color}; font-size: 16px; font-weight: 700; margin-left: 4px;">✓</div>` : ''}
+                            </div>
+                            <div class="text-xs font-light ml-4" style="color: var(--text-tertiary);">${candidateTitles[candidate.name] || ''}</div>
+                            <div class="mt-2 flex items-center gap-3 ml-4">
+                                <span class="text-xs" style="color: var(--text-tertiary);">${(candidate.votes || 0).toLocaleString()}</span>
+                                <div class="flex-1 h-px" style="background: var(--border-color);">
+                                    <div class="h-full" style="background: ${color}; width: ${candidate.percent || 0}%; transition: width 0.5s;"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="ml-6 flex flex-col items-end">
+                            <div class="text-2xl font-light tabular-nums" style="color: ${index === 0 ? 'var(--text-primary)' : 'var(--text-secondary)'};">${(candidate.percent || 0).toFixed(1)}%</div>
+                            ${deltaHTML}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayFallbackCandidates(party = null) {
+            const fallbackData = {
+                democratic: [
+                    { name: 'Aftyn Behn', title: 'State Representative, District 51', votes: 0, percent: 0 },
+                    { name: 'Darden Copeland', title: 'Public Affairs Firm Founder', votes: 0, percent: 0 },
+                    { name: 'Vincent Dixie', title: 'State Representative, District 54', votes: 0, percent: 0 },
+                    { name: 'Bo Mitchell', title: 'State Representative, District 50', votes: 0, percent: 0 }
+                ],
+                republican: [
+                    { name: 'Jody Barrett', title: 'State Representative, District 69', votes: 0, percent: 0 },
+                    { name: 'Gino Bulso', title: 'State Representative, District 61', votes: 0, percent: 0 },
+                    { name: 'Stuart Cooper', title: 'Business Professional', votes: 0, percent: 0 },
+                    { name: 'Adolph Dagan', title: '', votes: 0, percent: 0 },
+                    { name: 'Mason Foley', title: 'Former Legislative Correspondent', votes: 0, percent: 0 },
+                    { name: 'Jason Knight', title: '', votes: 0, percent: 0 },
+                    { name: 'Joe Leurs', title: '', votes: 0, percent: 0 },
+                    { name: 'Stewart Parks', title: 'Realtor', votes: 0, percent: 0 },
+                    { name: 'Lee Reeves', title: 'State Representative, District 65', votes: 0, percent: 0 },
+                    { name: 'Matt Van Epps', title: 'Former TN Commissioner of General Services', votes: 0, percent: 0 },
+                    { name: 'Tres Wittum', title: 'Legislative Policy Analyst', votes: 0, percent: 0 }
+                ]
+            };
+
+            if (party) {
+                displayCandidates(fallbackData[party], party);
+                const reportingBadge = document.getElementById(`${party === 'democratic' ? 'dem' : 'rep'}-reporting`);
+                if (reportingBadge) reportingBadge.textContent = `0% reporting`;
+            } else {
+                displayCandidates(fallbackData.democratic, 'democratic');
+                displayCandidates(fallbackData.republican, 'republican');
+                const demBadge = document.getElementById('dem-reporting');
+                const repBadge = document.getElementById('rep-reporting');
+                if (demBadge) demBadge.textContent = `0% reporting`;
+                if (repBadge) repBadge.textContent = `0% reporting`;
+            }
+        }
+
+        // ELECTION NIGHT COUNTY SHADING LOGIC
+        function updateMapColors(regionResults, party) {
+            if (!regionResults) return;
+
+            const countyDataStore = party === 'democratic' ? demCountyData : repCountyData;
+            const theme = document.documentElement.getAttribute('data-theme');
+            const isDark = theme !== 'light';
+
+            // API returns region_results as an OBJECT, convert to array
+            Object.values(regionResults).forEach(region => {
+                // API structure: region.name is the county name (e.g., "Benton")
+                const countyName = region.name;
+
+                if (tn07Counties.includes(countyName)) {
+                    // Store county-level candidate data for tooltip
+                    countyDataStore[countyName] = region.candidates.sort((a, b) => (b.percent || 0) - (a.percent || 0));
+
+                    const leading = region.candidates[0];
+                    const second = region.candidates[1];
+
+                    if (!leading || leading.votes === 0) {
+                        // NO REPORTING - White/Light Gray
+                        const noDataColor = isDark ? '#1a1a1a' : '#e5e5e5';
+                        d3.selectAll(`path[data-county="${countyName}"][data-party="${party}"]`)
+                            .transition()
+                            .duration(500)
+                            .attr('fill', noDataColor);
+                    } else {
+                        // CALCULATE MARGIN
+                        const margin = leading.percent - (second ? second.percent : 0);
+                        const baseColor = candidateColors[leading.name] || (party === 'democratic' ? '#3b82f6' : '#ef4444');
+
+                        // Parse RGB from hex
+                        const rgb = baseColor.match(/\w\w/g).map(x => parseInt(x, 16));
+
+                        // SHADING LOGIC - THEME AWARE:
+                        // Dark mode: Higher base opacity for visibility
+                        // Light mode: Lower opacity for subtlety
+                        let opacity;
+                        if (margin < 10) {
+                            // Competitive race (0-10% margin)
+                            opacity = isDark ? 0.5 : 0.35;
+                        } else if (margin < 25) {
+                            // Moderate lead (10-25% margin)
+                            opacity = isDark ? 0.75 : 0.65;
+                        } else {
+                            // Landslide (25%+ margin)
+                            opacity = 1.0;
+                        }
+
+                        const color = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
+
+                        d3.selectAll(`path[data-county="${countyName}"][data-party="${party}"]`)
+                            .transition()
+                            .duration(500)
+                            .attr('fill', color);
+                    }
+                }
+            });
+
+            // Update county results table if a county is selected
+            const selectedCounty = document.getElementById('county-select');
+            if (selectedCounty && selectedCounty.value) {
+                displayCountyResults();
+            }
+        }
+
+        function startAutoRefresh() {
+            setInterval(async () => {
+                await updateResults();
+            }, REFRESH_INTERVAL);
+        }
+
+        setInterval(() => {
+            updateLastUpdatedDisplay();
+        }, 15000);
+
+        updateLastUpdatedDisplay();
+
+        // County Results Functions
+        function populateCountyDropdown() {
+            const select = document.getElementById('county-select');
+            const sortedCounties = [...tn07Counties].sort();
+
+            sortedCounties.forEach(county => {
+                const option = document.createElement('option');
+                option.value = county;
+                option.textContent = county;
+                select.appendChild(option);
+            });
+
+            // Set default to Benton
+            select.value = 'Benton';
+            displayCountyResults();
+        }
+
+        function displayCountyResults() {
+            const county = document.getElementById('county-select').value;
+            const partyFilter = document.getElementById('party-filter').value;
+            const tbody = document.getElementById('county-results-tbody');
+
+            if (!county) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center" style="color: var(--text-tertiary);">
+                            Select a county to view results
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let demCandidates = (demCountyData[county] || []).map(c => ({ ...c, party: 'D', partyColor: '#3b82f6' }));
+            let repCandidates = (repCountyData[county] || []).map(c => ({ ...c, party: 'R', partyColor: '#ef4444' }));
+
+            // CRITICAL: Sort each party INDEPENDENTLY by votes (leader at top within each party)
+            demCandidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+            repCandidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+            if (partyFilter === 'democratic') {
+                repCandidates = [];
+            } else if (partyFilter === 'republican') {
+                demCandidates = [];
+            }
+
+            if (demCandidates.length === 0 && repCandidates.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center" style="color: var(--text-tertiary);">
+                            No results available for ${county} County
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Track previous rankings for animation
+            const rankingKey = `${county}-${partyFilter}`;
+            const previousRankings = previousCountyRankings[rankingKey] || { dem: [], rep: [] };
+            const currentRankings = {
+                dem: demCandidates.map(c => c.name),
+                rep: repCandidates.map(c => c.name)
+            };
+
+            let html = '';
+            let showCountyName = true;
+
+            // Render Democrats first
+            if (demCandidates.length > 0) {
+                demCandidates.forEach((candidate, partyIndex) => {
+                    const percent = candidate.percent || 0;
+                    const votes = candidate.votes || 0;
+                    const color = candidateColors[candidate.name] || candidate.partyColor;
+                    const isLeader = partyIndex === 0;
+
+                    // Calculate margin for leader
+                    let marginHTML = '';
+                    if (isLeader && demCandidates.length > 1) {
+                        const margin = (percent - (demCandidates[1].percent || 0)).toFixed(1);
+                        marginHTML = `<span class="margin-badge">+${margin}%</span>`;
+                    }
+
+                    // Check for rank changes
+                    const previousRank = previousRankings.dem.indexOf(candidate.name);
+                    const currentRank = partyIndex;
+                    let rankClass = '';
+
+                    if (previousRank !== -1 && previousRank !== currentRank) {
+                        if (currentRank < previousRank) {
+                            rankClass = 'rank-moving-up';
+                        } else {
+                            rankClass = 'rank-moving-down';
+                        }
+                    }
+
+                    if (isLeader) {
+                        rankClass += ' rank-leader';
+                    }
+
+                    const candidateId = `county-row-${candidate.party}-${candidate.name.replace(/\s/g, '-')}`;
+
+                    html += `
+                        <tr id="${candidateId}" class="${rankClass}" data-candidate="${candidate.name}" data-party="${candidate.party}" style="border-bottom: 1px solid var(--border-color);">
+                            <td class="px-6 py-4">
+                                ${showCountyName ? `<span class="county-name-cell">${county}</span>` : ''}
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="party-badge" style="background: ${color};">${candidate.party}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
+                                    <span class="text-sm" style="color: var(--text-secondary); ${isLeader ? 'font-weight: 600;' : ''}">${candidate.name}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="tabular-nums text-sm ${isLeader ? 'font-semibold' : ''}">${votes.toLocaleString()}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="result-bar-container">
+                                    <div class="result-bar-fill" style="width: ${percent}%; background: ${color}; transition: width 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);"></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="font-medium tabular-nums text-sm ${isLeader ? 'font-bold' : ''}">${percent.toFixed(1)}%</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                ${marginHTML}
+                            </td>
+                        </tr>
+                    `;
+                    showCountyName = false;
+                });
+            }
+
+            // Separator between parties
+            if (demCandidates.length > 0 && repCandidates.length > 0 && partyFilter === 'both') {
+                html += `
+                    <tr class="party-separator-row">
+                        <td colspan="7"></td>
+                    </tr>
+                `;
+            }
+
+            // Render Republicans
+            if (repCandidates.length > 0) {
+                repCandidates.forEach((candidate, partyIndex) => {
+                    const percent = candidate.percent || 0;
+                    const votes = candidate.votes || 0;
+                    const color = candidateColors[candidate.name] || candidate.partyColor;
+                    const isLeader = partyIndex === 0;
+
+                    // Calculate margin for leader
+                    let marginHTML = '';
+                    if (isLeader && repCandidates.length > 1) {
+                        const margin = (percent - (repCandidates[1].percent || 0)).toFixed(1);
+                        marginHTML = `<span class="margin-badge">+${margin}%</span>`;
+                    }
+
+                    // Check for rank changes
+                    const previousRank = previousRankings.rep.indexOf(candidate.name);
+                    const currentRank = partyIndex;
+                    let rankClass = '';
+
+                    if (previousRank !== -1 && previousRank !== currentRank) {
+                        if (currentRank < previousRank) {
+                            rankClass = 'rank-moving-up';
+                        } else {
+                            rankClass = 'rank-moving-down';
+                        }
+                    }
+
+                    if (isLeader) {
+                        rankClass += ' rank-leader';
+                    }
+
+                    const candidateId = `county-row-${candidate.party}-${candidate.name.replace(/\s/g, '-')}`;
+
+                    html += `
+                        <tr id="${candidateId}" class="${rankClass}" data-candidate="${candidate.name}" data-party="${candidate.party}" style="border-bottom: 1px solid var(--border-color);">
+                            <td class="px-6 py-4">
+                                ${showCountyName ? `<span class="county-name-cell">${county}</span>` : ''}
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="party-badge" style="background: ${color};">${candidate.party}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center gap-2">
+                                    <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
+                                    <span class="text-sm" style="color: var(--text-secondary); ${isLeader ? 'font-weight: 600;' : ''}">${candidate.name}</span>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="tabular-nums text-sm ${isLeader ? 'font-semibold' : ''}">${votes.toLocaleString()}</span>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="result-bar-container">
+                                    <div class="result-bar-fill" style="width: ${percent}%; background: ${color}; transition: width 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);"></div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <span class="font-medium tabular-nums text-sm ${isLeader ? 'font-bold' : ''}">${percent.toFixed(1)}%</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                ${marginHTML}
+                            </td>
+                        </tr>
+                    `;
+                    showCountyName = false;
+                });
+            }
+
+            tbody.innerHTML = html;
+
+            // Store current rankings for next comparison
+            previousCountyRankings[rankingKey] = currentRankings;
+
+            // Remove animation classes after animation completes
+            setTimeout(() => {
+                tbody.querySelectorAll('.rank-moving-up, .rank-moving-down').forEach(row => {
+                    row.classList.remove('rank-moving-up', 'rank-moving-down');
+                });
+            }, 800);
+        }
+
+        // Add event listeners for county select and party filter
+        document.addEventListener('DOMContentLoaded', () => {
+            const countySelect = document.getElementById('county-select');
+            const partyFilter = document.getElementById('party-filter');
+
+            if (countySelect) {
+                countySelect.addEventListener('change', displayCountyResults);
+                populateCountyDropdown();
+            }
+
+            if (partyFilter) {
+                partyFilter.addEventListener('change', displayCountyResults);
+            }
+        });
+
+        window.addEventListener('load', init);
+    </script>
+</body>
+</html>
