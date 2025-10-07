@@ -297,6 +297,210 @@
             background: linear-gradient(to right, transparent, var(--border-color) 15%, var(--border-color) 85%, transparent);
             opacity: 0.6;
         }
+
+        /* ========================================
+           RESPONSIVE DESIGN - MOBILE & TABLET
+           ======================================== */
+
+        /* Tablet and below (landscape tablets, portrait tablets, phones) */
+        @media (max-width: 1024px) {
+            .main-container {
+                flex-direction: column !important;
+                height: auto !important;
+            }
+
+            .left-panel {
+                width: 100% !important;
+                border-right: none !important;
+                border-bottom: 1px solid var(--border-color) !important;
+            }
+
+            .right-panel {
+                min-height: 600px;
+            }
+
+            .map-container {
+                min-height: 400px;
+            }
+        }
+
+        /* Mobile phones and small tablets */
+        @media (max-width: 768px) {
+            /* Reduce padding throughout */
+            .px-12 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+
+            .py-12 {
+                padding-top: 2rem !important;
+                padding-bottom: 2rem !important;
+            }
+
+            .py-8 {
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+
+            .px-8 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+            }
+
+            /* Smaller header text */
+            .text-3xl {
+                font-size: 1.5rem !important;
+                line-height: 2rem !important;
+            }
+
+            .text-6xl {
+                font-size: 2.5rem !important;
+                line-height: 1 !important;
+            }
+
+            /* Theme toggle button */
+            .theme-toggle {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+            }
+
+            /* County table - horizontal scroll */
+            .county-table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .county-table {
+                min-width: 800px;
+            }
+
+            /* Reduce table padding */
+            .county-table th,
+            .county-table td {
+                padding-left: 0.75rem !important;
+                padding-right: 0.75rem !important;
+                padding-top: 0.75rem !important;
+                padding-bottom: 0.75rem !important;
+                font-size: 0.75rem !important;
+            }
+
+            /* Hide margin column on mobile - least important */
+            .county-table th:last-child,
+            .county-table td:last-child {
+                display: none;
+            }
+
+            /* Smaller map heights */
+            .map-container {
+                min-height: 300px !important;
+            }
+
+            /* Reduce gap between maps */
+            .gap-6 {
+                gap: 1rem !important;
+            }
+
+            /* Smaller candidate rows */
+            .candidate-row {
+                font-size: 0.875rem !important;
+                padding-top: 0.5rem !important;
+                padding-bottom: 0.5rem !important;
+            }
+
+            /* Dropdowns stack on very small screens */
+            .filter-controls {
+                flex-direction: column !important;
+            }
+
+            .filter-controls > div {
+                width: 100% !important;
+                min-width: 100% !important;
+            }
+
+            /* Tooltip smaller on mobile */
+            .tooltip {
+                max-width: 240px !important;
+                font-size: 0.75rem !important;
+            }
+
+            /* Progress bars */
+            .result-bar-container {
+                min-width: 80px !important;
+            }
+        }
+
+        /* Very small phones */
+        @media (max-width: 480px) {
+            .text-6xl {
+                font-size: 2rem !important;
+            }
+
+            .text-3xl {
+                font-size: 1.25rem !important;
+            }
+
+            .text-lg {
+                font-size: 1rem !important;
+            }
+
+            /* Even more compact table */
+            .county-table {
+                min-width: 700px;
+            }
+
+            /* Hide county column when county is selected (redundant) */
+            .county-selected .county-table th:first-child,
+            .county-selected .county-table td:first-child {
+                display: none;
+            }
+
+            /* Theme toggle even smaller */
+            .theme-toggle {
+                padding: 6px 10px !important;
+                font-size: 11px !important;
+                top: 8px !important;
+                right: 8px !important;
+            }
+
+            /* Candidate percentage displays */
+            .candidate-percent {
+                font-size: 1.25rem !important;
+            }
+
+            .candidate-name {
+                font-size: 0.875rem !important;
+            }
+        }
+
+        /* Landscape phones */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .main-container {
+                height: auto !important;
+            }
+
+            .left-panel {
+                max-height: none !important;
+            }
+
+            .map-container {
+                min-height: 350px !important;
+            }
+        }
+
+        /* Utility classes for responsive hiding */
+        .mobile-only {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-only {
+                display: block;
+            }
+
+            .desktop-only {
+                display: none;
+            }
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -304,9 +508,9 @@
         <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
     </button>
 
-    <div class="flex h-screen w-screen">
+    <div class="flex h-screen w-screen main-container">
         <!-- Left Panel: Candidates -->
-        <div class="w-2/5 flex flex-col" style="border-right: 1px solid var(--border-color);">
+        <div class="w-2/5 flex flex-col left-panel" style="border-right: 1px solid var(--border-color);">
             <div class="px-12 py-8" style="border-bottom: 1px solid var(--border-color);">
                 <h1 class="text-3xl font-light tracking-tight mb-1">Tennessee 7th District</h1>
                 <p class="text-sm font-light" style="color: var(--text-tertiary);">Special Primary • October 7, 2025</p>
@@ -354,7 +558,7 @@
         </div>
 
         <!-- Right Panel: Two Maps -->
-        <div class="flex-1 flex flex-col p-8 gap-6">
+        <div class="flex-1 flex flex-col p-8 gap-6 right-panel">
             <!-- Democratic Map -->
             <div class="flex-1 flex flex-col">
                 <div class="mb-4">
@@ -363,7 +567,7 @@
                         <h2 class="text-lg font-light tracking-tight">Democratic Primary - County Results</h2>
                     </div>
                 </div>
-                <div class="flex-1 relative rounded-lg overflow-hidden" style="background: var(--bg-map);">
+                <div class="flex-1 relative rounded-lg overflow-hidden map-container" style="background: var(--bg-map);">
                     <div id="map-dem" class="w-full h-full"></div>
                 </div>
             </div>
@@ -376,7 +580,7 @@
                         <h2 class="text-lg font-light tracking-tight">Republican Primary - County Results</h2>
                     </div>
                 </div>
-                <div class="flex-1 relative rounded-lg overflow-hidden" style="background: var(--bg-map);">
+                <div class="flex-1 relative rounded-lg overflow-hidden map-container" style="background: var(--bg-map);">
                     <div id="map-rep" class="w-full h-full"></div>
                 </div>
             </div>
@@ -393,7 +597,7 @@
                 <p class="text-sm" style="color: var(--text-tertiary);">Note some counties appear whole on the map, while only partial parts are in the district.</p>
             </div>
 
-            <div class="mb-6 flex gap-4">
+            <div class="mb-6 flex gap-4 filter-controls">
                 <div class="flex-1">
                     <select id="county-select" class="px-4 py-3 rounded-lg text-sm w-full">
                         <option value="">Select a county...</option>
@@ -408,7 +612,7 @@
                 </div>
             </div>
 
-            <div class="rounded-lg overflow-hidden" style="border: 1px solid var(--border-color);">
+            <div class="rounded-lg overflow-hidden county-table-wrapper" style="border: 1px solid var(--border-color);">
                 <table class="county-table w-full">
                     <thead>
                         <tr class="text-xs uppercase tracking-wider" style="color: var(--text-tertiary);">
@@ -979,7 +1183,7 @@
                         <div class="flex-1">
                             <div class="flex items-center gap-2 mb-0.5">
                                 <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
-                                <div class="text-base font-medium" style="color: ${index === 0 ? 'var(--text-primary)' : 'var(--text-secondary)'};">${candidate.name}</div>
+                                <div class="text-base font-medium candidate-name" style="color: ${index === 0 ? 'var(--text-primary)' : 'var(--text-secondary)'};">${candidate.name}</div>
                                 ${isWinner ? `<div style="color: ${color}; font-size: 16px; font-weight: 700; margin-left: 4px;">✓</div>` : ''}
                             </div>
                             <div class="text-xs font-light ml-4" style="color: var(--text-tertiary);">${candidateTitles[candidate.name] || ''}</div>
@@ -991,7 +1195,7 @@
                             </div>
                         </div>
                         <div class="ml-6 flex flex-col items-end">
-                            <div class="text-2xl font-light tabular-nums" style="color: ${index === 0 ? 'var(--text-primary)' : 'var(--text-secondary)'};">${(candidate.percent || 0).toFixed(1)}%</div>
+                            <div class="text-2xl font-light tabular-nums candidate-percent" style="color: ${index === 0 ? 'var(--text-primary)' : 'var(--text-secondary)'};">${(candidate.percent || 0).toFixed(1)}%</div>
                             ${deltaHTML}
                         </div>
                     </div>
