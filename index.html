@@ -1517,9 +1517,23 @@
                 const votes = winner.votes;
                 const winnerColor = candidateColors[winner.name] || (party === 'democratic' ? '#3b82f6' : '#ef4444');
 
-                // Scale circle size: 3px to 20px based on votes
-                const minRadius = 3;
-                const maxRadius = 20;
+                // Scale circle size based on screen size
+                // Desktop: 3px to 20px, Mobile: 2px to 12px, Small phones: 1.5px to 8px
+                const isMobile = window.innerWidth <= 768;
+                const isSmallPhone = window.innerWidth <= 480;
+
+                let minRadius, maxRadius;
+                if (isSmallPhone) {
+                    minRadius = 1.5;
+                    maxRadius = 8;
+                } else if (isMobile) {
+                    minRadius = 2;
+                    maxRadius = 12;
+                } else {
+                    minRadius = 3;
+                    maxRadius = 20;
+                }
+
                 const radius = minRadius + ((votes / maxVotes) * (maxRadius - minRadius));
 
                 // Get county path to find centroid
@@ -1537,6 +1551,9 @@
                 // Remove existing circle for this county
                 svg.selectAll(`.vote-circle[data-county="${countyName}"][data-party="${party}"]`).remove();
 
+                // Adjust stroke width for mobile
+                const strokeWidth = isSmallPhone ? 1 : (isMobile ? 1.2 : 1.5);
+
                 // Add new circle
                 svg.append('circle')
                     .attr('class', 'vote-circle')
@@ -1548,7 +1565,7 @@
                     .attr('fill', winnerColor)
                     .attr('fill-opacity', 0.4)
                     .attr('stroke', winnerColor)
-                    .attr('stroke-width', 1.5)
+                    .attr('stroke-width', strokeWidth)
                     .attr('stroke-opacity', 0.8)
                     .attr('pointer-events', 'none')
                     .transition()
