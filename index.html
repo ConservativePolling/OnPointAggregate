@@ -756,6 +756,10 @@
         let demTotalVotes = 0;
         let repTotalVotes = 0;
 
+        // Store district-wide candidates with projection status
+        let demDistrictCandidates = [];
+        let repDistrictCandidates = [];
+
         // Track previous percentages for delta display
         let previousPercents = {
             democratic: {},
@@ -1238,6 +1242,18 @@
             // Get reporting % for projection logic
             const reporting = party === 'democratic' ? demReporting : repReporting;
 
+            // Store district candidates with winner status for county table use
+            const candidatesWithWinner = candidates.map((candidate, index) => ({
+                ...candidate,
+                isProjectedWinner: isProjectedWinner(candidate, candidates, reporting, index)
+            }));
+
+            if (party === 'democratic') {
+                demDistrictCandidates = candidatesWithWinner;
+            } else {
+                repDistrictCandidates = candidatesWithWinner;
+            }
+
             container.innerHTML = candidates.map((candidate, index) => {
                 const color = candidateColors[candidate.name] || (party === 'democratic' ? '#3b82f6' : '#ef4444');
                 const isWinner = isProjectedWinner(candidate, candidates, reporting, index);
@@ -1481,6 +1497,10 @@
                     const color = candidateColors[candidate.name] || candidate.partyColor;
                     const isLeader = partyIndex === 0;
 
+                    // Check if this candidate is the projected winner district-wide
+                    const districtCandidate = demDistrictCandidates.find(c => c.name === candidate.name);
+                    const isProjectedWinner = districtCandidate ? districtCandidate.isProjectedWinner : false;
+
                     // Calculate margin for leader
                     let marginHTML = '';
                     if (isLeader && demCandidates.length > 1) {
@@ -1519,7 +1539,7 @@
                                 <div class="flex items-center gap-2">
                                     <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
                                     <span class="text-sm" style="color: var(--text-secondary); ${isLeader ? 'font-weight: 600;' : ''}">${candidate.name}</span>
-                                    ${isLeader && votes > 0 ? `<span style="color: ${color}; font-size: 14px; margin-left: 4px; opacity: 0.8;">✓</span>` : ''}
+                                    ${isProjectedWinner ? `<span style="color: ${color}; font-size: 14px; margin-left: 4px; opacity: 0.8;">✓</span>` : ''}
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right">
@@ -1559,6 +1579,10 @@
                     const color = candidateColors[candidate.name] || candidate.partyColor;
                     const isLeader = partyIndex === 0;
 
+                    // Check if this candidate is the projected winner district-wide
+                    const districtCandidate = repDistrictCandidates.find(c => c.name === candidate.name);
+                    const isProjectedWinner = districtCandidate ? districtCandidate.isProjectedWinner : false;
+
                     // Calculate margin for leader
                     let marginHTML = '';
                     if (isLeader && repCandidates.length > 1) {
@@ -1597,7 +1621,7 @@
                                 <div class="flex items-center gap-2">
                                     <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
                                     <span class="text-sm" style="color: var(--text-secondary); ${isLeader ? 'font-weight: 600;' : ''}">${candidate.name}</span>
-                                    ${isLeader && votes > 0 ? `<span style="color: ${color}; font-size: 14px; margin-left: 4px; opacity: 0.8;">✓</span>` : ''}
+                                    ${isProjectedWinner ? `<span style="color: ${color}; font-size: 14px; margin-left: 4px; opacity: 0.8;">✓</span>` : ''}
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right">
