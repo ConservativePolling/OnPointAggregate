@@ -39,20 +39,24 @@
             transition: background-color 0.3s, color 0.3s;
         }
 
+        /* SVG path quality improvements */
+        svg {
+            shape-rendering: geometricPrecision;
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
         .county {
-            stroke: #666;
-            stroke-width: 0.3;
             transition: all 0.3s ease;
         }
 
-        [data-theme="light"] .county {
-            stroke: #999;
+        .county.district-7 {
+            cursor: pointer;
         }
 
-        .county.district-7 {
-            stroke: #999;
-            stroke-width: 1;
-            cursor: pointer;
+        .county.district-7:hover {
+            opacity: 0.85;
+            stroke-width: 2.5 !important;
         }
 
         [data-theme="light"] .county.district-7 {
@@ -804,7 +808,11 @@
                 if (!tn07Counties.includes(countyName)) {
                     // Non-TN-07 counties - always gray
                     county.attr('fill', isDark ? '#0a0a0a' : '#f5f5f5');
+                    county.attr('stroke', isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.1)');
                 } else {
+                    // Update stroke for TN-07 counties based on theme
+                    county.attr('stroke', isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)');
+
                     // TN-07 counties - check if we have data
                     const countyDataStore = party === 'democratic' ? demCountyData : repCountyData;
                     const countyData = countyDataStore[countyName];
@@ -904,6 +912,7 @@
                     .enter()
                     .append('path')
                     .attr('d', path)
+                    .attr('shape-rendering', 'geometricPrecision')
                     .attr('class', d => {
                         const countyName = countyNames[d.id];
                         return tn07Counties.includes(countyName) ? 'county district-7' : 'county';
@@ -917,6 +926,22 @@
                         }
                         return theme === 'light' ? '#f5f5f5' : '#0a0a0a';
                     })
+                    .attr('stroke', d => {
+                        const countyName = countyNames[d.id];
+                        const theme = document.documentElement.getAttribute('data-theme');
+                        if (tn07Counties.includes(countyName)) {
+                            // TN-07 counties get visible borders
+                            return theme === 'light' ? 'rgba(0,0,0,0.3)' : 'rgba(255,255,255,0.3)';
+                        }
+                        // Non-TN-07 counties get subtle borders
+                        return theme === 'light' ? 'rgba(0,0,0,0.1)' : 'rgba(255,255,255,0.05)';
+                    })
+                    .attr('stroke-width', d => {
+                        const countyName = countyNames[d.id];
+                        return tn07Counties.includes(countyName) ? 1.5 : 0.5;
+                    })
+                    .attr('stroke-linejoin', 'round')
+                    .attr('stroke-linecap', 'round')
                     .attr('data-county', d => countyNames[d.id])
                     .attr('data-party', party)
                     .on('click', function(event, d) {
@@ -1494,6 +1519,7 @@
                                 <div class="flex items-center gap-2">
                                     <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
                                     <span class="text-sm" style="color: var(--text-secondary); ${isLeader ? 'font-weight: 600;' : ''}">${candidate.name}</span>
+                                    ${isLeader && votes > 0 ? `<span style="color: ${color}; font-size: 14px; margin-left: 4px; opacity: 0.8;">✓</span>` : ''}
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right">
@@ -1571,6 +1597,7 @@
                                 <div class="flex items-center gap-2">
                                     <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>
                                     <span class="text-sm" style="color: var(--text-secondary); ${isLeader ? 'font-weight: 600;' : ''}">${candidate.name}</span>
+                                    ${isLeader && votes > 0 ? `<span style="color: ${color}; font-size: 14px; margin-left: 4px; opacity: 0.8;">✓</span>` : ''}
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-right">
