@@ -116,6 +116,30 @@
             opacity: 0.8;
         }
 
+        .vote-circles-toggle {
+            position: fixed;
+            top: 60px;
+            right: 20px;
+            z-index: 1000;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            color: var(--text-primary);
+        }
+
+        .vote-circles-toggle:hover {
+            opacity: 0.8;
+        }
+
+        .vote-circles-toggle.active {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+        }
+
         .reporting-badge {
             background: #3b82f6;
             color: white;
@@ -374,6 +398,12 @@
                 font-size: 12px !important;
             }
 
+            .vote-circles-toggle {
+                padding: 8px 12px !important;
+                font-size: 12px !important;
+                top: 50px !important;
+            }
+
             /* County table - horizontal scroll */
             .county-table-wrapper {
                 overflow-x: auto !important;
@@ -521,6 +551,13 @@
                 right: 8px !important;
             }
 
+            .vote-circles-toggle {
+                padding: 6px 10px !important;
+                font-size: 11px !important;
+                top: 42px !important;
+                right: 8px !important;
+            }
+
             /* Candidate percentage displays */
             .candidate-percent {
                 font-size: 1.25rem !important;
@@ -571,6 +608,10 @@
 <body class="antialiased">
     <button class="theme-toggle" onclick="toggleTheme()">
         <span id="theme-icon">☀️</span> <span id="theme-text">Light Mode</span>
+    </button>
+
+    <button class="vote-circles-toggle" onclick="toggleVoteCircles()">
+        <span id="circles-text">Show Vote Circles</span>
     </button>
 
     <div class="flex h-screen w-screen main-container">
@@ -823,6 +864,9 @@
 
                     if (!countyData || countyData.length === 0 || countyData[0].votes === 0) {
                         // NO DATA - use theme-appropriate gray
+                        county.attr('fill', isDark ? '#1a1a1a' : '#e5e5e5');
+                    } else if (voteCirclesEnabled) {
+                        // VOTE CIRCLES MODE - Show as gray
                         county.attr('fill', isDark ? '#1a1a1a' : '#e5e5e5');
                     } else {
                         // HAS DATA - recalculate color with new theme opacity
@@ -1369,6 +1413,13 @@
                             .transition()
                             .duration(500)
                             .attr('fill', noDataColor);
+                    } else if (voteCirclesEnabled) {
+                        // VOTE CIRCLES MODE - Show counties as gray like non-reporting
+                        const neutralColor = isDark ? '#1a1a1a' : '#e5e5e5';
+                        d3.selectAll(`path[data-county="${countyName}"][data-party="${party}"]`)
+                            .transition()
+                            .duration(500)
+                            .attr('fill', neutralColor);
                     } else {
                         // CALCULATE MARGIN
                         const margin = leading.percent - (second ? second.percent : 0);
@@ -1407,6 +1458,111 @@
             if (selectedCounty && selectedCounty.value) {
                 displayCountyResults();
             }
+
+            // Update vote circles if enabled
+            updateVoteCircles(party);
+        }
+
+        // Vote circles feature
+        let voteCirclesEnabled = localStorage.getItem('voteCircles') === 'true';
+
+        function toggleVoteCircles() {
+            voteCirclesEnabled = !voteCirclesEnabled;
+            localStorage.setItem('voteCircles', voteCirclesEnabled);
+
+            const button = document.querySelector('.vote-circles-toggle');
+            const text = document.getElementById('circles-text');
+
+            if (voteCirclesEnabled) {
+                button.classList.add('active');
+                text.textContent = 'Hide Vote Circles';
+                // Refresh map colors to gray out counties
+                updateMapTheme();
+                updateVoteCircles('democratic');
+                updateVoteCircles('republican');
+            } else {
+                button.classList.remove('active');
+                text.textContent = 'Show Vote Circles';
+                d3.selectAll('.vote-circle').remove();
+                // Restore colored counties
+                updateMapTheme();
+            }
+        }
+
+        function updateVoteCircles(party) {
+            if (!voteCirclesEnabled) {
+                d3.selectAll(`.vote-circle[data-party="${party}"]`).remove();
+                return;
+            }
+
+            const countyDataStore = party === 'democratic' ? demCountyData : repCountyData;
+
+            // Calculate max votes for scaling
+            let maxVotes = 0;
+            Object.values(countyDataStore).forEach(candidates => {
+                if (candidates && candidates.length > 0 && candidates[0].votes > 0) {
+                    maxVotes = Math.max(maxVotes, candidates[0].votes);
+                }
+            });
+
+            tn07Counties.forEach(countyName => {
+                const candidates = countyDataStore[countyName];
+                if (!candidates || candidates.length === 0 || candidates[0].votes === 0) {
+                    // Remove circle if no data
+                    d3.selectAll(`.vote-circle[data-county="${countyName}"][data-party="${party}"]`).remove();
+                    return;
+                }
+
+                const winner = candidates[0];
+                const votes = winner.votes;
+                const winnerColor = candidateColors[winner.name] || (party === 'democratic' ? '#3b82f6' : '#ef4444');
+
+                // Scale circle size: 3px to 20px based on votes
+                const minRadius = 3;
+                const maxRadius = 20;
+                const radius = minRadius + ((votes / maxVotes) * (maxRadius - minRadius));
+
+                // Get county path to find centroid
+                const countyPath = d3.select(`path[data-county="${countyName}"][data-party="${party}"]`);
+                if (countyPath.empty()) return;
+
+                const pathNode = countyPath.node();
+                const bbox = pathNode.getBBox();
+                const cx = bbox.x + bbox.width / 2;
+                const cy = bbox.y + bbox.height / 2;
+
+                // Get parent SVG
+                const svg = d3.select(pathNode.ownerSVGElement);
+
+                // Remove existing circle for this county
+                svg.selectAll(`.vote-circle[data-county="${countyName}"][data-party="${party}"]`).remove();
+
+                // Add new circle
+                svg.append('circle')
+                    .attr('class', 'vote-circle')
+                    .attr('data-county', countyName)
+                    .attr('data-party', party)
+                    .attr('cx', cx)
+                    .attr('cy', cy)
+                    .attr('r', 0)
+                    .attr('fill', winnerColor)
+                    .attr('fill-opacity', 0.4)
+                    .attr('stroke', winnerColor)
+                    .attr('stroke-width', 1.5)
+                    .attr('stroke-opacity', 0.8)
+                    .attr('pointer-events', 'none')
+                    .transition()
+                    .duration(500)
+                    .attr('r', radius);
+            });
+        }
+
+        // Initialize vote circles toggle on load
+        if (voteCirclesEnabled) {
+            const button = document.querySelector('.vote-circles-toggle');
+            const text = document.getElementById('circles-text');
+            button.classList.add('active');
+            text.textContent = 'Hide Vote Circles';
         }
 
         function startAutoRefresh() {
