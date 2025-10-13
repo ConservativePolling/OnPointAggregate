@@ -798,11 +798,16 @@
             useEffect(() => {
                 const fetchComments = async () => {
                     try {
+                        console.log('🔄 Fetching comments for article:', article.id);
                         const response = await fetch(`/.netlify/functions/article-comments?articleId=${article.id}`);
                         const data = await response.json();
+                        console.log('📥 Fetched comments:', data.comments?.length || 0, 'total');
+                        if (data.comments && data.comments.length > 0) {
+                            console.log('Comment IDs:', data.comments.map(c => c.id));
+                        }
                         setComments(data.comments || []);
                     } catch (error) {
-                        console.error('Error fetching comments:', error);
+                        console.error('❌ Error fetching comments:', error);
                     }
                 };
 
@@ -981,8 +986,12 @@
             const handleLike = async (commentId, replyId = null) => {
                 console.log('=== Liking Comment/Reply ===');
                 console.log('Comment ID:', commentId);
+                console.log('Comment ID type:', typeof commentId);
                 console.log('Reply ID:', replyId);
+                console.log('Reply ID type:', typeof replyId);
                 console.log('Article ID:', article.id);
+                console.log('Current comments in state:', comments.length);
+                console.log('All comment IDs in state:', comments.map(c => ({ id: c.id, type: c.type })));
 
                 if (!user) {
                     console.log('User not logged in for like');
@@ -1031,7 +1040,14 @@
                     } else {
                         const error = await response.json();
                         console.error('Like error response:', error);
-                        alert('Error liking comment: ' + (error.error || 'Unknown error'));
+                        console.error('Requested ID:', error.requestedId);
+                        console.error('Available IDs:', error.availableIds);
+                        console.error('Total comments:', error.totalComments);
+                        alert('Error liking comment: ' + error.error +
+                              '\n\nRequested ID: ' + error.requestedId +
+                              '\nAvailable IDs: ' + (error.availableIds || []).join(', ') +
+                              '\nTotal comments: ' + error.totalComments +
+                              '\n\nCheck console for full details.');
                     }
                 } catch (error) {
                     console.error('=== Like Error ===');

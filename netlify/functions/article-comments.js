@@ -151,16 +151,33 @@ exports.handler = async (event, context) => {
         }
 
         const comments = commentsStore[articleId] || [];
+        console.log('=== LIKE DEBUG ===');
+        console.log('Article ID:', articleId);
+        console.log('Looking for comment ID:', commentId);
+        console.log('Total comments in store:', comments.length);
+        console.log('Comment IDs in store:', comments.map(c => ({ id: c.id, type: c.type, author: c.author.name })));
+        console.log('Full commentsStore keys:', Object.keys(commentsStore));
+        console.log('Full commentsStore:', JSON.stringify(commentsStore, null, 2));
+
         const comment = comments.find(c => c.id === commentId);
 
         if (!comment) {
-          console.log('Comment not found:', commentId);
+          console.log('❌ Comment NOT FOUND');
+          console.log('Requested comment ID:', commentId);
+          console.log('Available comment IDs:', comments.map(c => c.id));
           return {
             statusCode: 404,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'Comment not found' })
+            body: JSON.stringify({
+              error: 'Comment not found',
+              requestedId: commentId,
+              availableIds: comments.map(c => c.id),
+              totalComments: comments.length
+            })
           };
         }
+
+        console.log('✅ Comment FOUND:', comment.id);
 
         // Handle reply like
         if (replyId) {
@@ -220,16 +237,32 @@ exports.handler = async (event, context) => {
         }
 
         const comments = commentsStore[articleId] || [];
+        console.log('=== REPLY DEBUG ===');
+        console.log('Article ID:', articleId);
+        console.log('Looking for comment ID:', commentId);
+        console.log('Total comments in store:', comments.length);
+        console.log('Comment IDs in store:', comments.map(c => ({ id: c.id, type: c.type, author: c.author.name })));
+        console.log('Full commentsStore keys:', Object.keys(commentsStore));
+
         const comment = comments.find(c => c.id === commentId);
 
         if (!comment) {
-          console.log('Comment not found for reply:', commentId);
+          console.log('❌ Comment NOT FOUND for reply');
+          console.log('Requested comment ID:', commentId);
+          console.log('Available comment IDs:', comments.map(c => c.id));
           return {
             statusCode: 404,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'Comment not found' })
+            body: JSON.stringify({
+              error: 'Comment not found',
+              requestedId: commentId,
+              availableIds: comments.map(c => c.id),
+              totalComments: comments.length
+            })
           };
         }
+
+        console.log('✅ Comment FOUND for reply:', comment.id);
 
         const newReply = {
           id: generateId(),
