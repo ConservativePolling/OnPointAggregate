@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+  command = "echo 'No build required'"
+  functions = "netlify/functions"
+
+[dev]
+  command = "npx http-server -p 8888"
+  port = 8888
+  publish = "."
+  functions = "netlify/functions"
+
+# Identity settings
+[identity]
+  # Configure signup settings
+  # In Netlify dashboard: Settings > Identity > Registration preferences
