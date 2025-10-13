@@ -1,4 +1,38 @@
+const fs = require('fs');
+const path = require('path');
+
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
+const DATA_DIR = path.join(__dirname, '../data');
+const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
+
+function ensureDataDir() {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+}
+
+function loadCommentsStore() {
+  try {
+    ensureDataDir();
+    if (!fs.existsSync(COMMENTS_FILE)) {
+      return {};
+    }
+    const contents = fs.readFileSync(COMMENTS_FILE, 'utf8');
+    return contents ? JSON.parse(contents) : {};
+  } catch (error) {
+    console.error('Error reading comments store:', error);
+    return {};
+  }
+}
+
+function saveCommentsStore(store) {
+  try {
+    ensureDataDir();
+    fs.writeFileSync(COMMENTS_FILE, JSON.stringify(store, null, 2), 'utf8');
+  } catch (error) {
+    console.error('Error writing comments store:', error);
+  }
+}
 
 // Decode JWT token to get user info
 function decodeToken(token) {
@@ -38,7 +72,15 @@ function generateId() {
 }
 
 // In-memory storage
-let commentsStore = {};
+let commentsStore = loadCommentsStore();
+
+function refreshStore() {
+  commentsStore = loadCommentsStore();
+}
+
+function persistStore() {
+  saveCommentsStore(commentsStore);
+}
 
 exports.handler = async (event, context) => {
   console.log('=== Function Invoked ===');
@@ -52,6 +94,8 @@ exports.handler = async (event, context) => {
   const rawUrl = event.rawUrl || '';
 
   try {
+    refreshStore();
+
     // Handle CORS preflight
     if (method === 'OPTIONS') {
       return {
@@ -77,8 +121,9 @@ exports.handler = async (event, context) => {
         };
       }
 
-      const comments = commentsStore[articleId] || [];
-      console.log('Returning', comments.length, 'comments for article', articleId);
+      const articleKey = String(articleId);
+      const comments = commentsStore[articleKey] || [];
+      console.log('Returning', comments.length, 'comments for article', articleKey);
 
       return {
         statusCode: 200,
@@ -150,9 +195,10 @@ exports.handler = async (event, context) => {
           };
         }
 
-        const comments = commentsStore[articleId] || [];
+        const articleKey = String(articleId);
+        const comments = commentsStore[articleKey] || [];
         console.log('=== LIKE DEBUG ===');
-        console.log('Article ID:', articleId);
+        console.log('Article ID:', articleKey);
         console.log('Looking for comment ID:', commentId);
         console.log('Total comments in store:', comments.length);
         console.log('Comment IDs in store:', comments.map(c => ({ id: c.id, type: c.type, author: c.author.name })));
@@ -213,7 +259,8 @@ exports.handler = async (event, context) => {
           }
         }
 
-        commentsStore[articleId] = comments;
+        commentsStore[articleKey] = comments;
+        persistStore();
 
         return {
           statusCode: 200,
@@ -236,9 +283,10 @@ exports.handler = async (event, context) => {
           };
         }
 
-        const comments = commentsStore[articleId] || [];
+        const articleKey = String(articleId);
+        const comments = commentsStore[articleKey] || [];
         console.log('=== REPLY DEBUG ===');
-        console.log('Article ID:', articleId);
+        console.log('Article ID:', articleKey);
         console.log('Looking for comment ID:', commentId);
         console.log('Total comments in store:', comments.length);
         console.log('Comment IDs in store:', comments.map(c => ({ id: c.id, type: c.type, author: c.author.name })));
@@ -276,7 +324,8 @@ exports.handler = async (event, context) => {
         };
 
         comment.replies.push(newReply);
-        commentsStore[articleId] = comments;
+        commentsStore[articleKey] = comments;
+        persistStore();
 
         console.log('Reply created:', newReply.id);
 
@@ -303,11 +352,12 @@ exports.handler = async (event, context) => {
       // Determine comment type
       const commentType = (type === 'reporter' && isAdmin) ? 'reporter' : 'user';
 
-      const comments = commentsStore[articleId] || [];
+      const articleKey = String(articleId);
+      const comments = commentsStore[articleKey] || [];
 
       const newComment = {
         id: generateId(),
-        articleId,
+        articleId: articleKey,
         type: commentType,
         author: {
           name: tokenData.email.split('@')[0],
@@ -320,7 +370,8 @@ exports.handler = async (event, context) => {
       };
 
       comments.unshift(newComment);
-      commentsStore[articleId] = comments;
+      commentsStore[articleKey] = comments;
+      persistStore();
 
       console.log('Comment created:', newComment.id, 'by', tokenData.email, 'type:', commentType);
 
@@ -355,7 +406,8 @@ exports.handler = async (event, context) => {
         };
       }
 
-      let comments = commentsStore[articleId] || [];
+      const articleKey = String(articleId);
+      let comments = commentsStore[articleKey] || [];
 
       if (replyId) {
         // Delete reply
@@ -370,7 +422,8 @@ exports.handler = async (event, context) => {
         comments = comments.filter(c => c.id !== commentId);
       }
 
-      commentsStore[articleId] = comments;
+      commentsStore[articleKey] = comments;
+      persistStore();
 
       return {
         statusCode: 200,
