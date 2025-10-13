@@ -769,10 +769,41 @@
 
         function ArticleView({ article, darkMode, setDarkMode, onBack, user, savedArticles, toggleSaveArticle }) {
             const [currentTime, setCurrentTime] = useState(new Date());
+            const [comments, setComments] = useState([]);
+            const [commentText, setCommentText] = useState('');
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [isAdmin, setIsAdmin] = useState(false);
 
             useEffect(() => {
                 window.scrollTo(0, 0);
             }, []);
+
+            // Check if user is admin
+            useEffect(() => {
+                if (user && user.email === 'jaydenmdavis2008@outlook.com') {
+                    setIsAdmin(true);
+                }
+            }, [user]);
+
+            // Fetch comments on mount and poll for updates
+            useEffect(() => {
+                const fetchComments = async () => {
+                    try {
+                        const response = await fetch(`/.netlify/functions/article-comments?articleId=${article.id}`);
+                        const data = await response.json();
+                        setComments(data.comments || []);
+                    } catch (error) {
+                        console.error('Error fetching comments:', error);
+                    }
+                };
+
+                fetchComments();
+
+                // Poll for new comments every 5 seconds
+                const interval = setInterval(fetchComments, 5000);
+
+                return () => clearInterval(interval);
+            }, [article.id]);
 
             // Update time every minute to keep relative timestamps accurate
             useEffect(() => {
@@ -782,6 +813,47 @@
 
                 return () => clearInterval(interval);
             }, []);
+
+            // Submit comment
+            const handleSubmitComment = async (e) => {
+                e.preventDefault();
+
+                if (!commentText.trim() || isSubmitting) return;
+
+                setIsSubmitting(true);
+
+                try {
+                    // Get fresh token from Netlify Identity
+                    const currentUser = netlifyIdentity.currentUser();
+                    const token = currentUser?.token?.access_token;
+
+                    const response = await fetch('/.netlify/functions/article-comments', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            articleId: article.id,
+                            text: commentText
+                        })
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        setComments(data.comments);
+                        setCommentText('');
+                    } else {
+                        const error = await response.json();
+                        alert('Error posting comment: ' + error.error);
+                    }
+                } catch (error) {
+                    console.error('Error posting comment:', error);
+                    alert('Error posting comment. Please try again.');
+                }
+
+                setIsSubmitting(false);
+            };
 
             const relatedArticles = articles.filter(a => 
                 a.id !== article.id && a.category === article.category
@@ -1075,39 +1147,87 @@
                         <div className={`mt-12 pt-12 border-t-2 ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
                             <div className="max-w-3xl">
                                 <div className="flex items-center justify-between mb-8">
-                                    <h3 className={`text-xl font-serif font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                        Reporter Comments
-                                    </h3>
-                                    <span className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{article.reporterComments?.length || 0} comments</span>
+                                    <div className="flex items-center space-x-3">
+                                        <h3 className={`text-xl font-serif font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                            Reporter Comments
+                                        </h3>
+                                        <span className="live-indicator w-1.5 h-1.5 bg-red-600 rounded-full"></span>
+                                        <span className="text-xs font-bold uppercase tracking-wider text-red-600">Live</span>
+                                    </div>
+                                    <span className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>{comments.length} comments</span>
                                 </div>
 
-                                {article.reporterComments?.map((comment, index) => (
-                                    <div key={index} className={`mb-6 ${comment.highlighted ? `border-2 ${darkMode ? 'border-red-900 bg-zinc-950' : 'border-red-200 bg-red-50'}` : `border ${darkMode ? 'border-gray-900 bg-zinc-950' : 'border-gray-200 bg-white'}`}`}>
+                                {/* Admin Comment Form */}
+                                {isAdmin && (
+                                    <div className={`mb-8 border-2 ${darkMode ? 'bg-zinc-950 border-blue-900' : 'bg-blue-50 border-blue-200'}`}>
                                         <div className="p-6">
-                                            <div className="flex items-start space-x-4">
-                                                <div className={`w-10 h-10 flex items-center justify-center text-sm font-bold flex-shrink-0 ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                                                    OPT
+                                            <div className="flex items-center space-x-2 mb-4">
+                                                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                                                </svg>
+                                                <span className="text-sm font-bold text-blue-600">Admin Mode</span>
+                                            </div>
+                                            <form onSubmit={handleSubmitComment}>
+                                                <textarea
+                                                    value={commentText}
+                                                    onChange={(e) => setCommentText(e.target.value)}
+                                                    placeholder="Add a reporter comment... (HTML is supported)"
+                                                    className={`w-full px-4 py-3 text-base border resize-vertical min-h-[120px] focus:outline-none ${darkMode ? 'bg-black border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                                    disabled={isSubmitting}
+                                                />
+                                                <div className="mt-3 flex items-center justify-between">
+                                                    <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+                                                        Tip: Use &lt;span class='font-bold'&gt;UPDATE:&lt;/span&gt; to highlight
+                                                    </span>
+                                                    <button
+                                                        type="submit"
+                                                        disabled={isSubmitting || !commentText.trim()}
+                                                        className={`px-6 py-2 text-sm font-semibold transition-all ${isSubmitting || !commentText.trim() ? 'opacity-50 cursor-not-allowed' : ''} ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                                    >
+                                                        {isSubmitting ? 'Posting...' : 'Post Comment'}
+                                                    </button>
                                                 </div>
-                                                <div className="flex-1">
-                                                    <div className="flex items-center space-x-2 mb-2">
-                                                        <span className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                                            {article.author}
-                                                        </span>
-                                                        <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                                                        <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                                            Senior Legal Affairs Reporter
-                                                        </span>
-                                                        <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                                                        <span className={`text-xs ${comment.highlighted ? 'font-bold' : ''} ${darkMode ? (comment.highlighted ? 'text-red-400' : 'text-gray-500') : (comment.highlighted ? 'text-red-600' : 'text-gray-500')}`}>
-                                                            {getRelativeTime(comment.timestamp)}
-                                                        </span>
+                                            </form>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {comments.length === 0 ? (
+                                    <div className={`border ${darkMode ? 'bg-zinc-950 border-gray-900' : 'bg-white border-gray-200'} p-8 text-center`}>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
+                                            No reporter comments yet. Check back for updates.
+                                        </p>
+                                    </div>
+                                ) : (
+                                    comments.map((comment, index) => (
+                                        <div key={index} className={`mb-6 ${comment.highlighted ? `border-2 ${darkMode ? 'border-red-900 bg-zinc-950' : 'border-red-200 bg-red-50'}` : `border ${darkMode ? 'border-gray-900 bg-zinc-950' : 'border-gray-200 bg-white'}`}`}>
+                                            <div className="p-6">
+                                                <div className="flex items-start space-x-4">
+                                                    <div className={`w-10 h-10 flex items-center justify-center text-sm font-bold flex-shrink-0 ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                                                        OPT
                                                     </div>
-                                                    <p className={`text-base leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`} dangerouslySetInnerHTML={{ __html: comment.text }}></p>
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center space-x-2 mb-2">
+                                                            <span className={`font-bold text-sm ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                                {article.author}
+                                                            </span>
+                                                            <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                                                            <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                                                Senior Legal Affairs Reporter
+                                                            </span>
+                                                            <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                                                            <span className={`text-xs ${comment.highlighted ? 'font-bold' : ''} ${darkMode ? (comment.highlighted ? 'text-red-400' : 'text-gray-500') : (comment.highlighted ? 'text-red-600' : 'text-gray-500')}`}>
+                                                                {getRelativeTime(comment.timestamp)}
+                                                                {index === 0 && <span className="ml-1 text-red-600 font-bold">• NEW</span>}
+                                                            </span>
+                                                        </div>
+                                                        <p className={`text-base leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'}`} dangerouslySetInnerHTML={{ __html: comment.text }}></p>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
 
                                 {/* Contact Footer */}
                                 <div className={`mt-8 pt-6 border-t ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
