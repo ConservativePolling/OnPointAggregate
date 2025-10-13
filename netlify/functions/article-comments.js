@@ -1,32 +1,53 @@
-const { getStore } = require('@netlify/blobs');
-
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
 
 // Decode JWT token to get user info
 function decodeToken(token) {
   try {
-    if (!token) return null;
+    if (!token) {
+      console.log('No token provided');
+      return null;
+    }
 
     // Remove 'Bearer ' prefix if present
     const cleanToken = token.replace(/^Bearer\s+/i, '');
 
     // JWT tokens are base64url encoded and have 3 parts separated by dots
     const parts = cleanToken.split('.');
-    if (parts.length !== 3) return null;
+    if (parts.length !== 3) {
+      console.log('Invalid token format - not 3 parts');
+      return null;
+    }
 
     // Decode the payload (second part)
-    const payload = parts[1];
+    // JWT uses base64url encoding, which needs to be converted to base64
+    let payload = parts[1];
+
+    // Replace base64url characters with base64
+    payload = payload.replace(/-/g, '+').replace(/_/g, '/');
+
+    // Add padding if needed
+    while (payload.length % 4 !== 0) {
+      payload += '=';
+    }
+
     const decoded = Buffer.from(payload, 'base64').toString('utf8');
-    return JSON.parse(decoded);
+    const parsed = JSON.parse(decoded);
+    console.log('Token decoded successfully, email:', parsed.email);
+    return parsed;
   } catch (error) {
-    console.error('Error decoding token:', error);
+    console.error('Error decoding token:', error.message);
     return null;
   }
 }
 
+// In-memory storage (will reset on function cold start, but good enough for demo)
+// In production, you'd use a real database
+let commentsStore = {};
+
 exports.handler = async (event, context) => {
+  console.log('Function invoked:', event.httpMethod, event.path);
+
   const method = event.httpMethod;
-  const store = getStore('comments');
 
   try {
     switch (method) {
@@ -34,7 +55,10 @@ exports.handler = async (event, context) => {
         // Get comments for an article
         const { articleId } = event.queryStringParameters || {};
 
+        console.log('GET request for articleId:', articleId);
+
         if (!articleId) {
+          console.log('No articleId provided');
           return {
             statusCode: 400,
             headers: {
@@ -45,7 +69,8 @@ exports.handler = async (event, context) => {
           };
         }
 
-        const comments = await store.get(articleId, { type: 'json' }) || [];
+        const comments = commentsStore[articleId] || [];
+        console.log('Returning', comments.length, 'comments');
 
         return {
           statusCode: 200,
@@ -59,7 +84,10 @@ exports.handler = async (event, context) => {
 
       case 'POST':
         // Add a comment (admin only)
+        console.log('POST request received');
         const authHeader = event.headers.authorization || event.headers.Authorization;
+
+        console.log('Auth header present:', !!authHeader);
 
         if (!authHeader) {
           return {
@@ -88,6 +116,7 @@ exports.handler = async (event, context) => {
 
         // Check if user is admin
         if (tokenData.email !== ADMIN_EMAIL) {
+          console.log('User not admin:', tokenData.email);
           return {
             statusCode: 403,
             headers: {
@@ -98,7 +127,10 @@ exports.handler = async (event, context) => {
           };
         }
 
-        const { articleId: postArticleId, text } = JSON.parse(event.body);
+        const requestBody = JSON.parse(event.body);
+        const { articleId: postArticleId, text } = requestBody;
+
+        console.log('Posting comment to article:', postArticleId);
 
         if (!postArticleId || !text) {
           return {
@@ -112,7 +144,7 @@ exports.handler = async (event, context) => {
         }
 
         // Get existing comments
-        const existingComments = await store.get(postArticleId, { type: 'json' }) || [];
+        const existingComments = commentsStore[postArticleId] || [];
 
         // Create new comment
         const newComment = {
@@ -125,7 +157,9 @@ exports.handler = async (event, context) => {
         const updatedComments = [newComment, ...existingComments];
 
         // Save back to store
-        await store.setJSON(postArticleId, updatedComments);
+        commentsStore[postArticleId] = updatedComments;
+
+        console.log('Comment saved successfully. Total comments:', updatedComments.length);
 
         return {
           statusCode: 201,
