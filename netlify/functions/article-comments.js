@@ -2,12 +2,20 @@ const fs = require('fs');
 const path = require('path');
 
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
-const DATA_DIR = path.join(__dirname, '../data');
+// Use /tmp directory which is writable in Netlify Functions
+const DATA_DIR = '/tmp';
 const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
 
+console.log('Comments file location:', COMMENTS_FILE);
+
 function ensureDataDir() {
-  if (!fs.existsSync(DATA_DIR)) {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+  try {
+    if (!fs.existsSync(DATA_DIR)) {
+      console.log('Creating data directory:', DATA_DIR);
+      fs.mkdirSync(DATA_DIR, { recursive: true });
+    }
+  } catch (error) {
+    console.error('Error creating data directory:', error);
   }
 }
 
@@ -15,12 +23,17 @@ function loadCommentsStore() {
   try {
     ensureDataDir();
     if (!fs.existsSync(COMMENTS_FILE)) {
+      console.log('Comments file does not exist yet, returning empty store');
       return {};
     }
+    console.log('Loading comments from:', COMMENTS_FILE);
     const contents = fs.readFileSync(COMMENTS_FILE, 'utf8');
-    return contents ? JSON.parse(contents) : {};
+    const parsed = contents ? JSON.parse(contents) : {};
+    console.log('Loaded comments store with', Object.keys(parsed).length, 'articles');
+    return parsed;
   } catch (error) {
-    console.error('Error reading comments store:', error);
+    console.error('❌ Error reading comments store:', error);
+    console.error('Stack:', error.stack);
     return {};
   }
 }
@@ -28,9 +41,19 @@ function loadCommentsStore() {
 function saveCommentsStore(store) {
   try {
     ensureDataDir();
+    console.log('💾 Saving comments store to:', COMMENTS_FILE);
+    console.log('Store has', Object.keys(store).length, 'articles');
     fs.writeFileSync(COMMENTS_FILE, JSON.stringify(store, null, 2), 'utf8');
+    console.log('✅ Comments saved successfully');
+
+    // Verify write
+    if (fs.existsSync(COMMENTS_FILE)) {
+      const size = fs.statSync(COMMENTS_FILE).size;
+      console.log('File size:', size, 'bytes');
+    }
   } catch (error) {
-    console.error('Error writing comments store:', error);
+    console.error('❌ Error writing comments store:', error);
+    console.error('Stack:', error.stack);
   }
 }
 
