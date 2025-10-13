@@ -41,13 +41,18 @@ function generateId() {
 let commentsStore = {};
 
 exports.handler = async (event, context) => {
-  console.log('Function invoked:', event.httpMethod, event.path);
+  console.log('=== Function Invoked ===');
+  console.log('Method:', event.httpMethod);
+  console.log('Path:', event.path);
+  console.log('RawUrl:', event.rawUrl);
+  console.log('Headers:', JSON.stringify(event.headers, null, 2));
 
   const method = event.httpMethod;
   const path = event.path || '';
+  const rawUrl = event.rawUrl || '';
 
   try {
-    // Handle different routes
+    // Handle CORS preflight
     if (method === 'OPTIONS') {
       return {
         statusCode: 200,
@@ -60,6 +65,7 @@ exports.handler = async (event, context) => {
       };
     }
 
+    // GET - Fetch comments
     if (method === 'GET') {
       const { articleId } = event.queryStringParameters || {};
 
@@ -89,6 +95,7 @@ exports.handler = async (event, context) => {
     const authHeader = event.headers.authorization || event.headers.Authorization;
 
     if (!authHeader) {
+      console.log('No auth header provided');
       return {
         statusCode: 401,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -99,6 +106,7 @@ exports.handler = async (event, context) => {
     const tokenData = decodeToken(authHeader);
 
     if (!tokenData || !tokenData.email) {
+      console.log('Invalid token data');
       return {
         statusCode: 401,
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -109,15 +117,153 @@ exports.handler = async (event, context) => {
     const isAdmin = tokenData.email === ADMIN_EMAIL;
     const requestBody = event.body ? JSON.parse(event.body) : {};
 
-    // POST - Create comment
-    if (method === 'POST' && !path.includes('/like') && !path.includes('/reply')) {
+    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+    console.log('User:', tokenData.email, 'isAdmin:', isAdmin);
+
+    // Determine action from path or request body
+    let action = requestBody.action || 'comment'; // Default action
+
+    // Check path for action type (more reliable routing)
+    if (path.includes('/comment-like') || rawUrl.includes('/comment-like')) {
+      action = 'like';
+      console.log('Action detected from path: LIKE');
+    } else if (path.includes('/comment-reply') || rawUrl.includes('/comment-reply')) {
+      action = 'reply';
+      console.log('Action detected from path: REPLY');
+    }
+
+    // POST requests
+    if (method === 'POST') {
+      console.log('POST action:', action);
+
+      // LIKE ACTION
+      if (action === 'like') {
+        console.log('Processing LIKE action');
+        const { articleId, commentId, replyId } = requestBody;
+
+        if (!articleId || !commentId) {
+          console.log('Missing articleId or commentId for like');
+          return {
+            statusCode: 400,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'articleId and commentId are required for like action' })
+          };
+        }
+
+        const comments = commentsStore[articleId] || [];
+        const comment = comments.find(c => c.id === commentId);
+
+        if (!comment) {
+          console.log('Comment not found:', commentId);
+          return {
+            statusCode: 404,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'Comment not found' })
+          };
+        }
+
+        // Handle reply like
+        if (replyId) {
+          console.log('Liking reply:', replyId);
+          const reply = comment.replies.find(r => r.id === replyId);
+          if (!reply) {
+            console.log('Reply not found:', replyId);
+            return {
+              statusCode: 404,
+              headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+              body: JSON.stringify({ error: 'Reply not found' })
+            };
+          }
+
+          const likeIndex = reply.likes.indexOf(tokenData.email);
+          if (likeIndex > -1) {
+            reply.likes.splice(likeIndex, 1);
+            console.log('Unliked reply');
+          } else {
+            reply.likes.push(tokenData.email);
+            console.log('Liked reply');
+          }
+        } else {
+          // Handle comment like
+          console.log('Liking comment:', commentId);
+          const likeIndex = comment.likes.indexOf(tokenData.email);
+          if (likeIndex > -1) {
+            comment.likes.splice(likeIndex, 1);
+            console.log('Unliked comment');
+          } else {
+            comment.likes.push(tokenData.email);
+            console.log('Liked comment');
+          }
+        }
+
+        commentsStore[articleId] = comments;
+
+        return {
+          statusCode: 200,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ success: true, comments })
+        };
+      }
+
+      // REPLY ACTION
+      if (action === 'reply') {
+        console.log('Processing REPLY action');
+        const { articleId, commentId, text } = requestBody;
+
+        if (!articleId || !commentId || !text) {
+          console.log('Missing required fields for reply');
+          return {
+            statusCode: 400,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'articleId, commentId, and text are required for reply action' })
+          };
+        }
+
+        const comments = commentsStore[articleId] || [];
+        const comment = comments.find(c => c.id === commentId);
+
+        if (!comment) {
+          console.log('Comment not found for reply:', commentId);
+          return {
+            statusCode: 404,
+            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            body: JSON.stringify({ error: 'Comment not found' })
+          };
+        }
+
+        const newReply = {
+          id: generateId(),
+          author: {
+            name: tokenData.email.split('@')[0],
+            email: tokenData.email
+          },
+          text,
+          timestamp: new Date().toISOString(),
+          likes: []
+        };
+
+        comment.replies.push(newReply);
+        commentsStore[articleId] = comments;
+
+        console.log('Reply created:', newReply.id);
+
+        return {
+          statusCode: 201,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          body: JSON.stringify({ success: true, reply: newReply, comments })
+        };
+      }
+
+      // COMMENT ACTION (default)
+      console.log('Processing COMMENT action');
       const { articleId, text, type } = requestBody;
 
       if (!articleId || !text) {
+        console.log('Missing articleId or text for comment');
         return {
           statusCode: 400,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'articleId and text are required' })
+          body: JSON.stringify({ error: 'articleId and text are required for comment action' })
         };
       }
 
@@ -143,7 +289,7 @@ exports.handler = async (event, context) => {
       comments.unshift(newComment);
       commentsStore[articleId] = comments;
 
-      console.log('Comment created:', newComment.id, 'by', tokenData.email);
+      console.log('Comment created:', newComment.id, 'by', tokenData.email, 'type:', commentType);
 
       return {
         statusCode: 201,
@@ -152,112 +298,12 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // POST /like - Like/unlike a comment
-    if (method === 'POST' && path.includes('/like')) {
-      const { articleId, commentId, replyId } = requestBody;
-
-      if (!articleId || !commentId) {
-        return {
-          statusCode: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'articleId and commentId are required' })
-        };
-      }
-
-      const comments = commentsStore[articleId] || [];
-      const comment = comments.find(c => c.id === commentId);
-
-      if (!comment) {
-        return {
-          statusCode: 404,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'Comment not found' })
-        };
-      }
-
-      // Handle reply like
-      if (replyId) {
-        const reply = comment.replies.find(r => r.id === replyId);
-        if (!reply) {
-          return {
-            statusCode: 404,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'Reply not found' })
-          };
-        }
-
-        const likeIndex = reply.likes.indexOf(tokenData.email);
-        if (likeIndex > -1) {
-          reply.likes.splice(likeIndex, 1);
-        } else {
-          reply.likes.push(tokenData.email);
-        }
-      } else {
-        // Handle comment like
-        const likeIndex = comment.likes.indexOf(tokenData.email);
-        if (likeIndex > -1) {
-          comment.likes.splice(likeIndex, 1);
-        } else {
-          comment.likes.push(tokenData.email);
-        }
-      }
-
-      commentsStore[articleId] = comments;
-
-      return {
-        statusCode: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ success: true, comments })
-      };
-    }
-
-    // POST /reply - Reply to a comment
-    if (method === 'POST' && path.includes('/reply')) {
-      const { articleId, commentId, text } = requestBody;
-
-      if (!articleId || !commentId || !text) {
-        return {
-          statusCode: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'articleId, commentId, and text are required' })
-        };
-      }
-
-      const comments = commentsStore[articleId] || [];
-      const comment = comments.find(c => c.id === commentId);
-
-      if (!comment) {
-        return {
-          statusCode: 404,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'Comment not found' })
-        };
-      }
-
-      const newReply = {
-        id: generateId(),
-        author: {
-          name: tokenData.email.split('@')[0],
-          email: tokenData.email
-        },
-        text,
-        timestamp: new Date().toISOString(),
-        likes: []
-      };
-
-      comment.replies.push(newReply);
-      commentsStore[articleId] = comments;
-
-      return {
-        statusCode: 201,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ success: true, reply: newReply, comments })
-      };
-    }
-
     // DELETE - Delete comment (admin only)
     if (method === 'DELETE') {
+      console.log('Processing DELETE action');
+
       if (!isAdmin) {
+        console.log('Non-admin tried to delete');
         return {
           statusCode: 403,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -268,6 +314,7 @@ exports.handler = async (event, context) => {
       const { articleId, commentId, replyId } = requestBody;
 
       if (!articleId || !commentId) {
+        console.log('Missing articleId or commentId for delete');
         return {
           statusCode: 400,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -279,12 +326,14 @@ exports.handler = async (event, context) => {
 
       if (replyId) {
         // Delete reply
+        console.log('Deleting reply:', replyId);
         const comment = comments.find(c => c.id === commentId);
         if (comment) {
           comment.replies = comment.replies.filter(r => r.id !== replyId);
         }
       } else {
         // Delete comment
+        console.log('Deleting comment:', commentId);
         comments = comments.filter(c => c.id !== commentId);
       }
 
@@ -304,11 +353,12 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('Error in article-comments function:', error);
+    console.error('ERROR in article-comments function:', error);
+    console.error('Stack trace:', error.stack);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: error.message, stack: error.stack })
     };
   }
 };

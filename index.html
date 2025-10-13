@@ -827,9 +827,18 @@
             const handleSubmitComment = async (e) => {
                 e.preventDefault();
 
-                if (!commentText.trim() || isSubmitting) return;
+                console.log('=== Submitting Comment ===');
+                console.log('Comment type:', commentType);
+                console.log('Comment text:', commentText);
+                console.log('Article ID:', article.id);
+
+                if (!commentText.trim() || isSubmitting) {
+                    console.log('Comment text empty or already submitting');
+                    return;
+                }
 
                 if (!user) {
+                    console.log('User not logged in');
                     alert('Please log in to comment');
                     return;
                 }
@@ -840,11 +849,24 @@
                     const currentUser = netlifyIdentity.currentUser();
                     const token = currentUser?.token?.access_token;
 
+                    console.log('User email:', currentUser?.email);
+                    console.log('Token present:', !!token);
+
                     if (!token) {
+                        console.error('No token available');
                         alert('Authentication error. Please try logging out and back in.');
                         setIsSubmitting(false);
                         return;
                     }
+
+                    const requestBody = {
+                        articleId: article.id,
+                        text: commentText,
+                        type: commentType
+                    };
+
+                    console.log('Making comment request to:', '/.netlify/functions/article-comments');
+                    console.log('Request body:', requestBody);
 
                     const response = await fetch('/.netlify/functions/article-comments', {
                         method: 'POST',
@@ -852,25 +874,28 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                        body: JSON.stringify({
-                            articleId: article.id,
-                            text: commentText,
-                            type: commentType
-                        })
+                        body: JSON.stringify(requestBody)
                     });
+
+                    console.log('Comment response status:', response.status);
+                    console.log('Comment response ok:', response.ok);
 
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Comment posted successfully:', data);
                         setComments(data.comments);
                         setCommentText('');
                         showSuccess('Comment posted!');
                     } else {
                         const error = await response.json();
-                        alert('Error: ' + (error.error || 'Unknown error'));
+                        console.error('Comment error response:', error);
+                        alert('Error posting comment: ' + (error.error || 'Unknown error'));
                     }
                 } catch (error) {
+                    console.error('=== Comment Error ===');
                     console.error('Error posting comment:', error);
-                    alert('Network error. Please try again.');
+                    console.error('Error stack:', error.stack);
+                    alert('Network error. Please check your connection and try again.');
                 }
 
                 setIsSubmitting(false);
@@ -878,9 +903,17 @@
 
             // Submit reply
             const handleSubmitReply = async (commentId) => {
-                if (!replyText.trim() || isSubmitting) return;
+                console.log('=== Submitting Reply ===');
+                console.log('Comment ID:', commentId);
+                console.log('Reply text:', replyText);
+
+                if (!replyText.trim() || isSubmitting) {
+                    console.log('Reply text empty or already submitting');
+                    return;
+                }
 
                 if (!user) {
+                    console.log('User not logged in');
                     alert('Please log in to reply');
                     return;
                 }
@@ -891,11 +924,24 @@
                     const currentUser = netlifyIdentity.currentUser();
                     const token = currentUser?.token?.access_token;
 
+                    console.log('User email:', currentUser?.email);
+                    console.log('Token present:', !!token);
+
                     if (!token) {
-                        alert('Authentication error.');
+                        console.error('No token available');
+                        alert('Authentication error. Please try logging out and back in.');
                         setIsSubmitting(false);
                         return;
                     }
+
+                    const requestBody = {
+                        articleId: article.id,
+                        commentId: commentId,
+                        text: replyText
+                    };
+
+                    console.log('Making reply request to:', '/.netlify/functions/comment-reply');
+                    console.log('Request body:', requestBody);
 
                     const response = await fetch('/.netlify/functions/comment-reply', {
                         method: 'POST',
@@ -903,26 +949,29 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                        body: JSON.stringify({
-                            articleId: article.id,
-                            commentId: commentId,
-                            text: replyText
-                        })
+                        body: JSON.stringify(requestBody)
                     });
+
+                    console.log('Reply response status:', response.status);
+                    console.log('Reply response ok:', response.ok);
 
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Reply posted successfully:', data);
                         setComments(data.comments);
                         setReplyText('');
                         setReplyingTo(null);
                         showSuccess('Reply posted!');
                     } else {
                         const error = await response.json();
-                        alert('Error: ' + (error.error || 'Unknown error'));
+                        console.error('Reply error response:', error);
+                        alert('Error posting reply: ' + (error.error || 'Unknown error'));
                     }
                 } catch (error) {
+                    console.error('=== Reply Error ===');
                     console.error('Error posting reply:', error);
-                    alert('Network error. Please try again.');
+                    console.error('Error stack:', error.stack);
+                    alert('Network error. Please check your connection and try again.');
                 }
 
                 setIsSubmitting(false);
@@ -930,7 +979,13 @@
 
             // Like/unlike comment or reply
             const handleLike = async (commentId, replyId = null) => {
+                console.log('=== Liking Comment/Reply ===');
+                console.log('Comment ID:', commentId);
+                console.log('Reply ID:', replyId);
+                console.log('Article ID:', article.id);
+
                 if (!user) {
+                    console.log('User not logged in for like');
                     alert('Please log in to like comments');
                     return;
                 }
@@ -939,10 +994,23 @@
                     const currentUser = netlifyIdentity.currentUser();
                     const token = currentUser?.token?.access_token;
 
+                    console.log('User email:', currentUser?.email);
+                    console.log('Token present:', !!token);
+
                     if (!token) {
-                        alert('Authentication error.');
+                        console.error('No token available for like');
+                        alert('Authentication error. Please try logging out and back in.');
                         return;
                     }
+
+                    const requestBody = {
+                        articleId: article.id,
+                        commentId: commentId,
+                        replyId: replyId
+                    };
+
+                    console.log('Making like request to:', '/.netlify/functions/comment-like');
+                    console.log('Request body:', requestBody);
 
                     const response = await fetch('/.netlify/functions/comment-like', {
                         method: 'POST',
@@ -950,22 +1018,26 @@
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                        body: JSON.stringify({
-                            articleId: article.id,
-                            commentId: commentId,
-                            replyId: replyId
-                        })
+                        body: JSON.stringify(requestBody)
                     });
+
+                    console.log('Like response status:', response.status);
+                    console.log('Like response ok:', response.ok);
 
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Like successful:', data);
                         setComments(data.comments);
                     } else {
                         const error = await response.json();
-                        alert('Error: ' + (error.error || 'Unknown error'));
+                        console.error('Like error response:', error);
+                        alert('Error liking comment: ' + (error.error || 'Unknown error'));
                     }
                 } catch (error) {
+                    console.error('=== Like Error ===');
                     console.error('Error liking:', error);
+                    console.error('Error stack:', error.stack);
+                    alert('Network error. Please try again.');
                 }
             };
 
