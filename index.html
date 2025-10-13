@@ -160,6 +160,9 @@
             const [showAccountModal, setShowAccountModal] = useState(false);
             const [savedArticles, setSavedArticles] = useState([]);
             const [showUserMenu, setShowUserMenu] = useState(false);
+            const [showLoginModal, setShowLoginModal] = useState(false);
+            const [showTOSModal, setShowTOSModal] = useState(false);
+            const [tosAccepted, setTosAccepted] = useState(false);
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -203,8 +206,21 @@
                 if (user) {
                     setShowAccountModal(true);
                 } else {
-                    netlifyIdentity.open();
+                    setShowLoginModal(true);
                 }
+            };
+
+            const handleLogin = () => {
+                if (!tosAccepted) {
+                    alert('Please accept the Terms of Service to continue');
+                    return;
+                }
+                setShowLoginModal(false);
+                netlifyIdentity.open();
+            };
+
+            const openTOS = () => {
+                setShowTOSModal(true);
             };
 
             const filteredArticles = selectedCategory === "All" 
@@ -229,7 +245,7 @@
                             <div className="flex items-center justify-between h-16">
                                 <div className="flex items-center space-x-12">
                                     <h1 className={`text-3xl font-serif font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                        The Chronicle
+                                        OnPoint Articles
                                     </h1>
                                     <nav className="hidden md:flex space-x-8">
                                         {["World", "Legal", "Business", "Technology", "Opinion", "More"].map(item => (
@@ -559,10 +575,319 @@
                                 ))}
                             </div>
                             <div className={`pt-8 border-t ${darkMode ? 'border-gray-900 text-gray-500' : 'border-gray-200 text-gray-600'} text-xs`}>
-                                <p>&copy; 2025 The Chronicle. All rights reserved.</p>
+                                <p>&copy; 2025 OnPoint Articles. All rights reserved.</p>
                             </div>
                         </div>
                     </footer>
+
+                    {/* Login Modal */}
+                    {showLoginModal && (
+                        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75 flex items-center justify-center p-4">
+                            <div className={`relative w-full max-w-md transform transition-all ${darkMode ? 'bg-zinc-950 border-2 border-gray-800' : 'bg-white border-2 border-gray-300'}`}>
+                                {/* Header */}
+                                <div className={`px-6 py-5 border-b ${darkMode ? 'border-gray-800' : 'border-gray-300'}`}>
+                                    <div className="flex items-center justify-between">
+                                        <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                            Sign In to OnPoint Articles
+                                        </h2>
+                                        <button
+                                            onClick={() => setShowLoginModal(false)}
+                                            className={`transition-colors ${darkMode ? 'text-gray-500 hover:text-white' : 'text-gray-400 hover:text-gray-900'}`}
+                                        >
+                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Body */}
+                                <div className="px-6 py-6">
+                                    <div className={`mb-6 p-4 border ${darkMode ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'}`}>
+                                        <h3 className={`font-bold mb-2 ${darkMode ? 'text-blue-300' : 'text-blue-900'}`}>
+                                            Join Our Community
+                                        </h3>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                                            Sign in to comment on articles, engage with other readers, and save articles for later reading.
+                                        </p>
+                                    </div>
+
+                                    {/* Terms of Service Acceptance */}
+                                    <div className="space-y-4">
+                                        <label className="flex items-start space-x-3 cursor-pointer group">
+                                            <input
+                                                type="checkbox"
+                                                checked={tosAccepted}
+                                                onChange={(e) => setTosAccepted(e.target.checked)}
+                                                className="mt-1 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                            />
+                                            <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                I agree to the{' '}
+                                                <button
+                                                    onClick={(e) => { e.preventDefault(); openTOS(); }}
+                                                    className="font-bold text-blue-600 hover:text-blue-700 underline"
+                                                >
+                                                    Terms of Service
+                                                </button>
+                                                {' '}and understand the community guidelines for commenting on OnPoint Articles.
+                                            </span>
+                                        </label>
+
+                                        <div className={`p-4 text-xs space-y-2 border ${darkMode ? 'bg-zinc-900 border-gray-800 text-gray-400' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
+                                            <p className="font-bold">By signing in, you agree to:</p>
+                                            <ul className="list-disc list-inside space-y-1 ml-2">
+                                                <li>Respect other users and maintain civil discourse</li>
+                                                <li>Refrain from hate speech, harassment, or threats</li>
+                                                <li>Avoid spam, misinformation, and off-topic content</li>
+                                                <li>Follow all community guidelines in the Terms of Service</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className={`px-6 py-4 border-t ${darkMode ? 'border-gray-800 bg-zinc-950' : 'border-gray-300 bg-gray-50'} flex items-center justify-end space-x-3`}>
+                                    <button
+                                        onClick={() => setShowLoginModal(false)}
+                                        className={`px-6 py-2 text-sm font-medium transition-colors ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={handleLogin}
+                                        disabled={!tosAccepted}
+                                        className={`px-6 py-2 text-sm font-semibold transition-all ${!tosAccepted ? 'opacity-50 cursor-not-allowed' : ''} ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                    >
+                                        Continue to Sign In
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Terms of Service Modal */}
+                    {showTOSModal && (
+                        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75 flex items-center justify-center p-4">
+                            <div className={`relative w-full max-w-4xl transform transition-all ${darkMode ? 'bg-zinc-950 border-2 border-gray-800' : 'bg-white border-2 border-gray-300'}`}>
+                                {/* Header */}
+                                <div className={`px-6 py-5 border-b ${darkMode ? 'border-gray-800' : 'border-gray-300'}`}>
+                                    <div className="flex items-center justify-between">
+                                        <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                            Terms of Service & Community Guidelines
+                                        </h2>
+                                        <button
+                                            onClick={() => setShowTOSModal(false)}
+                                            className={`transition-colors ${darkMode ? 'text-gray-500 hover:text-white' : 'text-gray-400 hover:text-gray-900'}`}
+                                        >
+                                            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Body - Scrollable */}
+                                <div className="px-6 py-6 max-h-[70vh] overflow-y-auto">
+                                    <div className={`space-y-6 text-sm ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                        <div>
+                                            <p className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'} mb-4`}>
+                                                <strong>Effective Date:</strong> October 13, 2025 | <strong>Last Updated:</strong> October 13, 2025
+                                            </p>
+                                        </div>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                1. Acceptance of Terms
+                                            </h3>
+                                            <p className="mb-2">
+                                                By accessing or using OnPoint Articles' commenting system, you agree to be bound by these Terms of Service ("Terms"). If you do not agree to these Terms, you may not access or use the commenting features of our platform.
+                                            </p>
+                                            <p>
+                                                These Terms apply to all users, including registered users, commenters, and those who interact with comments through likes or replies.
+                                            </p>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                2. Community Guidelines & Prohibited Conduct
+                                            </h3>
+                                            <p className="mb-3">
+                                                OnPoint Articles is committed to fostering a respectful, informative, and constructive community. Users must adhere to the following guidelines:
+                                            </p>
+
+                                            <div className={`pl-4 space-y-3 border-l-2 ${darkMode ? 'border-blue-900' : 'border-blue-300'}`}>
+                                                <div>
+                                                    <h4 className="font-bold mb-1">2.1 Respectful Discourse</h4>
+                                                    <ul className="list-disc list-inside space-y-1 ml-2">
+                                                        <li>Engage in civil, respectful dialogue</li>
+                                                        <li>Disagree with ideas, not people</li>
+                                                        <li>Avoid personal attacks, insults, or ad hominem arguments</li>
+                                                        <li>Do not harass, threaten, or intimidate other users</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-bold mb-1">2.2 Prohibited Content</h4>
+                                                    <p className="mb-1">Users may not post comments containing:</p>
+                                                    <ul className="list-disc list-inside space-y-1 ml-2">
+                                                        <li><strong>Hate speech:</strong> Content that attacks or demeans individuals or groups based on race, ethnicity, national origin, religion, gender, sexual orientation, disability, or other protected characteristics</li>
+                                                        <li><strong>Harassment or bullying:</strong> Targeted abuse, stalking, doxxing, or coordinated harassment</li>
+                                                        <li><strong>Threats of violence:</strong> Direct or indirect threats of physical harm to any person or group</li>
+                                                        <li><strong>Illegal content:</strong> Content that promotes, facilitates, or glorifies illegal activities</li>
+                                                        <li><strong>Graphic violence or gore:</strong> Excessively violent or disturbing imagery or descriptions</li>
+                                                        <li><strong>Sexual content:</strong> Sexually explicit material, solicitation, or content sexualizing minors</li>
+                                                        <li><strong>Misinformation:</strong> Deliberate false information presented as fact, particularly related to public health, elections, or safety</li>
+                                                        <li><strong>Spam:</strong> Repetitive comments, promotional content, or off-topic spam</li>
+                                                        <li><strong>Impersonation:</strong> Pretending to be another person, organization, or entity</li>
+                                                        <li><strong>Copyrighted material:</strong> Unauthorized use of copyrighted content without permission</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-bold mb-1">2.3 Stay On Topic</h4>
+                                                    <ul className="list-disc list-inside space-y-1 ml-2">
+                                                        <li>Keep comments relevant to the article and discussion</li>
+                                                        <li>Avoid derailing conversations with off-topic tangents</li>
+                                                        <li>Do not post promotional or commercial content unless relevant to the discussion</li>
+                                                    </ul>
+                                                </div>
+
+                                                <div>
+                                                    <h4 className="font-bold mb-1">2.4 Authentic Engagement</h4>
+                                                    <ul className="list-disc list-inside space-y-1 ml-2">
+                                                        <li>Do not manipulate discussions through multiple accounts</li>
+                                                        <li>Do not artificially inflate likes or engagement</li>
+                                                        <li>Do not coordinate brigading or mass reporting</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                3. Account Responsibilities
+                                            </h3>
+                                            <ul className="list-disc list-inside space-y-1 ml-2">
+                                                <li>You are responsible for all activity on your account</li>
+                                                <li>Keep your login credentials secure and confidential</li>
+                                                <li>Notify us immediately of any unauthorized access</li>
+                                                <li>You must be at least 13 years old to create an account</li>
+                                                <li>You may not share or transfer your account</li>
+                                            </ul>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                4. Content Ownership & Rights
+                                            </h3>
+                                            <p className="mb-2">
+                                                <strong>Your Content:</strong> You retain ownership of the comments you post. However, by posting, you grant OnPoint Articles a worldwide, non-exclusive, royalty-free license to use, display, reproduce, and distribute your comments on our platform.
+                                            </p>
+                                            <p className="mb-2">
+                                                <strong>Our Content:</strong> All articles, reporter comments, and editorial content remain the property of OnPoint Articles and are protected by copyright law.
+                                            </p>
+                                            <p>
+                                                <strong>Removal Rights:</strong> OnPoint Articles reserves the right to remove, edit, or refuse to publish any comment at our sole discretion.
+                                            </p>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                5. Moderation & Enforcement
+                                            </h3>
+                                            <p className="mb-2">OnPoint Articles employs a combination of automated and manual moderation to enforce these Terms. Violations may result in:</p>
+                                            <ul className="list-disc list-inside space-y-1 ml-2 mb-3">
+                                                <li><strong>Comment removal:</strong> Individual comments that violate Terms will be deleted</li>
+                                                <li><strong>Temporary suspension:</strong> Repeated minor violations or first-time serious violations</li>
+                                                <li><strong>Permanent ban:</strong> Severe violations or repeated offenses after warnings</li>
+                                                <li><strong>Legal action:</strong> In cases involving threats, harassment, or illegal activity</li>
+                                            </ul>
+                                            <p>
+                                                We strive to be transparent in our moderation but reserve the right to take action without prior warning for severe violations.
+                                            </p>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                6. Privacy & Data Collection
+                                            </h3>
+                                            <p className="mb-2">
+                                                We collect and process personal information in accordance with our Privacy Policy. By using our commenting system, you consent to:
+                                            </p>
+                                            <ul className="list-disc list-inside space-y-1 ml-2">
+                                                <li>Collection of your email address for authentication</li>
+                                                <li>Public display of your chosen username</li>
+                                                <li>Storage of your comments and engagement history</li>
+                                                <li>Use of cookies and tracking technologies</li>
+                                            </ul>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                7. Disclaimer of Warranties
+                                            </h3>
+                                            <p className="mb-2">
+                                                OnPoint Articles provides the commenting system "as is" without warranties of any kind. We do not guarantee:
+                                            </p>
+                                            <ul className="list-disc list-inside space-y-1 ml-2">
+                                                <li>Uninterrupted or error-free service</li>
+                                                <li>Accuracy of user-generated content</li>
+                                                <li>Protection against offensive or harmful content</li>
+                                                <li>Permanent storage of comments</li>
+                                            </ul>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                8. Limitation of Liability
+                                            </h3>
+                                            <p>
+                                                OnPoint Articles shall not be liable for any indirect, incidental, special, or consequential damages arising from your use of the commenting system, including but not limited to damages from user-generated content, service interruptions, or data loss.
+                                            </p>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                9. Changes to Terms
+                                            </h3>
+                                            <p>
+                                                We reserve the right to modify these Terms at any time. Material changes will be communicated through the platform. Continued use of the commenting system after changes constitutes acceptance of the modified Terms.
+                                            </p>
+                                        </section>
+
+                                        <section>
+                                            <h3 className={`text-lg font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                10. Contact & Reporting
+                                            </h3>
+                                            <p className="mb-2">
+                                                For questions about these Terms or to report violations, contact us at:
+                                            </p>
+                                            <div className={`p-3 border ${darkMode ? 'bg-zinc-900 border-gray-800' : 'bg-gray-50 border-gray-200'}`}>
+                                                <p><strong>Email:</strong> support@onpointarticles.com</p>
+                                                <p><strong>Report Abuse:</strong> abuse@onpointarticles.com</p>
+                                            </div>
+                                        </section>
+
+                                        <section className={`pt-6 border-t ${darkMode ? 'border-gray-800' : 'border-gray-300'}`}>
+                                            <p className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                                By clicking "I agree" and using OnPoint Articles' commenting features, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                                            </p>
+                                        </section>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className={`px-6 py-4 border-t ${darkMode ? 'border-gray-800 bg-zinc-950' : 'border-gray-300 bg-gray-50'} flex items-center justify-center`}>
+                                    <button
+                                        onClick={() => setShowTOSModal(false)}
+                                        className={`px-6 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                    >
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1141,7 +1466,7 @@
                                         <span className="font-medium text-sm">Back</span>
                                     </button>
                                     <h1 className={`text-2xl font-serif font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                        The Chronicle
+                                        OnPoint Articles
                                     </h1>
                                 </div>
                                 
