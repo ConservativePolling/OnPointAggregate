@@ -163,6 +163,9 @@
             const [showLoginModal, setShowLoginModal] = useState(false);
             const [showTOSModal, setShowTOSModal] = useState(false);
             const [tosAccepted, setTosAccepted] = useState(false);
+            const [showUsernameModal, setShowUsernameModal] = useState(false);
+            const [username, setUsername] = useState('');
+            const [tempUsername, setTempUsername] = useState('');
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -179,9 +182,35 @@
                     // Load user's saved articles
                     if (currentUser) {
                         loadSavedArticles();
+                        checkUsername(currentUser);
                     }
+
+                    // Listen for login events
+                    netlifyIdentity.on('login', (loggedInUser) => {
+                        setUser(loggedInUser);
+                        checkUsername(loggedInUser);
+                    });
+
+                    netlifyIdentity.on('logout', () => {
+                        setUser(null);
+                        setUsername('');
+                        localStorage.removeItem('username');
+                    });
                 }
             }, []);
+
+            const checkUsername = (currentUser) => {
+                if (!currentUser) return;
+
+                // Try to load username from localStorage
+                const storedUsername = localStorage.getItem(`username_${currentUser.email}`);
+                if (storedUsername) {
+                    setUsername(storedUsername);
+                } else {
+                    // No username set, show modal
+                    setShowUsernameModal(true);
+                }
+            };
 
             const loadSavedArticles = async () => {
                 // Load from localStorage for now, can be backend later
@@ -223,6 +252,35 @@
                 setShowTOSModal(true);
             };
 
+            const saveUsername = () => {
+                if (!tempUsername.trim()) {
+                    alert('Please enter a username');
+                    return;
+                }
+
+                if (tempUsername.length < 3) {
+                    alert('Username must be at least 3 characters');
+                    return;
+                }
+
+                if (tempUsername.length > 20) {
+                    alert('Username must be 20 characters or less');
+                    return;
+                }
+
+                // Check for invalid characters
+                if (!/^[a-zA-Z0-9_-]+$/.test(tempUsername)) {
+                    alert('Username can only contain letters, numbers, underscores, and hyphens');
+                    return;
+                }
+
+                // Save to localStorage
+                localStorage.setItem(`username_${user.email}`, tempUsername);
+                setUsername(tempUsername);
+                setShowUsernameModal(false);
+                setTempUsername('');
+            };
+
             const filteredArticles = selectedCategory === "All" 
                 ? articles 
                 : articles.filter(article => article.category === selectedCategory);
@@ -230,7 +288,7 @@
             const featuredArticles = articles.filter(article => article.featured);
 
             if (selectedArticle) {
-                return <ArticleView article={selectedArticle} darkMode={darkMode} setDarkMode={setDarkMode} onBack={() => setSelectedArticle(null)} user={user} savedArticles={savedArticles} toggleSaveArticle={toggleSaveArticle} />;
+                return <ArticleView article={selectedArticle} darkMode={darkMode} setDarkMode={setDarkMode} onBack={() => setSelectedArticle(null)} user={user} username={username} savedArticles={savedArticles} toggleSaveArticle={toggleSaveArticle} />;
             }
 
             if (showAccountModal) {
@@ -888,6 +946,74 @@
                             </div>
                         </div>
                     )}
+
+                    {/* Username Selection Modal */}
+                    {showUsernameModal && user && (
+                        <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-75 flex items-center justify-center p-4">
+                            <div className={`relative w-full max-w-md transform transition-all ${darkMode ? 'bg-zinc-950 border-2 border-gray-800' : 'bg-white border-2 border-gray-300'}`}>
+                                {/* Header */}
+                                <div className={`px-6 py-5 border-b ${darkMode ? 'border-gray-800' : 'border-gray-300'}`}>
+                                    <h2 className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        Choose Your Username
+                                    </h2>
+                                </div>
+
+                                {/* Body */}
+                                <div className="px-6 py-6">
+                                    <div className={`mb-6 p-4 border ${darkMode ? 'bg-blue-900/20 border-blue-800' : 'bg-blue-50 border-blue-200'}`}>
+                                        <h3 className={`font-bold mb-2 ${darkMode ? 'text-blue-300' : 'text-blue-900'}`}>
+                                            Welcome to OnPoint Articles!
+                                        </h3>
+                                        <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-700'}`}>
+                                            Choose a username that will be displayed when you comment. This keeps your email private.
+                                        </p>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div>
+                                            <label className={`block text-sm font-bold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Username
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={tempUsername}
+                                                onChange={(e) => setTempUsername(e.target.value)}
+                                                placeholder="Enter username..."
+                                                maxLength={20}
+                                                className={`w-full px-4 py-3 text-base border focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-black border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                                onKeyPress={(e) => { if (e.key === 'Enter') saveUsername(); }}
+                                            />
+                                        </div>
+
+                                        <div className={`p-3 text-xs space-y-1 border ${darkMode ? 'bg-zinc-900 border-gray-800 text-gray-400' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
+                                            <p className="font-bold">Username requirements:</p>
+                                            <ul className="list-disc list-inside space-y-1 ml-2">
+                                                <li>3-20 characters</li>
+                                                <li>Letters, numbers, underscores (_), and hyphens (-) only</li>
+                                                <li>Will be publicly visible on your comments</li>
+                                            </ul>
+                                        </div>
+
+                                        <div className={`p-3 text-xs border ${darkMode ? 'bg-yellow-900/20 border-yellow-800 text-yellow-300' : 'bg-yellow-50 border-yellow-200 text-yellow-800'}`}>
+                                            <p className="font-bold mb-1">Privacy Note:</p>
+                                            <p>Your email ({user.email}) will never be shown publicly. Only your username will appear on comments.</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Footer */}
+                                <div className={`px-6 py-4 border-t ${darkMode ? 'border-gray-800 bg-zinc-950' : 'border-gray-300 bg-gray-50'} flex items-center justify-end`}>
+                                    <button
+                                        onClick={saveUsername}
+                                        disabled={!tempUsername.trim()}
+                                        className={`px-6 py-2 text-sm font-semibold transition-all ${!tempUsername.trim() ? 'opacity-50 cursor-not-allowed' : ''} ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                    >
+                                        Save Username
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             );
         }
@@ -1094,7 +1220,7 @@
             );
         }
 
-        function ArticleView({ article, darkMode, setDarkMode, onBack, user, savedArticles, toggleSaveArticle }) {
+        function ArticleView({ article, darkMode, setDarkMode, onBack, user, username, savedArticles, toggleSaveArticle }) {
             const [currentTime, setCurrentTime] = useState(new Date());
             const [comments, setComments] = useState([]);
             const [commentText, setCommentText] = useState('');
@@ -1192,7 +1318,8 @@
                     const requestBody = {
                         articleId: article.id,
                         text: commentText,
-                        type: commentType
+                        type: commentType,
+                        username: username
                     };
 
                     console.log('Making comment request to:', '/.netlify/functions/article-comments');
@@ -1267,7 +1394,8 @@
                     const requestBody = {
                         articleId: article.id,
                         commentId: commentId,
-                        text: replyText
+                        text: replyText,
+                        username: username
                     };
 
                     console.log('Making reply request to:', '/.netlify/functions/article-comments');

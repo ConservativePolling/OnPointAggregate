@@ -295,7 +295,7 @@ exports.handler = async (event, context) => {
       // REPLY ACTION
       if (action === 'reply') {
         console.log('Processing REPLY action');
-        const { articleId, commentId, text } = requestBody;
+        const { articleId, commentId, text, username } = requestBody;
 
         if (!articleId || !commentId || !text) {
           console.log('Missing required fields for reply');
@@ -335,10 +335,13 @@ exports.handler = async (event, context) => {
 
         console.log('✅ Comment FOUND for reply:', comment.id);
 
+        // Use provided username or fall back to email prefix
+        const displayName = username || tokenData.email.split('@')[0];
+
         const newReply = {
           id: generateId(),
           author: {
-            name: tokenData.email.split('@')[0],
+            name: displayName,
             email: tokenData.email
           },
           text,
@@ -361,7 +364,7 @@ exports.handler = async (event, context) => {
 
       // COMMENT ACTION (default)
       console.log('Processing COMMENT action');
-      const { articleId, text, type } = requestBody;
+      const { articleId, text, type, username } = requestBody;
 
       if (!articleId || !text) {
         console.log('Missing articleId or text for comment');
@@ -375,6 +378,15 @@ exports.handler = async (event, context) => {
       // Determine comment type
       const commentType = (type === 'reporter' && isAdmin) ? 'reporter' : 'user';
 
+      // Determine display name
+      let displayName;
+      if (commentType === 'reporter') {
+        displayName = 'OnPointArticles Team';
+      } else {
+        // Use provided username or fall back to email prefix
+        displayName = username || tokenData.email.split('@')[0];
+      }
+
       const articleKey = String(articleId);
       const comments = commentsStore[articleKey] || [];
 
@@ -383,7 +395,7 @@ exports.handler = async (event, context) => {
         articleId: articleKey,
         type: commentType,
         author: {
-          name: commentType === 'reporter' ? 'OnPointArticles Team' : tokenData.email.split('@')[0],
+          name: displayName,
           email: tokenData.email
         },
         text,
