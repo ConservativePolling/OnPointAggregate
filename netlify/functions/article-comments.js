@@ -383,7 +383,7 @@ exports.handler = async (event, context) => {
         articleId: articleKey,
         type: commentType,
         author: {
-          name: tokenData.email.split('@')[0],
+          name: commentType === 'reporter' ? 'OnPointArticles Team' : tokenData.email.split('@')[0],
           email: tokenData.email
         },
         text,

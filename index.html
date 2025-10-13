@@ -945,16 +945,19 @@
                         text: replyText
                     };
 
-                    console.log('Making reply request to:', '/.netlify/functions/comment-reply');
-                    console.log('Request body:', requestBody);
+                    console.log('Making reply request to:', '/.netlify/functions/article-comments');
+                    console.log('Request body with action:', { ...requestBody, action: 'reply' });
 
-                    const response = await fetch('/.netlify/functions/comment-reply', {
+                    const response = await fetch('/.netlify/functions/article-comments', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                        body: JSON.stringify(requestBody)
+                        body: JSON.stringify({
+                            ...requestBody,
+                            action: 'reply'
+                        })
                     });
 
                     console.log('Reply response status:', response.status);
@@ -1018,16 +1021,19 @@
                         replyId: replyId
                     };
 
-                    console.log('Making like request to:', '/.netlify/functions/comment-like');
-                    console.log('Request body:', requestBody);
+                    console.log('Making like request to:', '/.netlify/functions/article-comments');
+                    console.log('Request body with action:', { ...requestBody, action: 'like' });
 
-                    const response = await fetch('/.netlify/functions/comment-like', {
+                    const response = await fetch('/.netlify/functions/article-comments', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                        body: JSON.stringify(requestBody)
+                        body: JSON.stringify({
+                            ...requestBody,
+                            action: 'like'
+                        })
                     });
 
                     console.log('Like response status:', response.status);
