@@ -825,7 +825,23 @@
                 try {
                     // Get fresh token from Netlify Identity
                     const currentUser = netlifyIdentity.currentUser();
+
+                    if (!currentUser) {
+                        alert('Please log in to post comments');
+                        setIsSubmitting(false);
+                        return;
+                    }
+
                     const token = currentUser?.token?.access_token;
+
+                    if (!token) {
+                        console.error('No access token found');
+                        alert('Authentication error. Please try logging out and back in.');
+                        setIsSubmitting(false);
+                        return;
+                    }
+
+                    console.log('Posting comment as:', currentUser.email);
 
                     const response = await fetch('/.netlify/functions/article-comments', {
                         method: 'POST',
@@ -839,17 +855,27 @@
                         })
                     });
 
+                    console.log('Response status:', response.status);
+
                     if (response.ok) {
                         const data = await response.json();
+                        console.log('Comment posted successfully:', data);
                         setComments(data.comments);
                         setCommentText('');
+                        // Show success feedback
+                        const successMsg = document.createElement('div');
+                        successMsg.textContent = '✓ Comment posted!';
+                        successMsg.className = 'fixed top-20 right-4 bg-green-600 text-white px-4 py-2 rounded shadow-lg z-50';
+                        document.body.appendChild(successMsg);
+                        setTimeout(() => successMsg.remove(), 3000);
                     } else {
                         const error = await response.json();
-                        alert('Error posting comment: ' + error.error);
+                        console.error('Error response:', error);
+                        alert('Error: ' + (error.error || 'Unknown error'));
                     }
                 } catch (error) {
                     console.error('Error posting comment:', error);
-                    alert('Error posting comment. Please try again.');
+                    alert('Network error. Please check your connection and try again.');
                 }
 
                 setIsSubmitting(false);
