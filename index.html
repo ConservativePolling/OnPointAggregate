@@ -245,27 +245,6 @@
                 }
             };
 
-            const handleAuthSubmit = async (e) => {
-                e.preventDefault();
-                setAuthError('');
-                setAuthLoading(true);
-
-                try {
-                    if (authMode === 'signup') {
-                        // Sign up new user
-                        await netlifyIdentity.open('signup');
-                        netlifyIdentity.close();
-                    } else {
-                        // Sign in existing user
-                        await netlifyIdentity.open('login');
-                        netlifyIdentity.close();
-                    }
-                } catch (error) {
-                    setAuthError(error.message || 'Authentication failed. Please try again.');
-                    setAuthLoading(false);
-                }
-            };
-
             const openAuthModal = (mode = 'signin') => {
                 setAuthMode(mode);
                 setAuthEmail('');
@@ -276,9 +255,26 @@
             };
 
             const handleLogin = () => {
-                // Open Netlify Identity widget directly
+                console.log('🔐 handleLogin called, authMode:', authMode);
+
+                // Close custom modal first
+                setShowLoginModal(false);
+
+                // Open Netlify Identity widget with correct mode
                 if (typeof netlifyIdentity !== 'undefined') {
-                    netlifyIdentity.open();
+                    console.log('✅ netlifyIdentity found, opening widget in mode:', authMode);
+
+                    // Slight delay to let modal close animation complete
+                    setTimeout(() => {
+                        if (authMode === 'signup') {
+                            netlifyIdentity.open('signup');
+                        } else {
+                            netlifyIdentity.open('login');
+                        }
+                    }, 100);
+                } else {
+                    console.error('❌ netlifyIdentity not defined!');
+                    alert('Authentication system not loaded. Please refresh the page.');
                 }
             };
 
