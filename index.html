@@ -318,7 +318,7 @@
             const featuredArticles = articles.filter(article => article.featured);
 
             if (selectedArticle) {
-                return <ArticleView article={selectedArticle} darkMode={darkMode} setDarkMode={setDarkMode} onBack={() => setSelectedArticle(null)} user={user} username={username} savedArticles={savedArticles} toggleSaveArticle={toggleSaveArticle} />;
+                return <ArticleView article={selectedArticle} darkMode={darkMode} setDarkMode={setDarkMode} onBack={() => setSelectedArticle(null)} user={user} username={username} savedArticles={savedArticles} toggleSaveArticle={toggleSaveArticle} openAuthModal={openAuthModal} />;
             }
 
             if (showAccountModal) {
@@ -1273,7 +1273,7 @@
             );
         }
 
-        function ArticleView({ article, darkMode, setDarkMode, onBack, user, username, savedArticles, toggleSaveArticle }) {
+        function ArticleView({ article, darkMode, setDarkMode, onBack, user, username, savedArticles, toggleSaveArticle, openAuthModal }) {
             const [currentTime, setCurrentTime] = useState(new Date());
             const [comments, setComments] = useState([]);
             const [displayedUserComments, setDisplayedUserComments] = useState([]);
