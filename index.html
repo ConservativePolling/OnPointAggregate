@@ -254,17 +254,24 @@
                 setShowLoginModal(true);
             };
 
-            const handleLogin = () => {
-                console.log('🔐 handleLogin called, authMode:', authMode);
+            const handleAuthSubmit = async (e) => {
+                e.preventDefault();
+                setAuthError('');
+                setAuthLoading(true);
 
-                // Close custom modal first
-                setShowLoginModal(false);
+                // For now, just open Netlify Identity widget
+                // Custom form is for UI only, actual auth handled by Netlify
+                try {
+                    if (typeof netlifyIdentity === 'undefined') {
+                        throw new Error('Authentication system not loaded. Please refresh the page.');
+                    }
 
-                // Open Netlify Identity widget with correct mode
-                if (typeof netlifyIdentity !== 'undefined') {
-                    console.log('✅ netlifyIdentity found, opening widget in mode:', authMode);
+                    console.log('🔐 Opening Netlify Identity widget in mode:', authMode);
 
-                    // Slight delay to let modal close animation complete
+                    // Close our custom modal
+                    setShowLoginModal(false);
+
+                    // Small delay for smooth transition
                     setTimeout(() => {
                         if (authMode === 'signup') {
                             netlifyIdentity.open('signup');
@@ -272,9 +279,11 @@
                             netlifyIdentity.open('login');
                         }
                     }, 100);
-                } else {
-                    console.error('❌ netlifyIdentity not defined!');
-                    alert('Authentication system not loaded. Please refresh the page.');
+
+                } catch (error) {
+                    console.error('Auth error:', error);
+                    setAuthError(error.message || 'Authentication failed. Please try again.');
+                    setAuthLoading(false);
                 }
             };
 
@@ -670,7 +679,7 @@
 
                     {/* Clean Login/Signup Modal */}
                     {showLoginModal && (
-                        <div className="fixed inset-0 z-[60] overflow-y-auto bg-black bg-opacity-90 flex items-center justify-center p-4">
+                        <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black bg-opacity-90 flex items-center justify-center p-4">
                             <div className={`relative w-full max-w-md ${darkMode ? 'bg-black' : 'bg-white'}`}>
                                 {/* Close Button */}
                                 <button
@@ -697,33 +706,81 @@
                                         </p>
                                     </div>
 
-                                    {/* Auth Button */}
-                                    <button
-                                        onClick={handleLogin}
-                                        className={`w-full px-6 py-4 text-base font-semibold transition-all mb-6 ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
-                                    >
-                                        {authMode === 'signup' ? 'Continue with Email' : 'Sign In with Email'}
-                                    </button>
+                                    {/* Auth Form */}
+                                    <form onSubmit={handleAuthSubmit} className="space-y-4 mb-6">
+                                        {authError && (
+                                            <div className={`p-3 text-sm border ${darkMode ? 'bg-red-900/20 border-red-800 text-red-400' : 'bg-red-50 border-red-200 text-red-600'}`}>
+                                                {authError}
+                                            </div>
+                                        )}
 
-                                    {/* Divider */}
-                                    <div className="relative mb-6">
-                                        <div className={`absolute inset-0 flex items-center`}>
-                                            <div className={`w-full border-t ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}></div>
+                                        {authMode === 'signup' && (
+                                            <div>
+                                                <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                    Full Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    value={authName}
+                                                    onChange={(e) => setAuthName(e.target.value)}
+                                                    placeholder="John Doe"
+                                                    className={`w-full px-4 py-3 text-base border focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-zinc-900 border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                                    disabled={authLoading}
+                                                />
+                                            </div>
+                                        )}
+
+                                        <div>
+                                            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Email Address
+                                            </label>
+                                            <input
+                                                type="email"
+                                                value={authEmail}
+                                                onChange={(e) => setAuthEmail(e.target.value)}
+                                                placeholder="you@example.com"
+                                                className={`w-full px-4 py-3 text-base border focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-zinc-900 border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                                disabled={authLoading}
+                                            />
                                         </div>
-                                        <div className="relative flex justify-center text-xs uppercase">
-                                            <span className={`px-3 ${darkMode ? 'bg-black text-gray-600' : 'bg-white text-gray-500'}`}>
-                                                or
-                                            </span>
+
+                                        <div>
+                                            <label className={`block text-sm font-medium mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Password
+                                            </label>
+                                            <input
+                                                type="password"
+                                                value={authPassword}
+                                                onChange={(e) => setAuthPassword(e.target.value)}
+                                                placeholder={authMode === 'signup' ? 'At least 6 characters' : 'Enter your password'}
+                                                className={`w-full px-4 py-3 text-base border focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-zinc-900 border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                                disabled={authLoading}
+                                            />
                                         </div>
-                                    </div>
+
+                                        <button
+                                            type="submit"
+                                            disabled={authLoading}
+                                            className={`w-full px-6 py-4 text-base font-semibold transition-all ${authLoading ? 'opacity-50 cursor-not-allowed' : ''} ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                        >
+                                            {authLoading ? 'Please wait...' : (authMode === 'signup' ? 'Create Account' : 'Sign In')}
+                                        </button>
+                                    </form>
 
                                     {/* Toggle Mode */}
-                                    <div className="text-center">
+                                    <div className="text-center mb-6">
                                         <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                                             {authMode === 'signup' ? 'Already have an account?' : "Don't have an account?"}
                                             {' '}
                                             <button
-                                                onClick={() => setAuthMode(authMode === 'signup' ? 'signin' : 'signup')}
+                                                type="button"
+                                                onClick={() => {
+                                                    setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
+                                                    setAuthError('');
+                                                    setAuthEmail('');
+                                                    setAuthPassword('');
+                                                    setAuthName('');
+                                                }}
                                                 className={`font-semibold ${darkMode ? 'text-white hover:underline' : 'text-black hover:underline'}`}
                                             >
                                                 {authMode === 'signup' ? 'Sign In' : 'Sign Up'}
