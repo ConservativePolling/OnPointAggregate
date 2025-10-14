@@ -134,10 +134,10 @@
                     { time: "09:45", text: "FIU Campus Police arrest Lester Gabriel Tellez, 20, on FIU campus for battery on persons with mental or physical disabilities" }
                 ],
                 reporterComments: [
-                    { timestamp: "2025-10-13T18:30:00", text: "<span class='font-bold'>UPDATE:</span> Sources say Lester Tellez will enter a \"Not Guilty\" plea at arraignment. The move buys his defense time to review evidence and pursue talks, keeping the December 8 trial date intact for now.", highlighted: false },
-                    { timestamp: "2025-10-13T14:00:00", text: "Trespassing remains a pivotal element. Tellez returned to FIU despite an existing campus ban, underscoring prior university warnings and his choice to ignore them. Prosecutors are likely to frame that as deliberate defiance.", highlighted: false },
-                    { timestamp: "2025-10-13T13:00:00", text: "A December 8 trial date signals an aggressive pace. Prosecutors appear confident in their evidence, and Judge Andrea Ricker Wolfson is known for keeping felony dockets on track in Miami-Dade.", highlighted: false },
-                    { timestamp: "2025-10-13T12:00:00", text: "This case spans gaming, campus politics, and online commentary. Tellez's prior campus bans and bribery-related disqualification at UCF suggest a pattern of boundary pushing prosecutors could revisit at trial.", highlighted: false }
+                    { timestamp: "2025-10-13T18:30:00", text: "<span class='font-bold'>UPDATE:</span> Sources close to the case indicate that Lester Tellez is expected to enter a plea of \"Not Guilty\" at his upcoming arraignment. This is a common initial plea in felony cases, allowing the defense time to review evidence and potentially negotiate with prosecutors. The Not Guilty plea means the case will proceed toward the December 8 trial date unless a plea agreement is reached beforehand.", highlighted: false },
+                    { timestamp: "2025-10-13T14:00:00", text: "The trespassing element adds a significant dimension to this case. Tellez was arrested on FIU campus despite being previously banned, which demonstrates both the seriousness of the university's prior concerns and his decision to violate that ban. This could be viewed unfavorably by prosecutors and the court.", highlighted: false },
+                    { timestamp: "2025-10-13T13:00:00", text: "With trial scheduled for December 8, this case is moving relatively quickly through the court system. The December trial date suggests that prosecutors believe they have sufficient evidence to proceed. Judge Andrea Ricker Wolfson is known for her fair but thorough approach to criminal cases in Miami-Dade.", highlighted: false },
+                    { timestamp: "2025-10-13T12:00:00", text: "This case intersects several communities—gaming, political commentary, and university politics. Tellez's history of campus bans and his disqualification from the UCF student body presidential race for bribery suggests a pattern of boundary violations that prosecutors may highlight during trial proceedings.", highlighted: false }
                 ]
             }
         ];
@@ -2317,153 +2317,134 @@
                                     </div>
                                 ) : (
                                     comments.filter(c => c.type === 'reporter').map((comment) => (
-                                        <div
-                                            key={comment.id}
-                                            className="mb-10"
-                                        >
-                                            <div
-                                                className={`relative pl-6 sm:pl-8 py-6 ${comment.highlighted ? (darkMode ? 'bg-blue-500/10 rounded-xl border border-blue-500/30' : 'bg-blue-50 rounded-xl border border-blue-200') : ''}`}
-                                            >
-                                                <div className={`absolute left-0 top-5 bottom-5 w-[3px] rounded-full ${comment.highlighted ? (darkMode ? 'bg-blue-400/80' : 'bg-blue-500') : (darkMode ? 'bg-red-500/70' : 'bg-red-500/80')}`}></div>
-                                                <div className="flex items-start justify-between gap-4">
-                                                    <div className="flex items-start gap-3 sm:gap-4">
-                                                        <div className={`mt-0.5 flex h-10 w-10 items-center justify-center text-[10px] font-black uppercase tracking-[0.35em] rounded-full ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                                                            OPA
-                                                        </div>
-                                                        <div>
-                                                            <div className="flex items-center flex-wrap gap-2">
-                                                                <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] rounded-full ${darkMode ? 'bg-gray-900 text-gray-100 border border-gray-700' : 'bg-gray-100 text-gray-700 border border-gray-200'}`}>
-                                                                    Reporter Update
-                                                                </span>
-                                                                {comment.highlighted && (
-                                                                    <span className={`px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] rounded-full ${darkMode ? 'bg-blue-500/20 text-blue-200 border border-blue-500/40' : 'bg-blue-100 text-blue-700 border border-blue-200'}`}>
-                                                                        Pinned
-                                                                    </span>
-                                                                )}
-                                                                <span className={`text-[11px] font-medium ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                                                                    {getRelativeTime(comment.timestamp)}
-                                                                </span>
-                                                            </div>
-                                                            <p className={`mt-2 text-[11px] font-semibold uppercase tracking-[0.3em] ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                                                {comment.author.name}
-                                                            </p>
-                                                        </div>
+                                        <div key={comment.id} className={`mb-8 pb-8 ${darkMode ? 'border-b border-gray-900' : 'border-b border-gray-200'}`}>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <div className="flex items-center space-x-3">
+                                                    {/* OPA Profile Picture */}
+                                                    <div className={`w-10 h-10 flex items-center justify-center text-xs font-black flex-shrink-0 ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                                                        OPA
                                                     </div>
-                                                    {isAdmin && (
-                                                        <button
-                                                            onClick={() => handleDelete(comment.id)}
-                                                            className={`p-2 rounded-full transition-colors ${darkMode ? 'text-gray-500 hover:text-red-400 hover:bg-gray-900' : 'text-gray-400 hover:text-red-600 hover:bg-gray-100'}`}
-                                                            title="Delete comment"
-                                                        >
-                                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                            </svg>
-                                                        </button>
-                                                    )}
+                                                    {/* Author Name in Box */}
+                                                    <span className={`px-3 py-1 text-xs font-bold ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                                                        {comment.author.name}
+                                                    </span>
+                                                    <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                                                    <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                                        {getRelativeTime(comment.timestamp)}
+                                                    </span>
                                                 </div>
-
-                                                <div
-                                                    className={`mt-4 text-base leading-relaxed ${darkMode ? 'text-gray-100' : 'text-gray-800'} whitespace-pre-wrap`}
-                                                    style={{ wordBreak: 'break-word' }}
-                                                    dangerouslySetInnerHTML={{ __html: comment.text }}
-                                                ></div>
-
-                                                <div className="mt-5 flex flex-wrap items-center gap-5 text-xs font-semibold">
+                                                {isAdmin && (
                                                     <button
-                                                        onClick={() => handleLike(comment.id)}
-                                                        className={`flex items-center space-x-1.5 transition-colors ${hasLiked(comment.likes) ? 'text-blue-500' : darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
-                                                    >
-                                                        <svg className="w-4 h-4" fill={hasLiked(comment.likes) ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                                                        </svg>
-                                                        <span>{comment.likes.length || 'Like'}</span>
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
-                                                        className={`flex items-center space-x-1.5 transition-colors ${darkMode ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
+                                                        onClick={() => handleDelete(comment.id)}
+                                                        className={`p-1 transition-colors ${darkMode ? 'text-gray-600 hover:text-red-400' : 'text-gray-400 hover:text-red-600'}`}
+                                                        title="Delete comment"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                                         </svg>
-                                                        <span>Reply</span>
                                                     </button>
-                                                </div>
-
-                                                {replyingTo === comment.id && (
-                                                    <div className={`mt-5 rounded-lg border ${darkMode ? 'border-gray-800 bg-black/60' : 'border-gray-200 bg-gray-50'} p-4`}>
-                                                        <textarea
-                                                            value={replyText}
-                                                            onChange={(e) => setReplyText(e.target.value)}
-                                                            placeholder="Write a reply..."
-                                                            className={`w-full px-3 py-2 text-sm border resize-vertical min-h-[80px] focus:outline-none ${darkMode ? 'bg-black border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
-                                                            disabled={isSubmitting}
-                                                        />
-                                                        <div className="mt-3 flex items-center gap-2">
-                                                            <button
-                                                                onClick={() => handleSubmitReply(comment.id)}
-                                                                disabled={isSubmitting || !replyText.trim()}
-                                                                className={`px-4 py-1.5 text-xs font-semibold transition-all rounded ${isSubmitting || !replyText.trim() ? 'opacity-50 cursor-not-allowed' : ''} ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
-                                                            >
-                                                                {isSubmitting ? 'Posting...' : 'Post Reply'}
-                                                            </button>
-                                                            <button
-                                                                onClick={() => { setReplyingTo(null); setReplyText(''); }}
-                                                                className={`px-4 py-1.5 text-xs font-medium transition-colors rounded ${darkMode ? 'text-gray-400 hover:text-white hover:bg-gray-900' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'}`}
-                                                            >
-                                                                Cancel
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                )}
-
-                                                {comment.replies && comment.replies.length > 0 && (
-                                                    <div className={`mt-6 space-y-4 border-t border-dashed ${darkMode ? 'border-gray-800' : 'border-gray-200'} pt-4`}>
-                                                        {comment.replies.map((reply) => (
-                                                            <div key={reply.id} className="flex items-start gap-3">
-                                                                <div className={`flex h-8 w-8 items-center justify-center text-xs font-bold rounded-full ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-900'}`}>
-                                                                    {reply.author.name.charAt(0).toUpperCase()}
-                                                                </div>
-                                                                <div className="flex-1">
-                                                                    <div className="flex items-center justify-between mb-1">
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className={`font-semibold text-xs ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                                                                {reply.author.name}
-                                                                            </span>
-                                                                            <span className={`text-[11px] ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                                                                            <span className={`text-[11px] ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                                                                {getRelativeTime(reply.timestamp)}
-                                                                            </span>
-                                                                        </div>
-                                                                        {isAdmin && (
-                                                                            <button
-                                                                                onClick={() => handleDelete(comment.id, reply.id)}
-                                                                                className={`p-1 rounded transition-colors ${darkMode ? 'text-gray-600 hover:text-red-400 hover:bg-gray-900' : 'text-gray-400 hover:text-red-600 hover:bg-gray-100'}`}
-                                                                                title="Delete reply"
-                                                                            >
-                                                                                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                                                </svg>
-                                                                            </button>
-                                                                        )}
-                                                                    </div>
-                                                                    <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-700'} whitespace-pre-wrap`}>
-                                                                        {reply.text}
-                                                                    </p>
-                                                                    <button
-                                                                        onClick={() => handleLike(comment.id, reply.id)}
-                                                                        className={`mt-2 flex items-center space-x-1 text-xs font-medium transition-colors ${hasLiked(reply.likes) ? 'text-blue-500' : darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
-                                                                    >
-                                                                        <svg className="w-3 h-3" fill={hasLiked(reply.likes) ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
-                                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
-                                                                        </svg>
-                                                                        <span>{reply.likes.length || 'Like'}</span>
-                                                                    </button>
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                    </div>
                                                 )}
                                             </div>
+                                            <p className={`text-base leading-relaxed mb-4 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`} dangerouslySetInnerHTML={{ __html: comment.text }}></p>
+
+                                            {/* Like and Reply buttons */}
+                                            <div className="flex items-center space-x-6">
+                                                <button
+                                                    onClick={() => handleLike(comment.id)}
+                                                    className={`flex items-center space-x-1.5 text-xs font-medium transition-colors ${hasLiked(comment.likes) ? 'text-blue-600' : darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
+                                                >
+                                                    <svg className="w-4 h-4" fill={hasLiked(comment.likes) ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                                    </svg>
+                                                    <span>{comment.likes.length > 0 ? comment.likes.length : 'Like'}</span>
+                                                </button>
+                                                <button
+                                                    onClick={() => setReplyingTo(replyingTo === comment.id ? null : comment.id)}
+                                                    className={`flex items-center space-x-1.5 text-xs font-medium transition-colors ${darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                                    </svg>
+                                                    <span>Reply</span>
+                                                </button>
+                                            </div>
+
+                                            {/* Reply Form */}
+                                            {replyingTo === comment.id && (
+                                                <div className={`mt-4 pl-4 border-l-2 ${darkMode ? 'border-gray-800' : 'border-gray-300'}`}>
+                                                    <textarea
+                                                        value={replyText}
+                                                        onChange={(e) => setReplyText(e.target.value)}
+                                                        placeholder="Write a reply..."
+                                                        className={`w-full px-3 py-2 text-sm border resize-vertical min-h-[80px] focus:outline-none ${darkMode ? 'bg-black border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                                        disabled={isSubmitting}
+                                                    />
+                                                    <div className="mt-2 flex items-center space-x-2">
+                                                        <button
+                                                            onClick={() => handleSubmitReply(comment.id)}
+                                                            disabled={isSubmitting || !replyText.trim()}
+                                                            className={`px-4 py-1.5 text-xs font-semibold transition-all ${isSubmitting || !replyText.trim() ? 'opacity-50 cursor-not-allowed' : ''} ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                                        >
+                                                            {isSubmitting ? 'Posting...' : 'Post Reply'}
+                                                        </button>
+                                                        <button
+                                                            onClick={() => { setReplyingTo(null); setReplyText(''); }}
+                                                            className={`px-4 py-1.5 text-xs font-medium transition-colors ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {/* Replies */}
+                                            {comment.replies && comment.replies.length > 0 && (
+                                                <div className={`mt-4 space-y-4 border-l-2 ${darkMode ? 'border-gray-800' : 'border-gray-300'} pl-4`}>
+                                                    {comment.replies.map((reply) => (
+                                                        <div key={reply.id} className="flex items-start space-x-3">
+                                                            <div className={`w-8 h-8 flex items-center justify-center text-xs font-bold flex-shrink-0 ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-900'}`}>
+                                                                {reply.author.name.charAt(0).toUpperCase()}
+                                                            </div>
+                                                            <div className="flex-1">
+                                                                <div className="flex items-center justify-between mb-1">
+                                                                    <div className="flex items-center space-x-2">
+                                                                        <span className={`font-bold text-xs ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                                                            {reply.author.name}
+                                                                        </span>
+                                                                        <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
+                                                                        <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                                                            {getRelativeTime(reply.timestamp)}
+                                                                        </span>
+                                                                    </div>
+                                                                    {isAdmin && (
+                                                                        <button
+                                                                            onClick={() => handleDelete(comment.id, reply.id)}
+                                                                            className={`p-1 transition-colors ${darkMode ? 'text-gray-600 hover:text-red-400' : 'text-gray-400 hover:text-red-600'}`}
+                                                                            title="Delete reply"
+                                                                        >
+                                                                            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                                            </svg>
+                                                                        </button>
+                                                                    )}
+                                                                </div>
+                                                                <p className={`text-sm leading-relaxed mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                                    {reply.text}
+                                                                </p>
+                                                                <button
+                                                                    onClick={() => handleLike(comment.id, reply.id)}
+                                                                    className={`flex items-center space-x-1 text-xs font-medium transition-colors ${hasLiked(reply.likes) ? 'text-blue-600' : darkMode ? 'text-gray-500 hover:text-gray-300' : 'text-gray-600 hover:text-gray-900'}`}
+                                                                >
+                                                                    <svg className="w-3 h-3" fill={hasLiked(reply.likes) ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                                                    </svg>
+                                                                    <span>{reply.likes.length > 0 ? reply.likes.length : ''}</span>
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
                                     ))
                                 )}
