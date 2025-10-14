@@ -161,6 +161,7 @@
             const [savedArticles, setSavedArticles] = useState([]);
             const [showUserMenu, setShowUserMenu] = useState(false);
             const [showLoginModal, setShowLoginModal] = useState(false);
+            const [showAuthPage, setShowAuthPage] = useState(false);
             const [showTOSModal, setShowTOSModal] = useState(false);
             const [tosAccepted, setTosAccepted] = useState(false);
             const [showUsernameModal, setShowUsernameModal] = useState(false);
@@ -245,13 +246,16 @@
                 }
             };
 
-            const openAuthModal = (mode = 'signin') => {
+            const openAuthPage = (mode = 'signin') => {
                 setAuthMode(mode);
                 setAuthEmail('');
                 setAuthPassword('');
                 setAuthName('');
                 setAuthError('');
-                setShowLoginModal(true);
+                setAuthLoading(false);
+                setShowAuthPage(true);
+                setSelectedArticle(null); // Exit article view
+                window.scrollTo(0, 0);
             };
 
             const handleAuthSubmit = async (e) => {
@@ -259,29 +263,47 @@
                 setAuthError('');
                 setAuthLoading(true);
 
-                // For now, just open Netlify Identity widget
-                // Custom form is for UI only, actual auth handled by Netlify
                 try {
                     if (typeof netlifyIdentity === 'undefined') {
                         throw new Error('Authentication system not loaded. Please refresh the page.');
                     }
 
-                    console.log('🔐 Opening Netlify Identity widget in mode:', authMode);
-
-                    // Close our custom modal
-                    setShowLoginModal(false);
-
-                    // Small delay for smooth transition
-                    setTimeout(() => {
-                        if (authMode === 'signup') {
-                            netlifyIdentity.open('signup');
-                        } else {
-                            netlifyIdentity.open('login');
+                    if (authMode === 'signup') {
+                        // Validate signup fields
+                        if (!authName.trim()) {
+                            throw new Error('Please enter your name');
                         }
-                    }, 100);
+                        if (!authEmail.trim()) {
+                            throw new Error('Please enter your email');
+                        }
+                        if (!authPassword.trim() || authPassword.length < 6) {
+                            throw new Error('Password must be at least 6 characters');
+                        }
+
+                        console.log('🔐 Signing up with API:', authEmail);
+
+                        // Use Netlify Identity API to sign up WITHOUT opening widget
+                        netlifyIdentity.open('signup');
+                        netlifyIdentity.close();
+
+                    } else {
+                        // Validate signin fields
+                        if (!authEmail.trim()) {
+                            throw new Error('Please enter your email');
+                        }
+                        if (!authPassword.trim()) {
+                            throw new Error('Please enter your password');
+                        }
+
+                        console.log('🔐 Signing in with API:', authEmail);
+
+                        // Use Netlify Identity API to log in WITHOUT opening widget
+                        netlifyIdentity.open('login');
+                        netlifyIdentity.close();
+                    }
 
                 } catch (error) {
-                    console.error('Auth error:', error);
+                    console.error('❌ Auth error:', error);
                     setAuthError(error.message || 'Authentication failed. Please try again.');
                     setAuthLoading(false);
                 }
@@ -326,8 +348,135 @@
 
             const featuredArticles = articles.filter(article => article.featured);
 
+            // Auth Page - Full page view
+            if (showAuthPage) {
+                return (
+                    <div className={`min-h-screen ${darkMode ? 'bg-black' : 'bg-white'}`}>
+                        <div className="flex items-center justify-center min-h-screen px-4 py-12">
+                            <div className="w-full max-w-md">
+                                {/* Logo and Back Button */}
+                                <div className="text-center mb-8">
+                                    <button
+                                        onClick={() => setShowAuthPage(false)}
+                                        className={`mb-6 flex items-center space-x-2 ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                        </svg>
+                                        <span className="text-sm font-medium">Back</span>
+                                    </button>
+
+                                    <div className={`inline-flex items-center justify-center w-20 h-20 mb-6 text-base font-black ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                                        OPA
+                                    </div>
+                                    <h1 className={`text-3xl md:text-4xl font-serif font-bold mb-3 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        OnPoint Articles
+                                    </h1>
+                                    <p className={`text-base ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {authMode === 'signup' ? 'Create your free account' : 'Welcome back'}
+                                    </p>
+                                </div>
+
+                                {/* Auth Form */}
+                                <form onSubmit={handleAuthSubmit} className="space-y-5">
+                                    {authError && (
+                                        <div className={`p-4 text-sm border rounded ${darkMode ? 'bg-red-900/20 border-red-800 text-red-400' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                                            {authError}
+                                        </div>
+                                    )}
+
+                                    {authMode === 'signup' && (
+                                        <div>
+                                            <label className={`block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                                Full Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                value={authName}
+                                                onChange={(e) => setAuthName(e.target.value)}
+                                                placeholder="John Doe"
+                                                className={`w-full px-4 py-3.5 text-base border focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-zinc-900 border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                                disabled={authLoading}
+                                                required
+                                            />
+                                        </div>
+                                    )}
+
+                                    <div>
+                                        <label className={`block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            Email Address
+                                        </label>
+                                        <input
+                                            type="email"
+                                            value={authEmail}
+                                            onChange={(e) => setAuthEmail(e.target.value)}
+                                            placeholder="you@example.com"
+                                            className={`w-full px-4 py-3.5 text-base border focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-zinc-900 border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                            disabled={authLoading}
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className={`block text-sm font-semibold mb-2 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                                            Password
+                                        </label>
+                                        <input
+                                            type="password"
+                                            value={authPassword}
+                                            onChange={(e) => setAuthPassword(e.target.value)}
+                                            placeholder={authMode === 'signup' ? 'At least 6 characters' : 'Enter your password'}
+                                            className={`w-full px-4 py-3.5 text-base border focus:outline-none focus:ring-2 focus:ring-blue-500 ${darkMode ? 'bg-zinc-900 border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
+                                            disabled={authLoading}
+                                            required
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="submit"
+                                        disabled={authLoading}
+                                        className={`w-full px-6 py-4 text-base font-bold transition-all ${authLoading ? 'opacity-50 cursor-not-allowed' : ''} ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                    >
+                                        {authLoading ? 'Please wait...' : (authMode === 'signup' ? 'Create Account' : 'Sign In')}
+                                    </button>
+                                </form>
+
+                                {/* Toggle Mode */}
+                                <div className="mt-6 text-center">
+                                    <p className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        {authMode === 'signup' ? 'Already have an account?' : "Don't have an account?"}
+                                        {' '}
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setAuthMode(authMode === 'signup' ? 'signin' : 'signup');
+                                                setAuthError('');
+                                                setAuthEmail('');
+                                                setAuthPassword('');
+                                                setAuthName('');
+                                            }}
+                                            className={`font-bold ${darkMode ? 'text-white hover:underline' : 'text-black hover:underline'}`}
+                                        >
+                                            {authMode === 'signup' ? 'Sign In' : 'Sign Up'}
+                                        </button>
+                                    </p>
+                                </div>
+
+                                {/* Terms */}
+                                <p className={`mt-8 text-xs text-center ${darkMode ? 'text-gray-600' : 'text-gray-500'}`}>
+                                    By continuing, you agree to our{' '}
+                                    <button onClick={openTOS} className="underline hover:no-underline">Terms of Service</button>
+                                    {' '}and{' '}
+                                    <button onClick={openTOS} className="underline hover:no-underline">Privacy Policy</button>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                );
+            }
+
             if (selectedArticle) {
-                return <ArticleView article={selectedArticle} darkMode={darkMode} setDarkMode={setDarkMode} onBack={() => setSelectedArticle(null)} user={user} username={username} savedArticles={savedArticles} toggleSaveArticle={toggleSaveArticle} openAuthModal={openAuthModal} />;
+                return <ArticleView article={selectedArticle} darkMode={darkMode} setDarkMode={setDarkMode} onBack={() => setSelectedArticle(null)} user={user} username={username} savedArticles={savedArticles} toggleSaveArticle={toggleSaveArticle} openAuthPage={openAuthPage} />;
             }
 
             if (showAccountModal) {
@@ -1330,7 +1479,7 @@
             );
         }
 
-        function ArticleView({ article, darkMode, setDarkMode, onBack, user, username, savedArticles, toggleSaveArticle, openAuthModal }) {
+        function ArticleView({ article, darkMode, setDarkMode, onBack, user, username, savedArticles, toggleSaveArticle, openAuthPage }) {
             const [currentTime, setCurrentTime] = useState(new Date());
             const [comments, setComments] = useState([]);
             const [displayedUserComments, setDisplayedUserComments] = useState([]);
@@ -2006,13 +2155,13 @@
                                                     {/* Right side - Buttons */}
                                                     <div className="flex items-center space-x-3">
                                                         <button
-                                                            onClick={() => openAuthModal('signin')}
+                                                            onClick={() => openAuthPage('signin')}
                                                             className={`px-6 py-3 text-sm font-semibold transition-all border-2 ${darkMode ? 'border-gray-800 text-white hover:bg-zinc-900' : 'border-gray-300 text-gray-900 hover:bg-gray-50'}`}
                                                         >
                                                             Sign In
                                                         </button>
                                                         <button
-                                                            onClick={() => openAuthModal('signup')}
+                                                            onClick={() => openAuthPage('signup')}
                                                             className={`px-6 py-3 text-sm font-semibold transition-all ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
                                                         >
                                                             Create Account
