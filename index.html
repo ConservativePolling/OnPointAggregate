@@ -1223,6 +1223,7 @@
         function ArticleView({ article, darkMode, setDarkMode, onBack, user, username, savedArticles, toggleSaveArticle }) {
             const [currentTime, setCurrentTime] = useState(new Date());
             const [comments, setComments] = useState([]);
+            const [displayedUserComments, setDisplayedUserComments] = useState([]);
             const [commentText, setCommentText] = useState('');
             const [commentType, setCommentType] = useState('user');
             const [isSubmitting, setIsSubmitting] = useState(false);
@@ -1257,6 +1258,10 @@
                             console.log('Comment IDs:', data.comments.map(c => c.id));
                         }
                         setComments(data.comments || []);
+                        // Initialize displayed user comments on first load
+                        if (displayedUserComments.length === 0) {
+                            setDisplayedUserComments(data.comments || []);
+                        }
                     } catch (error) {
                         console.error('❌ Error fetching comments:', error);
                     }
@@ -1264,11 +1269,16 @@
 
                 fetchComments();
 
-                // Poll for new comments every 5 seconds
-                const interval = setInterval(fetchComments, 5000);
+                // Poll for new comments every 30 seconds (reporter comments update automatically)
+                const interval = setInterval(fetchComments, 30000);
 
                 return () => clearInterval(interval);
             }, [article.id]);
+
+            // Manual refresh function for user comments
+            const refreshUserComments = () => {
+                setDisplayedUserComments(comments);
+            };
 
             // Update time every 10 seconds to keep relative timestamps accurate
             useEffect(() => {
@@ -1341,6 +1351,7 @@
                         const data = await response.json();
                         console.log('Comment posted successfully:', data);
                         setComments(data.comments);
+                        setDisplayedUserComments(data.comments); // Update displayed comments immediately
                         setCommentText('');
                         showSuccess('Comment posted!');
                     } else {
@@ -1420,6 +1431,7 @@
                         const data = await response.json();
                         console.log('Reply posted successfully:', data);
                         setComments(data.comments);
+                        setDisplayedUserComments(data.comments); // Update displayed comments immediately
                         setReplyText('');
                         setReplyingTo(null);
                         showSuccess('Reply posted!');
@@ -1496,6 +1508,7 @@
                         const data = await response.json();
                         console.log('Like successful:', data);
                         setComments(data.comments);
+                        setDisplayedUserComments(data.comments); // Update displayed comments immediately
                     } else {
                         const error = await response.json();
                         console.error('Like error response:', error);
@@ -1549,6 +1562,7 @@
                     if (response.ok) {
                         const data = await response.json();
                         setComments(data.comments);
+                        setDisplayedUserComments(data.comments); // Update displayed comments immediately
                         showSuccess('Deleted successfully');
                     } else {
                         const error = await response.json();
@@ -2082,9 +2096,20 @@
                                             Community Discussion
                                         </h3>
                                     </div>
-                                    <span className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                        {comments.filter(c => c.type === 'user').length} comments
-                                    </span>
+                                    <div className="flex items-center space-x-4">
+                                        <button
+                                            onClick={refreshUserComments}
+                                            className={`flex items-center space-x-2 px-3 py-1.5 text-xs font-semibold transition-all ${darkMode ? 'bg-zinc-900 text-gray-300 hover:bg-zinc-800 border border-gray-800' : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300'}`}
+                                        >
+                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                            </svg>
+                                            <span>Refresh</span>
+                                        </button>
+                                        <span className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                            {displayedUserComments.filter(c => c.type === 'user').length} comments
+                                        </span>
+                                    </div>
                                 </div>
 
                                 {/* User Comment Form */}
@@ -2133,14 +2158,14 @@
                                     </div>
                                 )}
 
-                                {comments.filter(c => c.type === 'user').length === 0 ? (
+                                {displayedUserComments.filter(c => c.type === 'user').length === 0 ? (
                                     <div className={`border ${darkMode ? 'bg-zinc-950 border-gray-900' : 'bg-white border-gray-200'} p-8 text-center`}>
                                         <p className={`text-sm ${darkMode ? 'text-gray-500' : 'text-gray-600'}`}>
                                             No comments yet. Be the first to share your thoughts!
                                         </p>
                                     </div>
                                 ) : (
-                                    comments.filter(c => c.type === 'user').map((comment) => (
+                                    displayedUserComments.filter(c => c.type === 'user').map((comment) => (
                                         <div key={comment.id} className={`mb-6 border ${darkMode ? 'border-gray-800 bg-zinc-950' : 'border-gray-200 bg-white'}`}>
                                             <div className="p-6">
                                                 <div className="flex items-start space-x-4">
