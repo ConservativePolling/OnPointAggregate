@@ -268,6 +268,8 @@
                         throw new Error('Authentication system not loaded. Please refresh the page.');
                     }
 
+                    const goTrue = netlifyIdentity.gotrue;
+
                     if (authMode === 'signup') {
                         // Validate signup fields
                         if (!authName.trim()) {
@@ -280,11 +282,22 @@
                             throw new Error('Password must be at least 6 characters');
                         }
 
-                        console.log('🔐 Signing up with API:', authEmail);
+                        console.log('🔐 Signing up with GoTrue API:', authEmail);
 
-                        // Use Netlify Identity API to sign up WITHOUT opening widget
-                        netlifyIdentity.open('signup');
-                        netlifyIdentity.close();
+                        // Use GoTrue API directly to sign up
+                        const response = await goTrue.signup(authEmail, authPassword, {
+                            full_name: authName
+                        });
+
+                        console.log('✅ Signup successful:', response);
+                        alert('Account created! Please check your email to confirm your account.');
+
+                        // Clear form
+                        setAuthEmail('');
+                        setAuthPassword('');
+                        setAuthName('');
+                        setAuthLoading(false);
+                        setShowAuthPage(false);
 
                     } else {
                         // Validate signin fields
@@ -295,16 +308,34 @@
                             throw new Error('Please enter your password');
                         }
 
-                        console.log('🔐 Signing in with API:', authEmail);
+                        console.log('🔐 Signing in with GoTrue API:', authEmail);
 
-                        // Use Netlify Identity API to log in WITHOUT opening widget
-                        netlifyIdentity.open('login');
-                        netlifyIdentity.close();
+                        // Use GoTrue API directly to log in
+                        const response = await goTrue.login(authEmail, authPassword, true);
+
+                        console.log('✅ Login successful:', response);
+
+                        // Set user immediately
+                        setUser(response);
+
+                        // Clear form and return to site
+                        setAuthEmail('');
+                        setAuthPassword('');
+                        setAuthLoading(false);
+                        setShowAuthPage(false);
                     }
 
                 } catch (error) {
                     console.error('❌ Auth error:', error);
-                    setAuthError(error.message || 'Authentication failed. Please try again.');
+                    let errorMessage = 'Authentication failed. Please try again.';
+
+                    if (error.json && error.json.error_description) {
+                        errorMessage = error.json.error_description;
+                    } else if (error.message) {
+                        errorMessage = error.message;
+                    }
+
+                    setAuthError(errorMessage);
                     setAuthLoading(false);
                 }
             };
@@ -556,10 +587,10 @@
                                         </div>
                                     ) : (
                                         <button
-                                            onClick={() => netlifyIdentity.open()}
+                                            onClick={() => openAuthPage('signin')}
                                             className={`hidden sm:block px-5 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
                                         >
-                                            Create Account / Sign In
+                                            Sign In
                                         </button>
                                     )}
                                     <button
@@ -2490,7 +2521,7 @@
                                             Join the conversation! Sign in to share your thoughts.
                                         </p>
                                         <button
-                                            onClick={() => netlifyIdentity.open()}
+                                            onClick={() => openAuthPage('signin')}
                                             className={`px-6 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
                                         >
                                             Sign In to Comment
