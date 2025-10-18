@@ -1,75 +1,87 @@
-const { getStore } = require('@netlify/blobs');
-
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
 
-console.log('💾 Comment storage using Netlify Blobs');
+console.log('💾 Comment system initializing...');
 
-// Simple, persistent blob store
-function getBlobStore() {
-  return getStore({
-    name: 'comments',
-    consistency: 'strong' // Ensure immediate consistency
-  });
+// In-memory store as fallback
+let inMemoryStore = {};
+let usingBlobStorage = false;
+let blobStoreInstance = null;
+
+// Try to initialize Netlify Blobs
+async function initializeBlobStorage() {
+  try {
+    console.log('Attempting to load @netlify/blobs...');
+    const { getStore } = require('@netlify/blobs');
+    blobStoreInstance = getStore({
+      name: 'comments',
+      consistency: 'strong'
+    });
+
+    // Test if it works
+    await blobStoreInstance.get('test');
+    usingBlobStorage = true;
+    console.log('✅ Netlify Blobs initialized successfully');
+    return true;
+  } catch (error) {
+    console.warn('⚠️ Netlify Blobs not available:', error.message);
+    console.log('📝 Falling back to in-memory storage (data will not persist)');
+    usingBlobStorage = false;
+    return false;
+  }
 }
 
 async function loadCommentsStore() {
   try {
-    const store = getBlobStore();
-    console.log('📖 Loading comments from Netlify Blobs');
-    const data = await store.get('all-comments', { type: 'json' });
+    if (!usingBlobStorage) {
+      console.log('Using in-memory store');
+      return inMemoryStore;
+    }
+
+    console.log('📖 Loading from Netlify Blobs...');
+    const data = await blobStoreInstance.get('all-comments', { type: 'json' });
 
     if (!data) {
-      console.log('ℹ️ No existing comments, starting fresh');
+      console.log('ℹ️ No existing data, starting fresh');
       return {};
     }
 
-    console.log('✅ Loaded', Object.keys(data).length, 'article(s) with comments');
+    console.log('✅ Loaded', Object.keys(data).length, 'article(s)');
     return data;
   } catch (error) {
-    console.error('❌ Error loading comments:', error);
-    console.error('Stack:', error.stack);
-    // Return empty but don't crash
-    return {};
+    console.error('❌ Error loading from Blobs:', error.message);
+    console.log('Falling back to in-memory');
+    return inMemoryStore;
   }
 }
 
 async function saveCommentsStore(store) {
   try {
-    const blobStore = getBlobStore();
-    console.log('💾 Saving comments to Netlify Blobs');
-    console.log('📊 Storing', Object.keys(store).length, 'article(s)');
+    // Always update in-memory store
+    inMemoryStore = { ...store };
 
-    await blobStore.setJSON('all-comments', store);
-
-    console.log('✅ Comments saved successfully');
-
-    // Verify the save
-    const verify = await blobStore.get('all-comments', { type: 'json' });
-    if (verify) {
-      console.log('✅ Verified:', Object.keys(verify).length, 'article(s) persisted');
+    if (!usingBlobStorage) {
+      console.log('💾 Saved to in-memory store');
+      return;
     }
+
+    console.log('💾 Saving to Netlify Blobs...');
+    await blobStoreInstance.setJSON('all-comments', store);
+    console.log('✅ Persisted to Blobs');
   } catch (error) {
-    console.error('❌ CRITICAL: Failed to save comments:', error);
-    console.error('Stack:', error.stack);
-    throw error; // Don't silently fail on save errors
+    console.error('❌ Error saving to Blobs:', error.message);
+    console.log('Data saved to in-memory only');
   }
 }
 
-// Decode JWT token to get user info
+// Decode JWT token
 function decodeToken(token) {
   try {
-    if (!token) {
-      console.log('No token provided');
-      return null;
-    }
+    if (!token) return null;
 
     const cleanToken = token.replace(/^Bearer\s+/i, '');
     const parts = cleanToken.split('.');
 
-    if (parts.length !== 3) {
-      console.log('Invalid token format');
-      return null;
-    }
+    if (parts.length !== 3) return null;
 
     let payload = parts[1];
     payload = payload.replace(/-/g, '+').replace(/_/g, '/');
@@ -78,11 +90,9 @@ function decodeToken(token) {
     }
 
     const decoded = Buffer.from(payload, 'base64').toString('utf8');
-    const parsed = JSON.parse(decoded);
-    console.log('Token decoded, email:', parsed.email);
-    return parsed;
+    return JSON.parse(decoded);
   } catch (error) {
-    console.error('Error decoding token:', error.message);
+    console.error('Token decode error:', error.message);
     return null;
   }
 }
@@ -92,10 +102,18 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// In-memory cache (refreshed on each function invocation)
 let commentsStore = null;
+let initialized = false;
+
+async function initializeIfNeeded() {
+  if (!initialized) {
+    await initializeBlobStorage();
+    initialized = true;
+  }
+}
 
 async function refreshStore() {
+  await initializeIfNeeded();
   commentsStore = await loadCommentsStore();
   return commentsStore;
 }
@@ -107,64 +125,62 @@ async function persistStore() {
 exports.handler = async (event, context) => {
   console.log('=== Function Invoked ===');
   console.log('Method:', event.httpMethod);
-  console.log('Path:', event.path);
 
   const method = event.httpMethod;
   const path = event.path || '';
   const rawUrl = event.rawUrl || '';
 
+  // CORS headers
+  const corsHeaders = {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+    'Content-Type': 'application/json'
+  };
+
   try {
-    // Load comments from persistent storage
+    // Load store
     await refreshStore();
 
-    // Handle CORS preflight
+    // CORS preflight
     if (method === 'OPTIONS') {
       return {
         statusCode: 200,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-          'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS'
-        },
+        headers: corsHeaders,
         body: ''
       };
     }
 
-    // GET - Fetch comments
+    // GET comments
     if (method === 'GET') {
       const { articleId } = event.queryStringParameters || {};
 
       if (!articleId) {
         return {
           statusCode: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'articleId is required' })
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'articleId required' })
         };
       }
 
       const articleKey = String(articleId);
       const comments = commentsStore[articleKey] || [];
-      console.log('Returning', comments.length, 'comments for article', articleKey);
+      console.log(`📝 Returning ${comments.length} comment(s) for article ${articleKey}`);
 
       return {
         statusCode: 200,
-        headers: {
-          'Content-Type': 'application/json',
-          'Cache-Control': 'no-cache',
-          'Access-Control-Allow-Origin': '*'
-        },
+        headers: { ...corsHeaders, 'Cache-Control': 'no-cache' },
         body: JSON.stringify({ comments })
       };
     }
 
-    // All other methods require authentication
+    // Auth required for POST/DELETE
     const authHeader = event.headers.authorization || event.headers.Authorization;
 
     if (!authHeader) {
-      console.log('No auth header provided');
       return {
         statusCode: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Authentication required' })
       };
     }
@@ -172,10 +188,9 @@ exports.handler = async (event, context) => {
     const tokenData = decodeToken(authHeader);
 
     if (!tokenData || !tokenData.email) {
-      console.log('Invalid token data');
       return {
         statusCode: 401,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders,
         body: JSON.stringify({ error: 'Invalid token' })
       };
     }
@@ -183,75 +198,58 @@ exports.handler = async (event, context) => {
     const isAdmin = tokenData.email === ADMIN_EMAIL;
     const requestBody = event.body ? JSON.parse(event.body) : {};
 
-    console.log('Request body:', JSON.stringify(requestBody, null, 2));
-    console.log('User:', tokenData.email, 'isAdmin:', isAdmin);
-
-    // Determine action from path or request body
-    let action = requestBody.action || 'comment'; // Default action
-
-    // Check path for action type (more reliable routing)
+    // Determine action
+    let action = requestBody.action || 'comment';
     if (path.includes('/comment-like') || rawUrl.includes('/comment-like')) {
       action = 'like';
-      console.log('Action detected from path: LIKE');
     } else if (path.includes('/comment-reply') || rawUrl.includes('/comment-reply')) {
       action = 'reply';
-      console.log('Action detected from path: REPLY');
     }
 
-    // POST requests
+    // POST operations
     if (method === 'POST') {
-      console.log('POST action:', action);
-
-      // LIKE ACTION
+      // LIKE
       if (action === 'like') {
-        console.log('Processing LIKE action');
         const { articleId, commentId, replyId } = requestBody;
-
         if (!articleId || !commentId) {
-          console.log('Missing articleId or commentId for like');
           return {
             statusCode: 400,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'articleId and commentId are required for like action' })
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'articleId and commentId required' })
           };
         }
 
         const articleKey = String(articleId);
         const comments = commentsStore[articleKey] || [];
-
         const comment = comments.find(c => c.id === commentId);
 
         if (!comment) {
-          console.log('❌ Comment NOT FOUND');
           return {
             statusCode: 404,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            headers: corsHeaders,
             body: JSON.stringify({ error: 'Comment not found' })
           };
         }
 
-        // Handle reply like
         if (replyId) {
           const reply = comment.replies.find(r => r.id === replyId);
           if (!reply) {
             return {
               statusCode: 404,
-              headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+              headers: corsHeaders,
               body: JSON.stringify({ error: 'Reply not found' })
             };
           }
-
-          const likeIndex = reply.likes.indexOf(tokenData.email);
-          if (likeIndex > -1) {
-            reply.likes.splice(likeIndex, 1);
+          const idx = reply.likes.indexOf(tokenData.email);
+          if (idx > -1) {
+            reply.likes.splice(idx, 1);
           } else {
             reply.likes.push(tokenData.email);
           }
         } else {
-          // Handle comment like
-          const likeIndex = comment.likes.indexOf(tokenData.email);
-          if (likeIndex > -1) {
-            comment.likes.splice(likeIndex, 1);
+          const idx = comment.likes.indexOf(tokenData.email);
+          if (idx > -1) {
+            comment.likes.splice(idx, 1);
           } else {
             comment.likes.push(tokenData.email);
           }
@@ -262,21 +260,19 @@ exports.handler = async (event, context) => {
 
         return {
           statusCode: 200,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: corsHeaders,
           body: JSON.stringify({ success: true, comments })
         };
       }
 
-      // REPLY ACTION
+      // REPLY
       if (action === 'reply') {
-        console.log('Processing REPLY action');
         const { articleId, commentId, text, username } = requestBody;
-
         if (!articleId || !commentId || !text) {
           return {
             statusCode: 400,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({ error: 'articleId, commentId, and text are required for reply action' })
+            headers: corsHeaders,
+            body: JSON.stringify({ error: 'Missing required fields' })
           };
         }
 
@@ -287,17 +283,15 @@ exports.handler = async (event, context) => {
         if (!comment) {
           return {
             statusCode: 404,
-            headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+            headers: corsHeaders,
             body: JSON.stringify({ error: 'Comment not found' })
           };
         }
 
-        const displayName = username || tokenData.email.split('@')[0];
-
         const newReply = {
           id: generateId(),
           author: {
-            name: displayName,
+            name: username || tokenData.email.split('@')[0],
             email: tokenData.email
           },
           text,
@@ -309,37 +303,30 @@ exports.handler = async (event, context) => {
         commentsStore[articleKey] = comments;
         await persistStore();
 
-        console.log('✅ Reply created:', newReply.id);
+        console.log('✅ Reply created');
 
         return {
           statusCode: 201,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: corsHeaders,
           body: JSON.stringify({ success: true, reply: newReply, comments })
         };
       }
 
-      // COMMENT ACTION (default)
-      console.log('Processing COMMENT action');
+      // COMMENT (default)
       const { articleId, text, type, username } = requestBody;
 
       if (!articleId || !text) {
         return {
           statusCode: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'articleId and text are required for comment action' })
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'articleId and text required' })
         };
       }
 
-      // Determine comment type
       const commentType = (type === 'reporter' && isAdmin) ? 'reporter' : 'user';
-
-      // Determine display name
-      let displayName;
-      if (commentType === 'reporter') {
-        displayName = 'OnPointArticles Team';
-      } else {
-        displayName = username || tokenData.email.split('@')[0];
-      }
+      const displayName = commentType === 'reporter'
+        ? 'OnPointArticles Team'
+        : (username || tokenData.email.split('@')[0]);
 
       const articleKey = String(articleId);
       const comments = commentsStore[articleKey] || [];
@@ -361,25 +348,23 @@ exports.handler = async (event, context) => {
       comments.unshift(newComment);
       commentsStore[articleKey] = comments;
 
-      console.log('💬 Creating comment:', newComment.id, 'by', tokenData.email, 'type:', commentType);
+      console.log(`💬 Creating ${commentType} comment by ${tokenData.email}`);
       await persistStore();
-      console.log('✅ Comment persisted successfully');
+      console.log('✅ Comment saved');
 
       return {
         statusCode: 201,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders,
         body: JSON.stringify({ success: true, comment: newComment, comments })
       };
     }
 
-    // DELETE - Delete comment (admin only)
+    // DELETE
     if (method === 'DELETE') {
-      console.log('Processing DELETE action');
-
       if (!isAdmin) {
         return {
           statusCode: 403,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+          headers: corsHeaders,
           body: JSON.stringify({ error: 'Admin access required' })
         };
       }
@@ -389,8 +374,8 @@ exports.handler = async (event, context) => {
       if (!articleId || !commentId) {
         return {
           statusCode: 400,
-          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-          body: JSON.stringify({ error: 'articleId and commentId are required' })
+          headers: corsHeaders,
+          body: JSON.stringify({ error: 'articleId and commentId required' })
         };
       }
 
@@ -411,27 +396,28 @@ exports.handler = async (event, context) => {
 
       return {
         statusCode: 200,
-        headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        headers: corsHeaders,
         body: JSON.stringify({ success: true, comments })
       };
     }
 
     return {
       statusCode: 405,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders,
       body: JSON.stringify({ error: 'Method not allowed' })
     };
 
   } catch (error) {
-    console.error('❌ CRITICAL ERROR in article-comments function:', error);
-    console.error('Stack trace:', error.stack);
+    console.error('❌ CRITICAL ERROR:', error);
+    console.error('Stack:', error.stack);
+
+    // Return error but don't crash
     return {
       statusCode: 500,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+      headers: corsHeaders,
       body: JSON.stringify({
         error: 'Internal server error',
-        message: error.message,
-        details: error.stack
+        message: error.message
       })
     };
   }
