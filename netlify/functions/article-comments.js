@@ -1,4 +1,6 @@
 const { getStore } = require('@netlify/blobs');
+const fs = require('fs/promises');
+const path = require('path');
 
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
 
@@ -6,16 +8,22 @@ console.log('Comment storage initialized');
 
 // Store instance will be created with context
 let currentContext = null;
+let storageMode = 'blob'; // 'blob' | 'file'
+
+const FALLBACK_PATH = path.join(__dirname, '..', 'data', 'comments.json');
 
 function getBlobStore() {
   if (!currentContext) {
     throw new Error('Context not initialized');
   }
-  return getStore({
-    name: 'comments',
-    siteID: currentContext.site?.id,
-    token: currentContext.token
-  });
+  const options = { name: 'comments' };
+
+  if (currentContext.site?.id && currentContext.token) {
+    options.siteID = currentContext.site.id;
+    options.token = currentContext.token;
+  }
+
+  return getStore(options);
 }
 
 async function loadCommentsStore() {
@@ -33,12 +41,14 @@ async function loadCommentsStore() {
       return {};
     }
     console.log('Loaded comments store with', Object.keys(data).length, 'articles');
+    storageMode = 'blob';
     return data;
   } catch (error) {
     console.error('❌ Error reading comments store from Blobs:', error);
     console.error('Stack:', error.stack);
     console.log('Returning empty store due to error');
-    return {};
+    storageMode = 'file';
+    return await loadFallbackStore();
   }
 }
 
@@ -46,6 +56,12 @@ async function saveCommentsStore(store) {
   try {
     if (!currentContext) {
       console.log('⚠️ No context available, cannot save');
+      return;
+    }
+
+    if (storageMode === 'file') {
+      console.log('💾 Saving comments store to local fallback file');
+      await saveFallbackStore(store);
       return;
     }
 
@@ -57,6 +73,35 @@ async function saveCommentsStore(store) {
   } catch (error) {
     console.error('❌ Error writing comments store to Blobs:', error);
     console.error('Stack:', error.stack);
+    storageMode = 'file';
+    await saveFallbackStore(store);
+  }
+}
+
+async function loadFallbackStore() {
+  try {
+    const raw = await fs.readFile(FALLBACK_PATH, 'utf8');
+    const parsed = JSON.parse(raw || '{}');
+    console.log('Loaded comments from fallback file with', Object.keys(parsed).length, 'articles');
+    return parsed;
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      console.log('Fallback comments file not found, creating fresh store');
+      await saveFallbackStore({});
+      return {};
+    }
+    console.error('Error reading fallback comments file:', error);
+    return {};
+  }
+}
+
+async function saveFallbackStore(store) {
+  try {
+    await fs.mkdir(path.dirname(FALLBACK_PATH), { recursive: true });
+    await fs.writeFile(FALLBACK_PATH, JSON.stringify(store, null, 2), 'utf8');
+    console.log('✅ Comments saved to fallback file');
+  } catch (error) {
+    console.error('Failed to write fallback comments file:', error);
   }
 }
 
