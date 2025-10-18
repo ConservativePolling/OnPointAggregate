@@ -1,115 +1,57 @@
-const fs = require('fs/promises');
-const path = require('path');
+const { getStore } = require('@netlify/blobs');
 
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
 
-console.log('Comment storage initialized');
+console.log('💾 Comment storage using Netlify Blobs');
 
-// Store instance will be created with context
-let currentContext = null;
-let storageMode = 'blob'; // 'blob' | 'file'
-
-const FALLBACK_PATH = path.join(__dirname, '..', 'data', 'comments.json');
-
-let blobsModulePromise = null;
-function loadBlobsModule() {
-  if (!blobsModulePromise) {
-    blobsModulePromise = import('@netlify/blobs');
-  }
-  return blobsModulePromise;
-}
-
-async function getBlobStore() {
-  if (!currentContext) {
-    throw new Error('Context not initialized');
-  }
-  const { getStore } = await loadBlobsModule();
-  const options = { name: 'comments' };
-
-  if (currentContext.site?.id && currentContext.token) {
-    options.siteID = currentContext.site.id;
-    options.token = currentContext.token;
-  }
-
-  return getStore(options);
+// Simple, persistent blob store
+function getBlobStore() {
+  return getStore({
+    name: 'comments',
+    consistency: 'strong' // Ensure immediate consistency
+  });
 }
 
 async function loadCommentsStore() {
   try {
-    if (!currentContext) {
-      console.log('⚠️ No context available, returning empty store');
+    const store = getBlobStore();
+    console.log('📖 Loading comments from Netlify Blobs');
+    const data = await store.get('all-comments', { type: 'json' });
+
+    if (!data) {
+      console.log('ℹ️ No existing comments, starting fresh');
       return {};
     }
 
-    const store = await getBlobStore();
-    console.log('Loading comments from Netlify Blobs');
-    const data = await store.get('all-comments', { type: 'json' });
-    if (!data) {
-      console.log('No comments in store yet, returning empty store');
-      return {};
-    }
-    console.log('Loaded comments store with', Object.keys(data).length, 'articles');
-    storageMode = 'blob';
+    console.log('✅ Loaded', Object.keys(data).length, 'article(s) with comments');
     return data;
   } catch (error) {
-    console.error('❌ Error reading comments store from Blobs:', error);
+    console.error('❌ Error loading comments:', error);
     console.error('Stack:', error.stack);
-    console.log('Returning empty store due to error');
-    storageMode = 'file';
-    return await loadFallbackStore();
+    // Return empty but don't crash
+    return {};
   }
 }
 
 async function saveCommentsStore(store) {
   try {
-    if (!currentContext) {
-      console.log('⚠️ No context available, cannot save');
-      return;
-    }
+    const blobStore = getBlobStore();
+    console.log('💾 Saving comments to Netlify Blobs');
+    console.log('📊 Storing', Object.keys(store).length, 'article(s)');
 
-    if (storageMode === 'file') {
-      console.log('💾 Saving comments store to local fallback file');
-      await saveFallbackStore(store);
-      return;
-    }
+    await blobStore.setJSON('all-comments', store);
 
-    const blobStoreInstance = await getBlobStore();
-    console.log('💾 Saving comments store to Netlify Blobs');
-    console.log('Store has', Object.keys(store).length, 'articles');
-    await blobStoreInstance.setJSON('all-comments', store);
-    console.log('✅ Comments saved successfully to Netlify Blobs');
+    console.log('✅ Comments saved successfully');
+
+    // Verify the save
+    const verify = await blobStore.get('all-comments', { type: 'json' });
+    if (verify) {
+      console.log('✅ Verified:', Object.keys(verify).length, 'article(s) persisted');
+    }
   } catch (error) {
-    console.error('❌ Error writing comments store to Blobs:', error);
+    console.error('❌ CRITICAL: Failed to save comments:', error);
     console.error('Stack:', error.stack);
-    storageMode = 'file';
-    await saveFallbackStore(store);
-  }
-}
-
-async function loadFallbackStore() {
-  try {
-    const raw = await fs.readFile(FALLBACK_PATH, 'utf8');
-    const parsed = JSON.parse(raw || '{}');
-    console.log('Loaded comments from fallback file with', Object.keys(parsed).length, 'articles');
-    return parsed;
-  } catch (error) {
-    if (error.code === 'ENOENT') {
-      console.log('Fallback comments file not found, creating fresh store');
-      await saveFallbackStore({});
-      return {};
-    }
-    console.error('Error reading fallback comments file:', error);
-    return {};
-  }
-}
-
-async function saveFallbackStore(store) {
-  try {
-    await fs.mkdir(path.dirname(FALLBACK_PATH), { recursive: true });
-    await fs.writeFile(FALLBACK_PATH, JSON.stringify(store, null, 2), 'utf8');
-    console.log('✅ Comments saved to fallback file');
-  } catch (error) {
-    console.error('Failed to write fallback comments file:', error);
+    throw error; // Don't silently fail on save errors
   }
 }
 
@@ -166,17 +108,13 @@ exports.handler = async (event, context) => {
   console.log('=== Function Invoked ===');
   console.log('Method:', event.httpMethod);
   console.log('Path:', event.path);
-  console.log('RawUrl:', event.rawUrl);
 
   const method = event.httpMethod;
   const path = event.path || '';
   const rawUrl = event.rawUrl || '';
 
   try {
-    // Set context for Blobs
-    currentContext = context;
-    console.log('Context initialized');
-
+    // Load comments from persistent storage
     await refreshStore();
 
     // Handle CORS preflight
@@ -280,40 +218,22 @@ exports.handler = async (event, context) => {
 
         const articleKey = String(articleId);
         const comments = commentsStore[articleKey] || [];
-        console.log('=== LIKE DEBUG ===');
-        console.log('Article ID:', articleKey);
-        console.log('Looking for comment ID:', commentId);
-        console.log('Total comments in store:', comments.length);
-        console.log('Comment IDs in store:', comments.map(c => ({ id: c.id, type: c.type, author: c.author.name })));
-        console.log('Full commentsStore keys:', Object.keys(commentsStore));
-        console.log('Full commentsStore:', JSON.stringify(commentsStore, null, 2));
 
         const comment = comments.find(c => c.id === commentId);
 
         if (!comment) {
           console.log('❌ Comment NOT FOUND');
-          console.log('Requested comment ID:', commentId);
-          console.log('Available comment IDs:', comments.map(c => c.id));
           return {
             statusCode: 404,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({
-              error: 'Comment not found',
-              requestedId: commentId,
-              availableIds: comments.map(c => c.id),
-              totalComments: comments.length
-            })
+            body: JSON.stringify({ error: 'Comment not found' })
           };
         }
 
-        console.log('✅ Comment FOUND:', comment.id);
-
         // Handle reply like
         if (replyId) {
-          console.log('Liking reply:', replyId);
           const reply = comment.replies.find(r => r.id === replyId);
           if (!reply) {
-            console.log('Reply not found:', replyId);
             return {
               statusCode: 404,
               headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -324,21 +244,16 @@ exports.handler = async (event, context) => {
           const likeIndex = reply.likes.indexOf(tokenData.email);
           if (likeIndex > -1) {
             reply.likes.splice(likeIndex, 1);
-            console.log('Unliked reply');
           } else {
             reply.likes.push(tokenData.email);
-            console.log('Liked reply');
           }
         } else {
           // Handle comment like
-          console.log('Liking comment:', commentId);
           const likeIndex = comment.likes.indexOf(tokenData.email);
           if (likeIndex > -1) {
             comment.likes.splice(likeIndex, 1);
-            console.log('Unliked comment');
           } else {
             comment.likes.push(tokenData.email);
-            console.log('Liked comment');
           }
         }
 
@@ -358,7 +273,6 @@ exports.handler = async (event, context) => {
         const { articleId, commentId, text, username } = requestBody;
 
         if (!articleId || !commentId || !text) {
-          console.log('Missing required fields for reply');
           return {
             statusCode: 400,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -368,34 +282,16 @@ exports.handler = async (event, context) => {
 
         const articleKey = String(articleId);
         const comments = commentsStore[articleKey] || [];
-        console.log('=== REPLY DEBUG ===');
-        console.log('Article ID:', articleKey);
-        console.log('Looking for comment ID:', commentId);
-        console.log('Total comments in store:', comments.length);
-        console.log('Comment IDs in store:', comments.map(c => ({ id: c.id, type: c.type, author: c.author.name })));
-        console.log('Full commentsStore keys:', Object.keys(commentsStore));
-
         const comment = comments.find(c => c.id === commentId);
 
         if (!comment) {
-          console.log('❌ Comment NOT FOUND for reply');
-          console.log('Requested comment ID:', commentId);
-          console.log('Available comment IDs:', comments.map(c => c.id));
           return {
             statusCode: 404,
             headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-            body: JSON.stringify({
-              error: 'Comment not found',
-              requestedId: commentId,
-              availableIds: comments.map(c => c.id),
-              totalComments: comments.length
-            })
+            body: JSON.stringify({ error: 'Comment not found' })
           };
         }
 
-        console.log('✅ Comment FOUND for reply:', comment.id);
-
-        // Use provided username or fall back to email prefix
         const displayName = username || tokenData.email.split('@')[0];
 
         const newReply = {
@@ -413,7 +309,7 @@ exports.handler = async (event, context) => {
         commentsStore[articleKey] = comments;
         await persistStore();
 
-        console.log('Reply created:', newReply.id);
+        console.log('✅ Reply created:', newReply.id);
 
         return {
           statusCode: 201,
@@ -427,7 +323,6 @@ exports.handler = async (event, context) => {
       const { articleId, text, type, username } = requestBody;
 
       if (!articleId || !text) {
-        console.log('Missing articleId or text for comment');
         return {
           statusCode: 400,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -443,7 +338,6 @@ exports.handler = async (event, context) => {
       if (commentType === 'reporter') {
         displayName = 'OnPointArticles Team';
       } else {
-        // Use provided username or fall back to email prefix
         displayName = username || tokenData.email.split('@')[0];
       }
 
@@ -466,9 +360,10 @@ exports.handler = async (event, context) => {
 
       comments.unshift(newComment);
       commentsStore[articleKey] = comments;
-      await persistStore();
 
-      console.log('Comment created:', newComment.id, 'by', tokenData.email, 'type:', commentType);
+      console.log('💬 Creating comment:', newComment.id, 'by', tokenData.email, 'type:', commentType);
+      await persistStore();
+      console.log('✅ Comment persisted successfully');
 
       return {
         statusCode: 201,
@@ -482,7 +377,6 @@ exports.handler = async (event, context) => {
       console.log('Processing DELETE action');
 
       if (!isAdmin) {
-        console.log('Non-admin tried to delete');
         return {
           statusCode: 403,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -493,7 +387,6 @@ exports.handler = async (event, context) => {
       const { articleId, commentId, replyId } = requestBody;
 
       if (!articleId || !commentId) {
-        console.log('Missing articleId or commentId for delete');
         return {
           statusCode: 400,
           headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
@@ -505,15 +398,11 @@ exports.handler = async (event, context) => {
       let comments = commentsStore[articleKey] || [];
 
       if (replyId) {
-        // Delete reply
-        console.log('Deleting reply:', replyId);
         const comment = comments.find(c => c.id === commentId);
         if (comment) {
           comment.replies = comment.replies.filter(r => r.id !== replyId);
         }
       } else {
-        // Delete comment
-        console.log('Deleting comment:', commentId);
         comments = comments.filter(c => c.id !== commentId);
       }
 
@@ -534,12 +423,16 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('ERROR in article-comments function:', error);
+    console.error('❌ CRITICAL ERROR in article-comments function:', error);
     console.error('Stack trace:', error.stack);
     return {
       statusCode: 500,
       headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: error.message, stack: error.stack })
+      body: JSON.stringify({
+        error: 'Internal server error',
+        message: error.message,
+        details: error.stack
+      })
     };
   }
 };
