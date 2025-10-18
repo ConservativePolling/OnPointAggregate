@@ -1,4 +1,3 @@
-const { getStore } = require('@netlify/blobs');
 const fs = require('fs/promises');
 const path = require('path');
 
@@ -12,10 +11,19 @@ let storageMode = 'blob'; // 'blob' | 'file'
 
 const FALLBACK_PATH = path.join(__dirname, '..', 'data', 'comments.json');
 
-function getBlobStore() {
+let blobsModulePromise = null;
+function loadBlobsModule() {
+  if (!blobsModulePromise) {
+    blobsModulePromise = import('@netlify/blobs');
+  }
+  return blobsModulePromise;
+}
+
+async function getBlobStore() {
   if (!currentContext) {
     throw new Error('Context not initialized');
   }
+  const { getStore } = await loadBlobsModule();
   const options = { name: 'comments' };
 
   if (currentContext.site?.id && currentContext.token) {
@@ -33,7 +41,7 @@ async function loadCommentsStore() {
       return {};
     }
 
-    const store = getBlobStore();
+    const store = await getBlobStore();
     console.log('Loading comments from Netlify Blobs');
     const data = await store.get('all-comments', { type: 'json' });
     if (!data) {
@@ -65,7 +73,7 @@ async function saveCommentsStore(store) {
       return;
     }
 
-    const blobStoreInstance = getBlobStore();
+    const blobStoreInstance = await getBlobStore();
     console.log('💾 Saving comments store to Netlify Blobs');
     console.log('Store has', Object.keys(store).length, 'articles');
     await blobStoreInstance.setJSON('all-comments', store);
