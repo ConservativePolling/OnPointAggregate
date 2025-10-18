@@ -1,58 +1,46 @@
-const fs = require('fs');
-const path = require('path');
+const { getStore } = require('@netlify/blobs');
 
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
-// Use /tmp directory which is writable in Netlify Functions
-const DATA_DIR = '/tmp';
-const COMMENTS_FILE = path.join(DATA_DIR, 'comments.json');
 
-console.log('Comments file location:', COMMENTS_FILE);
+console.log('Using Netlify Blobs for persistent comment storage');
 
-function ensureDataDir() {
-  try {
-    if (!fs.existsSync(DATA_DIR)) {
-      console.log('Creating data directory:', DATA_DIR);
-      fs.mkdirSync(DATA_DIR, { recursive: true });
-    }
-  } catch (error) {
-    console.error('Error creating data directory:', error);
+// Get Netlify Blobs store instance
+let blobStore = null;
+
+function getBlobStore() {
+  if (!blobStore) {
+    blobStore = getStore('comments');
   }
+  return blobStore;
 }
 
-function loadCommentsStore() {
+async function loadCommentsStore() {
   try {
-    ensureDataDir();
-    if (!fs.existsSync(COMMENTS_FILE)) {
-      console.log('Comments file does not exist yet, returning empty store');
+    const store = getBlobStore();
+    console.log('Loading comments from Netlify Blobs');
+    const data = await store.get('all-comments', { type: 'json' });
+    if (!data) {
+      console.log('No comments in store yet, returning empty store');
       return {};
     }
-    console.log('Loading comments from:', COMMENTS_FILE);
-    const contents = fs.readFileSync(COMMENTS_FILE, 'utf8');
-    const parsed = contents ? JSON.parse(contents) : {};
-    console.log('Loaded comments store with', Object.keys(parsed).length, 'articles');
-    return parsed;
+    console.log('Loaded comments store with', Object.keys(data).length, 'articles');
+    return data;
   } catch (error) {
-    console.error('❌ Error reading comments store:', error);
+    console.error('❌ Error reading comments store from Blobs:', error);
     console.error('Stack:', error.stack);
     return {};
   }
 }
 
-function saveCommentsStore(store) {
+async function saveCommentsStore(store) {
   try {
-    ensureDataDir();
-    console.log('💾 Saving comments store to:', COMMENTS_FILE);
+    const blobStoreInstance = getBlobStore();
+    console.log('💾 Saving comments store to Netlify Blobs');
     console.log('Store has', Object.keys(store).length, 'articles');
-    fs.writeFileSync(COMMENTS_FILE, JSON.stringify(store, null, 2), 'utf8');
-    console.log('✅ Comments saved successfully');
-
-    // Verify write
-    if (fs.existsSync(COMMENTS_FILE)) {
-      const size = fs.statSync(COMMENTS_FILE).size;
-      console.log('File size:', size, 'bytes');
-    }
+    await blobStoreInstance.setJSON('all-comments', store);
+    console.log('✅ Comments saved successfully to Netlify Blobs');
   } catch (error) {
-    console.error('❌ Error writing comments store:', error);
+    console.error('❌ Error writing comments store to Blobs:', error);
     console.error('Stack:', error.stack);
   }
 }
@@ -94,15 +82,16 @@ function generateId() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
-// In-memory storage
-let commentsStore = loadCommentsStore();
+// In-memory cache (refreshed on each function invocation)
+let commentsStore = null;
 
-function refreshStore() {
-  commentsStore = loadCommentsStore();
+async function refreshStore() {
+  commentsStore = await loadCommentsStore();
+  return commentsStore;
 }
 
-function persistStore() {
-  saveCommentsStore(commentsStore);
+async function persistStore() {
+  await saveCommentsStore(commentsStore);
 }
 
 exports.handler = async (event, context) => {
@@ -117,7 +106,7 @@ exports.handler = async (event, context) => {
   const rawUrl = event.rawUrl || '';
 
   try {
-    refreshStore();
+    await refreshStore();
 
     // Handle CORS preflight
     if (method === 'OPTIONS') {
@@ -283,7 +272,7 @@ exports.handler = async (event, context) => {
         }
 
         commentsStore[articleKey] = comments;
-        persistStore();
+        await persistStore();
 
         return {
           statusCode: 200,
@@ -351,7 +340,7 @@ exports.handler = async (event, context) => {
 
         comment.replies.push(newReply);
         commentsStore[articleKey] = comments;
-        persistStore();
+        await persistStore();
 
         console.log('Reply created:', newReply.id);
 
@@ -406,7 +395,7 @@ exports.handler = async (event, context) => {
 
       comments.unshift(newComment);
       commentsStore[articleKey] = comments;
-      persistStore();
+      await persistStore();
 
       console.log('Comment created:', newComment.id, 'by', tokenData.email, 'type:', commentType);
 
@@ -458,7 +447,7 @@ exports.handler = async (event, context) => {
       }
 
       commentsStore[articleKey] = comments;
-      persistStore();
+      await persistStore();
 
       return {
         statusCode: 200,
