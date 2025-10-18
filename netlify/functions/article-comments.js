@@ -2,20 +2,29 @@ const { getStore } = require('@netlify/blobs');
 
 const ADMIN_EMAIL = 'jaydenmdavis2008@outlook.com';
 
-console.log('Using Netlify Blobs for persistent comment storage');
+console.log('Comment storage initialized');
 
-// Get Netlify Blobs store instance
-let blobStore = null;
+// Store instance will be created with context
+let currentContext = null;
 
 function getBlobStore() {
-  if (!blobStore) {
-    blobStore = getStore('comments');
+  if (!currentContext) {
+    throw new Error('Context not initialized');
   }
-  return blobStore;
+  return getStore({
+    name: 'comments',
+    siteID: currentContext.site?.id,
+    token: currentContext.token
+  });
 }
 
 async function loadCommentsStore() {
   try {
+    if (!currentContext) {
+      console.log('⚠️ No context available, returning empty store');
+      return {};
+    }
+
     const store = getBlobStore();
     console.log('Loading comments from Netlify Blobs');
     const data = await store.get('all-comments', { type: 'json' });
@@ -28,12 +37,18 @@ async function loadCommentsStore() {
   } catch (error) {
     console.error('❌ Error reading comments store from Blobs:', error);
     console.error('Stack:', error.stack);
+    console.log('Returning empty store due to error');
     return {};
   }
 }
 
 async function saveCommentsStore(store) {
   try {
+    if (!currentContext) {
+      console.log('⚠️ No context available, cannot save');
+      return;
+    }
+
     const blobStoreInstance = getBlobStore();
     console.log('💾 Saving comments store to Netlify Blobs');
     console.log('Store has', Object.keys(store).length, 'articles');
@@ -99,13 +114,16 @@ exports.handler = async (event, context) => {
   console.log('Method:', event.httpMethod);
   console.log('Path:', event.path);
   console.log('RawUrl:', event.rawUrl);
-  console.log('Headers:', JSON.stringify(event.headers, null, 2));
 
   const method = event.httpMethod;
   const path = event.path || '';
   const rawUrl = event.rawUrl || '';
 
   try {
+    // Set context for Blobs
+    currentContext = context;
+    console.log('Context initialized');
+
     await refreshStore();
 
     // Handle CORS preflight
