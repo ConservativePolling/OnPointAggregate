@@ -671,7 +671,7 @@
                                                 </div>
                                                 
                                                 <h2 className={`text-5xl font-serif font-black mb-8 leading-[0.95] ${darkMode ? 'text-white group-hover:text-gray-200' : 'text-black group-hover:text-gray-800'} transition-colors`}>
-                                                    LESTER TELLEZ CHARGED
+                                                    {featuredArticles[0].title}
                                                 </h2>
                                                 
                                                 <div className="mb-8">
@@ -688,7 +688,7 @@
                                                 </div>
                                                 
                                                 <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-                                                    Former UCF student body presidential candidate and creator of Five Nights at Freddy's fan game 'Grizzly's' arrested on FIU campus for battery on persons with disabilities. Trial set for December 8.
+                                                    {featuredArticles[0].excerpt}
                                                 </p>
                                                 
                                                 <div className={`pt-6 border-t ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
@@ -1529,6 +1529,15 @@
             const [editWhatYouMustKnow, setEditWhatYouMustKnow] = useState('');
             const [editArticleBody, setEditArticleBody] = useState('');
 
+            const ensureIdentity = () => {
+                if (typeof window === 'undefined' || !window.netlifyIdentity) {
+                    console.error('Netlify Identity is not available on window for protected action.');
+                    alert('Authentication system not ready. Please refresh the page and try again.');
+                    return null;
+                }
+                return window.netlifyIdentity;
+            };
+
             useEffect(() => {
                 window.scrollTo(0, 0);
             }, []);
@@ -1584,11 +1593,13 @@
             }, []);
 
             // Submit comment
-            const handleSubmitComment = async (e) => {
+            const handleSubmitComment = async (e, typeOverride = null) => {
                 e.preventDefault();
 
+                const selectedType = typeOverride || commentType;
+
                 console.log('=== Submitting Comment ===');
-                console.log('Comment type:', commentType);
+                console.log('Comment type:', selectedType);
                 console.log('Comment text:', commentText);
                 console.log('Article ID:', article.id);
 
@@ -1603,10 +1614,16 @@
                     return;
                 }
 
+                const identity = ensureIdentity();
+                if (!identity) {
+                    return;
+                }
+
+                setCommentType(selectedType);
                 setIsSubmitting(true);
 
                 try {
-                    const currentUser = netlifyIdentity.currentUser();
+                    const currentUser = identity.currentUser();
                     const token = currentUser?.token?.access_token;
 
                     console.log('User email:', currentUser?.email);
@@ -1622,7 +1639,7 @@
                     const requestBody = {
                         articleId: article.id,
                         text: commentText,
-                        type: commentType,
+                        type: selectedType,
                         username: username
                     };
 
@@ -1647,6 +1664,7 @@
                         setComments(data.comments);
                         setDisplayedUserComments(data.comments); // Update displayed comments immediately
                         setCommentText('');
+                        setCommentType('user');
                         showSuccess('Comment posted!');
                     } else {
                         const error = await response.json();
@@ -1680,10 +1698,15 @@
                     return;
                 }
 
+                const identity = ensureIdentity();
+                if (!identity) {
+                    return;
+                }
+
                 setIsSubmitting(true);
 
                 try {
-                    const currentUser = netlifyIdentity.currentUser();
+                    const currentUser = identity.currentUser();
                     const token = currentUser?.token?.access_token;
 
                     console.log('User email:', currentUser?.email);
@@ -1761,8 +1784,13 @@
                     return;
                 }
 
+                const identity = ensureIdentity();
+                if (!identity) {
+                    return;
+                }
+
                 try {
-                    const currentUser = netlifyIdentity.currentUser();
+                    const currentUser = identity.currentUser();
                     const token = currentUser?.token?.access_token;
 
                     console.log('User email:', currentUser?.email);
@@ -1831,8 +1859,13 @@
                     return;
                 }
 
+                const identity = ensureIdentity();
+                if (!identity) {
+                    return;
+                }
+
                 try {
-                    const currentUser = netlifyIdentity.currentUser();
+                    const currentUser = identity.currentUser();
                     const token = currentUser?.token?.access_token;
 
                     if (!token) {
@@ -1942,11 +1975,11 @@
                             </div>
                             
                             <h1 className="text-5xl md:text-6xl font-serif font-black mb-6 leading-[0.95]">
-                                LESTER TELLEZ CHARGED
+                                {article.title}
                             </h1>
                             
                             <p className={`text-xl md:text-2xl mb-8 leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                Former UCF student body presidential candidate and creator of Five Nights at Freddy's fan game 'Grizzly's' arrested on FIU campus for battery on persons with disabilities. Trial set for December 8.
+                                {article.excerpt}
                             </p>
                             
                             <div className={`flex items-center space-x-6 pb-8 border-b ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
@@ -2292,7 +2325,7 @@
                                                 </svg>
                                                 <span className="text-sm font-bold text-blue-600">Admin Mode - Reporter Comment</span>
                                             </div>
-                                            <form onSubmit={(e) => { setCommentType('reporter'); handleSubmitComment(e); }}>
+                                            <form onSubmit={(e) => handleSubmitComment(e, 'reporter')}>
                                                 <textarea
                                                     value={commentText}
                                                     onChange={(e) => setCommentText(e.target.value)}
@@ -2500,7 +2533,7 @@
                                                     Commenting as {user.email.split('@')[0]}
                                                 </span>
                                             </div>
-                                            <form onSubmit={(e) => { setCommentType('user'); handleSubmitComment(e); }}>
+                                            <form onSubmit={(e) => handleSubmitComment(e, 'user')}>
                                                 <textarea
                                                     value={commentText}
                                                     onChange={(e) => setCommentText(e.target.value)}
