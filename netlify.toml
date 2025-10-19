@@ -9,6 +9,15 @@
   publish = "."
   functions = "netlify/functions"
 
+# Functions configuration
+[functions]
+  node_bundler = "esbuild"
+  included_files = ["netlify/data/**"]
+
+# Enable Netlify Blobs
+[blobs]
+  consistency = "strong"
+
 # Identity settings
 [identity]
   # Configure signup settings
