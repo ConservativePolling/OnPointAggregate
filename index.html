@@ -211,17 +211,13 @@
                 }
             }, []);
 
-            // Show subscription popup on first visit
+            // Show subscription popup on page load
             useEffect(() => {
-                // Check if user has seen the subscription announcement
-                const hasSeenSubscription = localStorage.getItem('hasSeenSubscription');
-                if (!hasSeenSubscription) {
-                    // Show popup after a brief delay (2 seconds)
-                    const timer = setTimeout(() => {
-                        setShowSubscriptionModal(true);
-                    }, 2000);
-                    return () => clearTimeout(timer);
-                }
+                // Show popup after a brief delay (2 seconds)
+                const timer = setTimeout(() => {
+                    setShowSubscriptionModal(true);
+                }, 2000);
+                return () => clearTimeout(timer);
             }, []);
 
             const checkUsername = (currentUser) => {
@@ -262,11 +258,6 @@
                 } else {
                     setShowLoginModal(true);
                 }
-            };
-
-            const closeSubscriptionModal = () => {
-                setShowSubscriptionModal(false);
-                localStorage.setItem('hasSeenSubscription', 'true');
             };
 
             const openAuthPage = (mode = 'signin') => {
@@ -1330,7 +1321,7 @@
 
                     {/* Subscription Modal */}
                     {showSubscriptionModal && (
-                        <SubscriptionModal darkMode={darkMode} onClose={closeSubscriptionModal} />
+                        <SubscriptionModal darkMode={darkMode} onClose={() => setShowSubscriptionModal(false)} />
                     )}
                 </div>
             );
@@ -1631,9 +1622,6 @@
                         <div className="px-4 py-8 sm:px-8 sm:py-12 md:px-12 md:py-16">
                             {/* Header */}
                             <div className="text-center mb-6 sm:mb-10">
-                                <div className={`inline-flex items-center justify-center w-12 h-12 sm:w-16 sm:h-16 mb-4 sm:mb-6 text-xs sm:text-sm font-black ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
-                                    OPA
-                                </div>
                                 <div className={`inline-block px-2 sm:px-3 py-1 mb-3 sm:mb-4 text-[10px] sm:text-xs font-bold uppercase tracking-wider border ${darkMode ? 'border-gray-700 text-gray-400' : 'border-gray-300 text-gray-600'}`}>
                                     Coming Soon
                                 </div>
