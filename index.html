@@ -220,6 +220,19 @@
                 return () => clearTimeout(timer);
             }, []);
 
+            // Lock body scroll when subscription modal is open
+            useEffect(() => {
+                if (showSubscriptionModal) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'unset';
+                }
+                // Cleanup on unmount
+                return () => {
+                    document.body.style.overflow = 'unset';
+                };
+            }, [showSubscriptionModal]);
+
             const checkUsername = (currentUser) => {
                 if (!currentUser) return;
 
