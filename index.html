@@ -71,6 +71,35 @@
         .prose p {
             margin-bottom: 1.5rem;
         }
+
+        /* Modal animations */
+        @keyframes modalOverlayFadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes modalContentFadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-overlay {
+            animation: modalOverlayFadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .modal-content {
+            animation: modalContentFadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
     </style>
 </head>
 <body>
@@ -232,6 +261,66 @@
                     document.body.style.overflow = 'unset';
                 };
             }, [showSubscriptionModal]);
+
+            // Lock body scroll when login modal is open
+            useEffect(() => {
+                if (showLoginModal) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'unset';
+                }
+                return () => {
+                    document.body.style.overflow = 'unset';
+                };
+            }, [showLoginModal]);
+
+            // Lock body scroll when TOS modal is open
+            useEffect(() => {
+                if (showTOSModal) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'unset';
+                }
+                return () => {
+                    document.body.style.overflow = 'unset';
+                };
+            }, [showTOSModal]);
+
+            // Lock body scroll when username modal is open
+            useEffect(() => {
+                if (showUsernameModal) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'unset';
+                }
+                return () => {
+                    document.body.style.overflow = 'unset';
+                };
+            }, [showUsernameModal]);
+
+            // Lock body scroll when auth page is open
+            useEffect(() => {
+                if (showAuthPage) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'unset';
+                }
+                return () => {
+                    document.body.style.overflow = 'unset';
+                };
+            }, [showAuthPage]);
+
+            // Lock body scroll when account modal is open
+            useEffect(() => {
+                if (showAccountModal) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = 'unset';
+                }
+                return () => {
+                    document.body.style.overflow = 'unset';
+                };
+            }, [showAccountModal]);
 
             const checkUsername = (currentUser) => {
                 if (!currentUser) return;
@@ -1619,8 +1708,8 @@
 
         function SubscriptionModal({ darkMode, onClose }) {
             return (
-                <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black bg-opacity-90 flex items-center justify-center p-2 sm:p-4">
-                    <div className={`relative w-full max-w-3xl ${darkMode ? 'bg-black' : 'bg-white'}`}>
+                <div className="modal-overlay fixed inset-0 z-[9999] overflow-y-auto bg-black bg-opacity-90 flex items-center justify-center p-2 sm:p-4">
+                    <div className={`modal-content relative w-full max-w-3xl ${darkMode ? 'bg-black' : 'bg-white'}`}>
                         {/* Close Button */}
                         <button
                             onClick={onClose}
