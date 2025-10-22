@@ -144,6 +144,35 @@
 
         const articles = [
             {
+                id: 999,
+                title: "TRUMP WINS 2024 PRESIDENTIAL ELECTION",
+                excerpt: "Donald Trump secures decisive victory over Kamala Harris with 312 electoral votes, sweeping all seven battleground states in historic comeback. Republicans capture popular vote for first time in 20 years.",
+                category: "Politics",
+                author: "The OnPoint Articles Team",
+                date: "2024-11-06",
+                readTime: "12 min read",
+                image: "https://images.unsplash.com/photo-1584731167471-3bb0c66bf1e1?w=1200&h=675&fit=crop",
+                featured: true,
+                breaking: true,
+                isElectionResults: true,
+                liveUpdates: [
+                    { time: "02:45", text: "Associated Press calls Pennsylvania for Trump, securing 270+ electoral votes and the presidency" },
+                    { time: "01:30", text: "Trump wins Wisconsin, completing sweep of all seven battleground states" },
+                    { time: "00:15", text: "Nevada called for Trump - first Republican win in Silver State since 2004" },
+                    { time: "23:45", text: "Arizona projected for Trump, expanding electoral lead to 295 votes" },
+                    { time: "23:00", text: "Michigan falls to Trump, marking sixth battleground state flip from 2020" },
+                    { time: "21:30", text: "Georgia called for Trump - critical flip in the Deep South" },
+                    { time: "20:00", text: "North Carolina projected for Trump, first battleground state decided" }
+                ],
+                reporterComments: [
+                    { timestamp: "2024-11-06T03:00:00", text: "<span class='font-bold'>HISTORIC VICTORY:</span> Donald Trump has secured the presidency with a commanding 312-226 electoral vote victory over Vice President Kamala Harris. This marks an extraordinary political comeback for Trump, who becomes only the second president in U.S. history to serve non-consecutive terms. His sweep of all seven battleground states—Pennsylvania, Georgia, North Carolina, Michigan, Arizona, Wisconsin, and Nevada—represents a complete repudiation of the Democratic coalition that carried these states in 2020.", highlighted: true },
+                    { timestamp: "2024-11-06T02:30:00", text: "The popular vote margin is equally significant. Trump secured approximately 77.3 million votes (49.9%) to Harris' 75 million (48.4%), marking the first time a Republican has won the national popular vote since George W. Bush in 2004. This 2.3 million vote margin demolishes the narrative that Trump's support is limited to the Electoral College.", highlighted: false },
+                    { timestamp: "2024-11-06T01:45:00", text: "The swing state margins tell the story of a broad-based shift toward Trump. In Pennsylvania, Trump won by 1.7 points after losing by 1.2 in 2020—a 3-point swing. Georgia flipped by 2.2 points, Michigan by 1.7 points, and Wisconsin by 0.9 points. Even in states Harris won, Trump dramatically improved his margins, cutting into Democratic strongholds across the board.", highlighted: false },
+                    { timestamp: "2024-11-06T01:00:00", text: "Exit polling reveals the demographics of Trump's victory. He made significant gains with Hispanic voters, winning approximately 45% compared to 32% in 2020. Young voters shifted right, with Trump winning men under 30 and narrowing the gap with women in that demographic. Working-class voters of all races moved toward Trump, particularly in industrial states.", highlighted: false },
+                    { timestamp: "2024-11-05T23:00:00", text: "The congressional implications are profound. Republicans have secured the Senate with at least 52 seats, flipping Montana, West Virginia, and Ohio. The House remains too close to call, but Republicans lead in several key races that could expand their majority. Trump will enter office with a governing trifecta if Republicans hold the House.", highlighted: false }
+                ]
+            },
+            {
                 id: 1,
                 title: "LESTER TELLEZ PLEADS NOT GUILTY, DEMANDS JURY TRIAL",
                 excerpt: "Former UCF student body presidential candidate formally enters not guilty plea to battery charges and demands trial by jury. Defense attorney files for Brady/Bagley material as case heads to December 8 trial.",
@@ -1840,6 +1869,181 @@
             );
         }
 
+        // Electoral Results Component
+        function ElectoralResults({ darkMode }) {
+            const [hoveredState, setHoveredState] = useState(null);
+
+            const electionData = {
+                trump: { name: "Donald J. Trump", party: "Republican", electoral: 312, popular: 77303573, percent: 49.9, color: "#DC2626", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/5/56/Donald_Trump_official_portrait.jpg/440px-Donald_Trump_official_portrait.jpg" },
+                harris: { name: "Kamala D. Harris", party: "Democratic", electoral: 226, popular: 75019257, percent: 48.4, color: "#2563EB", image: "https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Kamala_Harris_Vice_Presidential_Portrait.jpg/440px-Kamala_Harris_Vice_Presidential_Portrait.jpg" }
+            };
+
+            const swingStates = [
+                { name: "Pennsylvania", abbr: "PA", ev: 19, winner: "Trump", trumpPct: 50.4, harrisPct: 48.7, trumpVotes: "3,544,813", harrisVotes: "3,424,587" },
+                { name: "Georgia", abbr: "GA", ev: 16, winner: "Trump", trumpPct: 50.7, harrisPct: 48.5, trumpVotes: "2,661,477", harrisVotes: "2,547,398" },
+                { name: "North Carolina", abbr: "NC", ev: 16, winner: "Trump", trumpPct: 50.9, harrisPct: 47.6, trumpVotes: "2,898,428", harrisVotes: "2,708,547" },
+                { name: "Michigan", abbr: "MI", ev: 15, winner: "Trump", trumpPct: 49.7, harrisPct: 48.3, trumpVotes: "2,804,647", harrisVotes: "2,724,373" },
+                { name: "Arizona", abbr: "AZ", ev: 11, winner: "Trump", trumpPct: 52.2, harrisPct: 46.7, trumpVotes: "1,770,965", harrisVotes: "1,584,398" },
+                { name: "Wisconsin", abbr: "WI", ev: 10, winner: "Trump", trumpPct: 49.6, harrisPct: 48.8, trumpVotes: "1,697,769", harrisVotes: "1,668,372" },
+                { name: "Nevada", abbr: "NV", ev: 6, winner: "Trump", trumpPct: 50.6, harrisPct: 47.5, trumpVotes: "751,725", harrisVotes: "705,101" }
+            ];
+
+            const stateResults = [
+                { name: "Alabama", abbr: "AL", ev: 9, winner: "Trump", trumpPct: 64.8, harrisPct: 34.2 },
+                { name: "Alaska", abbr: "AK", ev: 3, winner: "Trump", trumpPct: 54.6, harrisPct: 42.8 },
+                { name: "Arizona", abbr: "AZ", ev: 11, winner: "Trump", trumpPct: 52.2, harrisPct: 46.7 },
+                { name: "Arkansas", abbr: "AR", ev: 6, winner: "Trump", trumpPct: 63.9, harrisPct: 34.1 },
+                { name: "California", abbr: "CA", ev: 54, winner: "Harris", trumpPct: 39.2, harrisPct: 58.4 },
+                { name: "Colorado", abbr: "CO", ev: 10, winner: "Harris", trumpPct: 44.5, harrisPct: 53.3 },
+                { name: "Connecticut", abbr: "CT", ev: 7, winner: "Harris", trumpPct: 43.4, harrisPct: 55.1 },
+                { name: "Delaware", abbr: "DE", ev: 3, winner: "Harris", trumpPct: 41.9, harrisPct: 56.5 },
+                { name: "Florida", abbr: "FL", ev: 30, winner: "Trump", trumpPct: 56.1, harrisPct: 43.0 },
+                { name: "Georgia", abbr: "GA", ev: 16, winner: "Trump", trumpPct: 50.7, harrisPct: 48.5 },
+                { name: "Hawaii", abbr: "HI", ev: 4, winner: "Harris", trumpPct: 38.5, harrisPct: 59.6 },
+                { name: "Idaho", abbr: "ID", ev: 4, winner: "Trump", trumpPct: 66.8, harrisPct: 31.2 },
+                { name: "Illinois", abbr: "IL", ev: 19, winner: "Harris", trumpPct: 44.9, harrisPct: 53.8 },
+                { name: "Indiana", abbr: "IN", ev: 11, winner: "Trump", trumpPct: 58.0, harrisPct: 40.2 },
+                { name: "Iowa", abbr: "IA", ev: 6, winner: "Trump", trumpPct: 56.0, harrisPct: 42.6 },
+                { name: "Kansas", abbr: "KS", ev: 6, winner: "Trump", trumpPct: 57.2, harrisPct: 41.0 },
+                { name: "Kentucky", abbr: "KY", ev: 8, winner: "Trump", trumpPct: 64.4, harrisPct: 34.2 },
+                { name: "Louisiana", abbr: "LA", ev: 8, winner: "Trump", trumpPct: 59.2, harrisPct: 39.5 },
+                { name: "Maine", abbr: "ME", ev: 4, winner: "Harris", trumpPct: 45.6, harrisPct: 52.3 },
+                { name: "Maryland", abbr: "MD", ev: 10, winner: "Harris", trumpPct: 36.3, harrisPct: 62.5 },
+                { name: "Massachusetts", abbr: "MA", ev: 11, winner: "Harris", trumpPct: 37.9, harrisPct: 60.8 },
+                { name: "Michigan", abbr: "MI", ev: 15, winner: "Trump", trumpPct: 49.7, harrisPct: 48.3 },
+                { name: "Minnesota", abbr: "MN", ev: 10, winner: "Harris", trumpPct: 46.8, harrisPct: 51.1 },
+                { name: "Mississippi", abbr: "MS", ev: 6, winner: "Trump", trumpPct: 61.5, harrisPct: 37.4 },
+                { name: "Missouri", abbr: "MO", ev: 10, winner: "Trump", trumpPct: 58.5, harrisPct: 40.0 },
+                { name: "Montana", abbr: "MT", ev: 4, winner: "Trump", trumpPct: 58.6, harrisPct: 39.1 },
+                { name: "Nebraska", abbr: "NE", ev: 5, winner: "Trump", trumpPct: 59.1, harrisPct: 39.2 },
+                { name: "Nevada", abbr: "NV", ev: 6, winner: "Trump", trumpPct: 50.6, harrisPct: 47.5 },
+                { name: "New Hampshire", abbr: "NH", ev: 4, winner: "Harris", trumpPct: 48.3, harrisPct: 50.4 },
+                { name: "New Jersey", abbr: "NJ", ev: 14, winner: "Harris", trumpPct: 45.7, harrisPct: 52.9 },
+                { name: "New Mexico", abbr: "NM", ev: 5, winner: "Harris", trumpPct: 43.8, harrisPct: 54.3 },
+                { name: "New York", abbr: "NY", ev: 28, winner: "Harris", trumpPct: 44.2, harrisPct: 55.8 },
+                { name: "North Carolina", abbr: "NC", ev: 16, winner: "Trump", trumpPct: 50.9, harrisPct: 47.6 },
+                { name: "North Dakota", abbr: "ND", ev: 3, winner: "Trump", trumpPct: 67.5, harrisPct: 30.9 },
+                { name: "Ohio", abbr: "OH", ev: 17, winner: "Trump", trumpPct: 55.2, harrisPct: 43.9 },
+                { name: "Oklahoma", abbr: "OK", ev: 7, winner: "Trump", trumpPct: 66.1, harrisPct: 32.3 },
+                { name: "Oregon", abbr: "OR", ev: 8, winner: "Harris", trumpPct: 43.1, harrisPct: 54.8 },
+                { name: "Pennsylvania", abbr: "PA", ev: 19, winner: "Trump", trumpPct: 50.4, harrisPct: 48.7 },
+                { name: "Rhode Island", abbr: "RI", ev: 4, winner: "Harris", trumpPct: 41.1, harrisPct: 57.4 },
+                { name: "South Carolina", abbr: "SC", ev: 9, winner: "Trump", trumpPct: 58.3, harrisPct: 40.5 },
+                { name: "South Dakota", abbr: "SD", ev: 3, winner: "Trump", trumpPct: 63.0, harrisPct: 35.2 },
+                { name: "Tennessee", abbr: "TN", ev: 11, winner: "Trump", trumpPct: 64.2, harrisPct: 34.3 },
+                { name: "Texas", abbr: "TX", ev: 40, winner: "Trump", trumpPct: 56.3, harrisPct: 42.4 },
+                { name: "Utah", abbr: "UT", ev: 6, winner: "Trump", trumpPct: 58.1, harrisPct: 39.1 },
+                { name: "Vermont", abbr: "VT", ev: 3, winner: "Harris", trumpPct: 35.8, harrisPct: 63.0 },
+                { name: "Virginia", abbr: "VA", ev: 13, winner: "Harris", trumpPct: 46.8, harrisPct: 51.8 },
+                { name: "Washington", abbr: "WA", ev: 12, winner: "Harris", trumpPct: 42.3, harrisPct: 56.2 },
+                { name: "West Virginia", abbr: "WV", ev: 4, winner: "Trump", trumpPct: 70.1, harrisPct: 28.3 },
+                { name: "Wisconsin", abbr: "WI", ev: 10, winner: "Trump", trumpPct: 49.6, harrisPct: 48.8 },
+                { name: "Wyoming", abbr: "WY", ev: 3, winner: "Trump", trumpPct: 72.3, harrisPct: 25.7 }
+            ];
+
+            return (
+                <div className="mb-12">
+                    {/* Candidates Section */}
+                    <div className={`grid md:grid-cols-2 gap-6 mb-12 border ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
+                        {/* Trump */}
+                        <div className={`p-6 ${darkMode ? 'bg-zinc-950' : 'bg-white'}`}>
+                            <div className="flex items-start space-x-4">
+                                <img src={electionData.trump.image} alt="Donald Trump" className="w-24 h-24 object-cover" />
+                                <div className="flex-1">
+                                    <div className={`text-xs font-bold uppercase tracking-wider mb-1 ${darkMode ? 'text-red-400' : 'text-red-600'}`}>Winner</div>
+                                    <h3 className={`text-xl font-serif font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{electionData.trump.name}</h3>
+                                    <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{electionData.trump.party}</div>
+                                    <div className={`text-4xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{electionData.trump.electoral}</div>
+                                    <div className={`text-xs uppercase tracking-wider ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Electoral Votes</div>
+                                    <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+                                        <div className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{electionData.trump.popular.toLocaleString()}</div>
+                                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{electionData.trump.percent}% Popular Vote</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Harris */}
+                        <div className={`p-6 border-l ${darkMode ? 'bg-zinc-950 border-gray-900' : 'bg-white border-gray-200'}`}>
+                            <div className="flex items-start space-x-4">
+                                <img src={electionData.harris.image} alt="Kamala Harris" className="w-24 h-24 object-cover" />
+                                <div className="flex-1">
+                                    <div className={`text-xs font-bold uppercase tracking-wider mb-1 ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>Runner-Up</div>
+                                    <h3 className={`text-xl font-serif font-bold mb-1 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{electionData.harris.name}</h3>
+                                    <div className={`text-sm mb-3 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{electionData.harris.party}</div>
+                                    <div className={`text-4xl font-bold mb-2 ${darkMode ? 'text-white' : 'text-gray-900'}`}>{electionData.harris.electoral}</div>
+                                    <div className={`text-xs uppercase tracking-wider ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>Electoral Votes</div>
+                                    <div className={`mt-4 pt-4 border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
+                                        <div className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{electionData.harris.popular.toLocaleString()}</div>
+                                        <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{electionData.harris.percent}% Popular Vote</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Swing States Tracker */}
+                    <div className="mb-12">
+                        <h3 className={`text-2xl font-serif font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>Battleground States</h3>
+                        <div className={`border ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
+                            <div className={`grid grid-cols-4 border-b font-bold text-xs uppercase tracking-wider ${darkMode ? 'border-gray-900 bg-zinc-950 text-gray-400' : 'border-gray-200 bg-gray-50 text-gray-600'}`}>
+                                <div className="p-3">State</div>
+                                <div className="p-3 text-center">EV</div>
+                                <div className="p-3 text-center">Trump</div>
+                                <div className="p-3 text-center">Harris</div>
+                            </div>
+                            {swingStates.map(state => (
+                                <div key={state.abbr} className={`grid grid-cols-4 border-b ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
+                                    <div className={`p-3 font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{state.name}</div>
+                                    <div className={`p-3 text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{state.ev}</div>
+                                    <div className={`p-3 text-center font-bold ${darkMode ? 'text-red-400' : 'text-red-600'}`}>{state.trumpPct}%</div>
+                                    <div className={`p-3 text-center ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{state.harrisPct}%</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* State by State Grid */}
+                    <div>
+                        <h3 className={`text-2xl font-serif font-bold mb-4 ${darkMode ? 'text-white' : 'text-gray-900'}`}>All 50 States</h3>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
+                            {stateResults.map(state => (
+                                <div
+                                    key={state.abbr}
+                                    onMouseEnter={() => setHoveredState(state)}
+                                    onMouseLeave={() => setHoveredState(null)}
+                                    className={`relative p-4 border cursor-pointer transition-all ${
+                                        state.winner === 'Trump'
+                                            ? (darkMode ? 'bg-red-950 border-red-900 hover:bg-red-900' : 'bg-red-50 border-red-200 hover:bg-red-100')
+                                            : (darkMode ? 'bg-blue-950 border-blue-900 hover:bg-blue-900' : 'bg-blue-50 border-blue-200 hover:bg-blue-100')
+                                    }`}
+                                >
+                                    <div className={`text-xs font-bold mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{state.abbr}</div>
+                                    <div className={`text-2xl font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>{state.ev}</div>
+
+                                    {/* Hover Tooltip */}
+                                    {hoveredState?.abbr === state.abbr && (
+                                        <div className={`absolute z-10 bottom-full left-0 mb-2 p-3 border shadow-lg min-w-[200px] ${darkMode ? 'bg-black border-gray-800 text-white' : 'bg-white border-gray-300 text-gray-900'}`}>
+                                            <div className="font-bold mb-2">{state.name}</div>
+                                            <div className="text-sm space-y-1">
+                                                <div>Electoral Votes: <span className="font-bold">{state.ev}</span></div>
+                                                <div className={state.winner === 'Trump' ? (darkMode ? 'text-red-400' : 'text-red-600') : ''}>
+                                                    Trump: <span className="font-bold">{state.trumpPct}%</span>
+                                                </div>
+                                                <div className={state.winner === 'Harris' ? (darkMode ? 'text-blue-400' : 'text-blue-600') : ''}>
+                                                    Harris: <span className="font-bold">{state.harrisPct}%</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
         function ArticleView({ article, darkMode, setDarkMode, onBack, user, username, savedArticles, toggleSaveArticle, openAuthPage }) {
             const [currentTime, setCurrentTime] = useState(new Date());
             const [comments, setComments] = useState([]);
@@ -2432,11 +2636,108 @@
                             </div>
                         )}
 
+                        {/* Electoral Results Component for Election Article */}
+                        {article.isElectionResults && (
+                            <ElectoralResults darkMode={darkMode} />
+                        )}
+
                         {/* Article Body - With Login Wall Overlay for Non-Authenticated Users */}
                         <div className={`prose max-w-none relative ${!user ? 'max-h-[600px] overflow-hidden' : ''}`}>
-                            <p className={`text-xl leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
-                                Lester Gabriel Tellez, a 20-year-old former University of Central Florida student body presidential candidate and indie game developer, was arrested on October 9, 2025, by Florida International University Campus Police on the FIU campus in Miami-Dade County, Florida. Authorities charged him with two third-degree felony counts of battery on persons with mental or physical disabilities under Florida Statute § 784.085. He was released shortly after booking on a $5,000 bond.
-                            </p>
+                            {article.isElectionResults ? (
+                                <>
+                                    <p className={`text-xl leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        In a stunning political comeback, Donald J. Trump has been elected the 47th President of the United States, defeating Vice President Kamala Harris in a decisive Electoral College victory that defied polling expectations and reshaped the American political landscape.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Trump secured 312 electoral votes to Harris's 226, surpassing the 270 needed to win. The former president's victory was powered by sweeping wins across all seven battleground states—Pennsylvania, Georgia, North Carolina, Michigan, Wisconsin, Arizona, and Nevada—marking the first time since 2004 that one candidate won every contested swing state.
+                                    </p>
+
+                                    <h2 className={`text-3xl font-serif font-bold mt-12 mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        The Path to 270
+                                    </h2>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Trump's victory was built on a foundation of working-class support across the Rust Belt and Sun Belt. Pennsylvania, the largest battleground prize with 19 electoral votes, proved decisive. Trump's 50.4% to 48.7% margin in the Keystone State represented a dramatic shift from 2020, when President Biden carried the state by 1.2 percentage points.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        In the Sun Belt, Trump's victories were equally commanding. He won Georgia by 2.2 points and North Carolina by 3.0 points, states that had been considered toss-ups throughout the campaign. His 1.4-point victory in Arizona marked a return of the state to the Republican column after Biden's narrow 2020 win.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Perhaps most surprisingly, Trump flipped Michigan and Wisconsin, two states that formed part of Democrats' "blue wall" for decades. His 1.8-point victory in Michigan and 1.1-point win in Wisconsin demonstrated the breadth of his coalition and the extent of Democratic erosion in formerly safe territory.
+                                    </p>
+
+                                    <h2 className={`text-3xl font-serif font-bold mt-12 mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        A Broad Coalition
+                                    </h2>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Trump's 49.9% to 48.4% popular vote victory—with more than 77.3 million votes—represented a significant improvement over his 2020 performance. Exit polls showed Trump made substantial gains among Latino voters, young men, and working-class voters across racial lines.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        In heavily Latino counties across Texas, Florida, and Nevada, Trump posted double-digit improvements over his 2020 margins. His economic message, centered on inflation, border security, and American manufacturing, resonated with voters who felt left behind by the Biden-Harris administration's policies.
+                                    </p>
+
+                                    <h2 className={`text-3xl font-serif font-bold mt-12 mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        Harris's Struggles
+                                    </h2>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Vice President Harris faced significant headwinds throughout the campaign. Despite strong fundraising and enthusiastic rallies, she struggled to distance herself from the Biden administration's record on inflation and the southern border. Her inability to articulate a clear economic vision distinct from Biden proved costly with working-class voters.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Harris underperformed Biden's 2020 margins in virtually every demographic group and geographic region. She lost ground with Black voters, particularly Black men, and saw catastrophic losses among Latino voters. Even in reliably Democratic states like New York, New Jersey, and California, Harris's margins were significantly smaller than Biden's four years earlier.
+                                    </p>
+
+                                    <h2 className={`text-3xl font-serif font-bold mt-12 mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        Historical Significance
+                                    </h2>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Trump's victory makes him only the second president in American history to win non-consecutive terms, joining Grover Cleveland. At 78, he will be the oldest person inaugurated as president, surpassing the record set by Joe Biden in 2021.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        The win comes despite Trump facing four criminal indictments and 91 felony charges across multiple jurisdictions. His ability to maintain and expand his political coalition while under unprecedented legal scrutiny defied conventional political wisdom and rewrote the rules of American politics.
+                                    </p>
+
+                                    <h2 className={`text-3xl font-serif font-bold mt-12 mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        Republican Gains Down Ballot
+                                    </h2>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Trump's coattails helped Republicans secure control of the United States Senate, with key victories in Montana, Ohio, and West Virginia. The GOP held all of its Senate seats while flipping Democratic-held seats, giving Republicans a working majority heading into 2025.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Control of the House of Representatives remained competitive, with several races too close to call on election night. However, Republicans expressed confidence they would maintain their narrow majority, potentially giving Trump unified control of government for at least the first two years of his term.
+                                    </p>
+
+                                    <h2 className={`text-3xl font-serif font-bold mt-12 mb-6 ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                                        Looking Ahead
+                                    </h2>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Trump's victory speech emphasized unity and promised to be a "president for all Americans." He outlined an ambitious agenda including border security, energy independence, tax cuts, and deregulation. His transition team has already begun planning for a dramatic first 100 days designed to quickly implement his campaign promises.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        For Democrats, the loss prompted immediate soul-searching about the party's direction. Progressive and moderate factions began debating whether the party had moved too far left on cultural issues or failed to adequately address economic concerns of working-class voters. The 2028 presidential race will likely feature intense competition among Democrats seeking to chart a new course for the party.
+                                    </p>
+
+                                    <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        As Trump prepares to return to the White House on January 20, 2025, America stands at a pivotal moment. His unprecedented political comeback, fueled by a diverse coalition united by economic concerns and cultural grievances, has reshaped American politics in ways that will reverberate for years to come.
+                                    </p>
+                                </>
+                            ) : (
+                                <>
+                                    <p className={`text-xl leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                        Lester Gabriel Tellez, a 20-year-old former University of Central Florida student body presidential candidate and indie game developer, was arrested on October 9, 2025, by Florida International University Campus Police on the FIU campus in Miami-Dade County, Florida. Authorities charged him with two third-degree felony counts of battery on persons with mental or physical disabilities under Florida Statute § 784.085. He was released shortly after booking on a $5,000 bond.
+                                    </p>
 
                             <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
                                 Tellez, born November 15, 2004, had built a notable presence across multiple communities. He gained recognition within gaming circles as the creator of "Grizzly's," an independently developed horror game inspired by Scott Cawthon's Five Nights at Freddy's franchise. Beyond gaming, he operated "On Point Politics," a YouTube channel focused on conservative political commentary. Prior to his arrest, Tellez and his associates had been banned from FIU campus, events, and activities due to ongoing political disputes and behavioral violations.
