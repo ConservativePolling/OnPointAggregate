@@ -237,6 +237,8 @@
             const [authLoading, setAuthLoading] = useState(false);
             const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
+            const articleBodyClass = `prose max-w-none relative ${!user ? 'max-h-[600px] overflow-hidden' : ''}`;
+
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 50);
                 window.addEventListener('scroll', handleScroll);
@@ -2642,9 +2644,8 @@
                         )}
 
                         {/* Article Body - With Login Wall Overlay for Non-Authenticated Users */}
-                        <div className={`prose max-w-none relative ${!user ? 'max-h-[600px] overflow-hidden' : ''}`}>
-                            {article.isElectionResults ? (
-                                <>
+                        {article.isElectionResults ? (
+                            <div className={articleBodyClass}>
                                     <p className={`text-xl leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
                                         In a stunning political comeback, Donald J. Trump has been elected the 47th President of the United States, defeating Vice President Kamala Harris in a decisive Electoral College victory that defied polling expectations and reshaped the American political landscape.
                                     </p>
@@ -2732,9 +2733,10 @@
                                     <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
                                         As Trump prepares to return to the White House on January 20, 2025, America stands at a pivotal moment. His unprecedented political comeback, fueled by a diverse coalition united by economic concerns and cultural grievances, has reshaped American politics in ways that will reverberate for years to come.
                                     </p>
-                                </>
-                            ) : (
-                                <>
+                            </div>
+                    ) : (
+                        <React.Fragment>
+                            <div className={articleBodyClass}>
                                     <p className={`text-xl leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
                                         Lester Gabriel Tellez, a 20-year-old former University of Central Florida student body presidential candidate and indie game developer, was arrested on October 9, 2025, by Florida International University Campus Police on the FIU campus in Miami-Dade County, Florida. Authorities charged him with two third-degree felony counts of battery on persons with mental or physical disabilities under Florida Statute § 784.085. He was released shortly after booking on a $5,000 bond.
                                     </p>
@@ -2896,7 +2898,7 @@
                                     </div>
                                 </>
                             )}
-                        </div>
+                            </div>
 
                         {/* Tags - Only for Logged In Users */}
                         {user && (
@@ -2924,8 +2926,8 @@
                         )}
 
                         {/* Comments Sections - Only for Logged In Users */}
-                        {user && (
-                            <>
+                    {user && (
+                        <React.Fragment>
                         {/* Reporter Comments Section */}
                         <div className={`mt-12 pt-12 border-t-2 ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
                             <div className="max-w-3xl">
@@ -3351,9 +3353,11 @@
                                 </div>
                             </div>
                         </div>
-                            </>
+                            </React.Fragment>
                         )}
-                    </article>
+                    </React.Fragment>
+                )}
+                </article>
 
                     {/* Related Articles */}
                     {relatedArticles.length > 0 && (
