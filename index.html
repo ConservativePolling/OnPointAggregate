@@ -16,21 +16,37 @@
             font-family: 'Libre Franklin', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 40%, #f8fafc 100%);
+            color: #0f172a;
+            transition: background 0.6s ease, color 0.6s ease;
+            min-height: 100vh;
         }
-        
+
+        body.dark-mode {
+            background: radial-gradient(circle at top, #111827 0%, #020617 55%, #000000 100%);
+            color: #e5e7eb;
+        }
+
+        ::selection {
+            background: rgba(59, 130, 246, 0.2);
+        }
+
         .font-serif {
             font-family: 'Crimson Pro', Georgia, 'Times New Roman', serif;
             letter-spacing: -0.015em;
         }
-        
+
         .article-card {
-            transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 1.5rem;
+            box-shadow: 0 24px 80px -48px rgba(15, 23, 42, 0.45);
         }
-        
+
         .article-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-6px) scale(1.01);
+            box-shadow: 0 32px 120px -60px rgba(15, 23, 42, 0.55);
         }
-        
+
         .live-indicator {
             animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
         }
@@ -238,6 +254,11 @@
             const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
 
             const articleBodyClass = `prose max-w-none relative ${!user ? 'max-h-[600px] overflow-hidden' : ''}`;
+
+            useEffect(() => {
+                document.body.classList.toggle('dark-mode', darkMode);
+                return () => document.body.classList.remove('dark-mode');
+            }, [darkMode]);
 
             useEffect(() => {
                 const handleScroll = () => setScrolled(window.scrollY > 50);
@@ -662,69 +683,83 @@
             }
 
             return (
-                <div className={`min-h-screen transition-colors duration-200 ${darkMode ? 'bg-black text-gray-100' : 'bg-white text-gray-900'}`}>
+                <div className={`min-h-screen transition-colors duration-500 ${darkMode ? 'text-slate-100' : 'text-slate-900'}`}>
                     {/* Header */}
-                    <header className={`sticky top-0 z-50 transition-all duration-200 ${scrolled ? (darkMode ? 'bg-black/98 backdrop-blur-xl border-b border-gray-900' : 'bg-white/98 backdrop-blur-xl border-b border-gray-200') : (darkMode ? 'border-b border-gray-900' : 'border-b border-gray-200')}`}>
+                    <header className={`sticky top-0 z-50 border-b transition-all duration-300 ${scrolled ? (darkMode ? 'backdrop-blur-xl bg-black/75 border-white/10 shadow-[0_18px_40px_-30px_rgba(0,0,0,0.8)]' : 'backdrop-blur-xl bg-white/80 border-slate-200/80 shadow-[0_18px_40px_-30px_rgba(15,23,42,0.25)]') : (darkMode ? 'border-white/10 bg-black/45 backdrop-blur-lg' : 'border-white/60 bg-white/60 backdrop-blur-lg')}`}>
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                            <div className="flex items-center justify-between h-16">
-                                <div className="flex items-center space-x-12">
-                                    <h1 className={`text-3xl font-serif font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
-                                        OnPoint Articles
-                                    </h1>
-                                    <nav className="hidden md:flex space-x-8">
+                            <div className="flex items-center justify-between py-4">
+                                <div className="flex items-center space-x-8">
+                                    <div className="flex items-center space-x-3">
+                                        <div className={`inline-flex h-11 w-11 items-center justify-center rounded-2xl text-sm font-black tracking-tight ${darkMode ? 'bg-white text-black' : 'bg-slate-900 text-white'}`}>
+                                            OPA
+                                        </div>
+                                        <div>
+                                            <h1 className={`text-2xl font-serif font-black tracking-tight ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                                                OnPoint Articles
+                                            </h1>
+                                            <p className={`text-xs font-semibold uppercase tracking-[0.35em] ${darkMode ? 'text-slate-400' : 'text-slate-500/80'}`}>
+                                                The Modern Chronicle
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <nav className={`hidden md:flex items-center gap-1 rounded-full border px-1 py-1 text-sm shadow-sm backdrop-blur ${darkMode ? 'border-white/10 bg-white/5 text-slate-200' : 'border-slate-200/80 bg-white/80 text-slate-600'}`}>
                                         {["World", "Legal", "Business", "Technology", "Opinion", "More"].map(item => (
-                                            <a key={item} href="#" className={`text-sm font-medium transition-colors ${darkMode ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>
+                                            <a
+                                                key={item}
+                                                href="#"
+                                                className={`rounded-full px-4 py-1.5 font-medium transition-all ${darkMode ? 'hover:bg-white/10 hover:text-white' : 'hover:bg-slate-900/5 hover:text-slate-900'}`}
+                                            >
                                                 {item}
                                             </a>
                                         ))}
                                     </nav>
                                 </div>
-                                
-                                <div className="flex items-center space-x-4">
+
+                                <div className="flex items-center space-x-3">
                                     {user ? (
-                                        <div className="relative flex items-center space-x-3">
+                                        <div className="relative flex items-center space-x-2">
                                             <button
                                                 onClick={() => setShowUserMenu(!showUserMenu)}
-                                                className={`flex items-center space-x-2 px-4 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'bg-gray-100 text-black hover:bg-gray-200'}`}
+                                                className={`flex items-center space-x-3 rounded-full px-4 py-2 text-sm font-semibold shadow-sm transition-all ${darkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-white text-slate-900 hover:-translate-y-0.5 hover:shadow-md'}`}
                                             >
-                                                <div className={`w-8 h-8 flex items-center justify-center text-xs font-bold rounded-full ${darkMode ? 'bg-white text-black' : 'bg-black text-white'}`}>
+                                                <div className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold ${darkMode ? 'bg-white text-black' : 'bg-slate-900 text-white'}`}>
                                                     {user.email.charAt(0).toUpperCase()}
                                                 </div>
                                                 <span className="hidden sm:block">{user.email.split('@')[0]}</span>
-                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                                 </svg>
                                             </button>
 
                                             {showUserMenu && (
-                                                <div className={`absolute right-0 top-12 w-64 border ${darkMode ? 'bg-black border-gray-800' : 'bg-white border-gray-200'} shadow-lg z-50`}>
-                                                    <div className={`px-4 py-3 border-b ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}>
-                                                        <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-gray-900'}`}>OnPoint Articles Account</p>
-                                                        <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>{user.email}</p>
+                                                <div className={`absolute right-0 top-12 w-64 overflow-hidden rounded-2xl border shadow-xl ${darkMode ? 'border-white/10 bg-black/90' : 'border-slate-200/80 bg-white/95'}`}>
+                                                    <div className={`px-4 py-3 border-b ${darkMode ? 'border-white/10' : 'border-slate-200/80'}`}>
+                                                        <p className={`text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>OnPoint Articles Account</p>
+                                                        <p className={`text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>{user.email}</p>
                                                     </div>
                                                     <button
                                                         onClick={() => { setShowUserMenu(false); setShowAccountModal(true); }}
-                                                        className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'hover:bg-zinc-900 text-gray-300' : 'hover:bg-gray-50 text-gray-700'} transition-colors flex items-center space-x-2`}
+                                                        className={`flex w-full items-center space-x-2 px-4 py-3 text-sm transition-colors ${darkMode ? 'text-slate-300 hover:bg-white/10' : 'text-slate-600 hover:bg-slate-900/5'}`}
                                                     >
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                                         </svg>
                                                         <span>My Dashboard</span>
                                                     </button>
                                                     <button
                                                         onClick={() => { setShowUserMenu(false); setShowAccountModal(true); }}
-                                                        className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'hover:bg-zinc-900 text-gray-300' : 'hover:bg-gray-50 text-gray-700'} transition-colors flex items-center space-x-2`}
+                                                        className={`flex w-full items-center space-x-2 px-4 py-3 text-sm transition-colors ${darkMode ? 'text-slate-300 hover:bg-white/10' : 'text-slate-600 hover:bg-slate-900/5'}`}
                                                     >
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                                                         </svg>
                                                         <span>Saved Articles ({savedArticles.length})</span>
                                                     </button>
                                                     <button
                                                         onClick={() => { setShowUserMenu(false); netlifyIdentity.logout(); }}
-                                                        className={`w-full text-left px-4 py-3 text-sm ${darkMode ? 'hover:bg-zinc-900 text-red-400' : 'hover:bg-gray-50 text-red-600'} transition-colors flex items-center space-x-2 border-t ${darkMode ? 'border-gray-800' : 'border-gray-200'}`}
+                                                        className={`flex w-full items-center space-x-2 border-t px-4 py-3 text-sm transition-colors ${darkMode ? 'border-white/5 text-red-300 hover:bg-white/10' : 'border-slate-200/80 text-red-600 hover:bg-red-50'}`}
                                                     >
-                                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                                         </svg>
                                                         <span>Logout</span>
@@ -735,22 +770,22 @@
                                     ) : (
                                         <button
                                             onClick={() => openAuthPage('signin')}
-                                            className={`hidden sm:block px-5 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}
+                                            className={`hidden sm:inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold transition-all ${darkMode ? 'bg-white text-black hover:-translate-y-0.5 hover:bg-slate-100' : 'bg-slate-900 text-white hover:-translate-y-0.5 hover:bg-slate-800'}`}
                                         >
                                             Sign In
                                         </button>
                                     )}
                                     <button
                                         onClick={() => setDarkMode(!darkMode)}
-                                        className={`p-2 transition-colors ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                                        className={`rounded-full p-2 transition-colors ${darkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}
                                         aria-label="Toggle dark mode"
                                     >
                                         {darkMode ? (
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                                             </svg>
                                         ) : (
-                                            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                                             </svg>
                                         )}
@@ -759,148 +794,151 @@
                             </div>
                         </div>
                     </header>
-
                     {/* Live Updates Bar */}
-                    <div className={`border-b ${darkMode ? 'bg-black border-gray-900' : 'bg-gray-50 border-gray-200'}`}>
+                    <div className={`border-b ${darkMode ? 'border-white/10 bg-black/40 backdrop-blur-lg' : 'border-white/60 bg-white/60 backdrop-blur-lg shadow-sm'}`}>
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-                            <div className="flex items-center space-x-6 overflow-x-auto">
-                                <div className="flex items-center space-x-2 flex-shrink-0">
-                                    <span className="live-indicator w-1.5 h-1.5 bg-red-600 rounded-full"></span>
-                                    <span className="text-xs font-bold uppercase tracking-widest text-red-600">Live</span>
+                            <div className="flex items-center gap-6 overflow-x-auto">
+                                <div className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.35em] ${darkMode ? 'bg-red-500/10 text-red-300 ring-1 ring-red-500/40' : 'bg-red-500/10 text-red-600 ring-1 ring-red-500/40'}`}>
+                                    <span className="live-indicator h-2 w-2 rounded-full bg-red-500"></span>
+                                    Live Now
                                 </div>
-                                <div className="flex space-x-8">
+                                <div className="flex items-center gap-8">
                                     {liveUpdates.map(update => (
-                                        <div key={update.id} className="flex items-center space-x-3 flex-shrink-0">
-                                            <span className={`text-sm ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>{update.text}</span>
-                                            <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>{update.time}</span>
+                                        <div key={update.id} className="flex min-w-max items-center gap-3">
+                                            <span className={`text-sm ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>{update.text}</span>
+                                            <span className={`text-xs ${darkMode ? 'text-slate-500' : 'text-slate-400'}`}>{update.time}</span>
                                         </div>
                                     ))}
                                 </div>
                             </div>
                         </div>
                     </div>
-
                     {/* Main Content */}
                     <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                         {/* Breaking News Section */}
                         {featuredArticles.length > 0 && (
-                            <section className="mb-16">
+                            <section className="mb-20">
                                 {featuredArticles[0].breaking && (
-                                    <div className="mb-8 py-4 text-center border-y-2 bg-red-600 border-red-600">
-                                        <div className="flex items-center justify-center space-x-3">
-                                            <span className="live-indicator w-2.5 h-2.5 bg-white rounded-full"></span>
-                                            <span className="text-sm font-black uppercase tracking-widest text-white">Breaking News</span>
-                                            <span className="live-indicator w-2.5 h-2.5 bg-white rounded-full"></span>
+                                    <div className="mb-10 flex justify-center">
+                                        <div className={`inline-flex items-center gap-3 rounded-full px-5 py-2 text-[0.7rem] font-black uppercase tracking-[0.4em] ${darkMode ? 'bg-red-500/15 text-red-300 ring-1 ring-red-500/40' : 'bg-red-500/10 text-red-600 ring-1 ring-red-500/30'}`}>
+                                            <span className="live-indicator h-2 w-2 rounded-full bg-red-500"></span>
+                                            Breaking Update
+                                            <span className="live-indicator h-2 w-2 rounded-full bg-red-500"></span>
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                    {/* Main Article */}
-                                    <div className="lg:col-span-2">
-                                        <div 
-                                            onClick={() => setSelectedArticle(featuredArticles[0])}
-                                            className={`cursor-pointer group ${darkMode ? 'bg-black border-2 border-gray-900' : 'bg-white border-2 border-gray-200'}`}
-                                        >
-                                            <div className="p-8">
-                                                <div className="flex items-center space-x-3 mb-6">
-                                                    <span className={`text-xs font-bold uppercase tracking-widest ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                <div className="grid grid-cols-1 gap-8 xl:grid-cols-12">
+                                    <article
+                                        onClick={() => setSelectedArticle(featuredArticles[0])}
+                                        className={`group relative overflow-hidden rounded-3xl border transition-all duration-500 ${darkMode ? 'border-white/5 bg-gradient-to-br from-zinc-950 via-zinc-900 to-black shadow-[0_45px_90px_-50px_rgba(0,0,0,0.9)]' : 'border-slate-200/70 bg-white/90 shadow-[0_40px_90px_-45px_rgba(15,23,42,0.45)] backdrop-blur'}`}
+                                    >
+                                        <div className="flex flex-col gap-10 lg:flex-row">
+                                            <div className="flex-1 space-y-6 px-8 pb-8 pt-10 lg:px-12 lg:pb-12">
+                                                <div className="flex flex-wrap items-center gap-3">
+                                                    <span className={`inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold tracking-wider ${darkMode ? 'bg-white/10 text-white ring-1 ring-white/15' : 'bg-slate-900 text-white ring-1 ring-slate-900/10'}`}>
                                                         {featuredArticles[0].category}
                                                     </span>
-                                                    <span className={`text-xs ${darkMode ? 'text-gray-700' : 'text-gray-300'}`}>•</span>
-                                                    <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-500'}`}>
+                                                    <span className={`text-xs font-semibold ${darkMode ? 'text-slate-500' : 'text-slate-500/80'}`}>
                                                         {featuredArticles[0].readTime}
                                                     </span>
                                                 </div>
-                                                
-                                                <h2 className={`text-5xl font-serif font-black mb-8 leading-[0.95] ${darkMode ? 'text-white group-hover:text-gray-200' : 'text-black group-hover:text-gray-800'} transition-colors`}>
+
+                                                <h2 className={`text-4xl font-serif font-black leading-tight tracking-tight sm:text-5xl ${darkMode ? 'text-white' : 'text-slate-900'}`}>
                                                     {featuredArticles[0].title}
                                                 </h2>
-                                                
-                                                <div className="mb-8">
-                                                    <div className={`mb-3 border ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
-                                                        <img 
-                                                            src={featuredArticles[0].image} 
-                                                            alt={featuredArticles[0].title}
-                                                            className="w-full h-auto object-cover"
-                                                        />
-                                                    </div>
-                                                    <p className={`text-xs leading-relaxed ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                                        Florida International University campus, where Lester Tellez was arrested by FIU Campus Police on October 9, 2025.
-                                                    </p>
-                                                </div>
-                                                
-                                                <p className={`text-lg leading-relaxed mb-6 ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+
+                                                <p className={`text-base leading-relaxed sm:text-lg ${darkMode ? 'text-slate-300/90' : 'text-slate-600'}`}>
                                                     {featuredArticles[0].excerpt}
                                                 </p>
-                                                
-                                                <div className={`pt-6 border-t ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
-                                                    <div className={`flex items-center space-x-2 text-sm ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                                        <span className="font-semibold">By {featuredArticles[0].author}</span>
-                                                        <span>•</span>
-                                                        <span>{featuredArticles[0].date}</span>
-                                                    </div>
+
+                                                <div className={`flex flex-wrap items-center gap-x-4 gap-y-2 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                    <span className="font-semibold">By {featuredArticles[0].author}</span>
+                                                    <span>•</span>
+                                                    <span>{featuredArticles[0].date}</span>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 pt-2">
+                                                    <span className={`inline-flex items-center gap-2 text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+                                                        Read full story
+                                                        <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                                        </svg>
+                                                    </span>
+                                                </div>
+                                            </div>
+
+                                            <div className="relative h-64 w-full overflow-hidden rounded-t-3xl lg:h-auto lg:w-[40%] lg:rounded-l-3xl">
+                                                <img
+                                                    src={featuredArticles[0].image}
+                                                    alt={featuredArticles[0].title}
+                                                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                />
+                                                <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent p-6 text-xs font-medium uppercase tracking-widest text-white/70">
+                                                    Florida International University campus where the arrest occurred.
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
+                                    </article>
 
-                                    {/* Live Updates Sidebar */}
-                                    <div className="lg:col-span-1">
-                                        {featuredArticles[0].liveUpdates && (
-                                            <div className={`sticky top-24 border-2 ${darkMode ? 'bg-zinc-950 border-gray-900' : 'bg-gray-50 border-gray-200'}`}>
-                                                <div className={`px-5 py-4 border-b ${darkMode ? 'border-gray-900 bg-black' : 'border-gray-200 bg-white'}`}>
-                                                    <div className="flex items-center space-x-2 mb-1">
-                                                        <span className="live-indicator w-2 h-2 bg-red-600 rounded-full"></span>
-                                                        <h3 className="text-xs font-black uppercase tracking-widest text-red-600">Live Updates</h3>
+                                    {featuredArticles[0].liveUpdates && (
+                                        <aside className="xl:col-span-4">
+                                            <div className={`flex h-full flex-col overflow-hidden rounded-3xl border backdrop-blur ${darkMode ? 'border-white/10 bg-black/60 shadow-[0_35px_90px_-45px_rgba(0,0,0,0.75)]' : 'border-slate-200/70 bg-white/90 shadow-[0_35px_90px_-45px_rgba(15,23,42,0.35)]'}`}>
+                                                <div className={`flex items-center justify-between px-6 py-5 border-b ${darkMode ? 'border-white/10' : 'border-slate-200/70'}`}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="live-indicator h-2 w-2 rounded-full bg-red-500"></span>
+                                                        <h3 className={`text-xs font-black uppercase tracking-[0.35em] ${darkMode ? 'text-red-300' : 'text-red-600'}`}>
+                                                            Live Desk
+                                                        </h3>
                                                     </div>
-                                                    <p className={`text-xs mt-2 ${darkMode ? 'text-gray-600' : 'text-gray-500'}`}>
-                                                        Latest: {featuredArticles[0].liveUpdates[0].time}
-                                                    </p>
+                                                    <span className={`text-[0.65rem] font-semibold uppercase tracking-[0.3em] ${darkMode ? 'text-slate-500' : 'text-slate-500/80'}`}>
+                                                        Updated {featuredArticles[0].liveUpdates[0].time}
+                                                    </span>
                                                 </div>
-                                                
-                                                <div className="max-h-[600px] overflow-y-auto">
+
+                                                <div className={`flex-1 divide-y overflow-y-auto ${darkMode ? 'divide-white/5' : 'divide-slate-200/70'}`}>
                                                     {featuredArticles[0].liveUpdates.map((update, index) => (
-                                                        <div 
-                                                            key={index} 
-                                                            className={`px-5 py-4 border-b ${darkMode ? 'border-gray-900 hover:bg-black' : 'border-gray-200 hover:bg-white'} transition-colors`}
+                                                        <div
+                                                            key={index}
+                                                            className={`px-6 py-5 transition-colors ${darkMode ? 'hover:bg-white/5' : 'hover:bg-slate-900/5'}`}
                                                         >
-                                                            <div className="flex items-start space-x-3 mb-2">
-                                                                <div className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${index === 0 ? 'bg-red-600' : darkMode ? 'bg-gray-800' : 'bg-gray-300'}`}></div>
-                                                                <span className={`text-xs font-bold ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                                                            <div className="mb-2 flex items-center gap-3 text-xs font-semibold uppercase tracking-[0.3em]">
+                                                                <span className={`rounded-full px-2 py-0.5 ${index === 0 ? (darkMode ? 'bg-red-500/20 text-red-200' : 'bg-red-500/10 text-red-600') : (darkMode ? 'bg-white/10 text-slate-400' : 'bg-slate-900/5 text-slate-500')}`}>
                                                                     {update.time}
                                                                 </span>
                                                             </div>
-                                                            <p className={`text-sm leading-relaxed ${darkMode ? 'text-gray-300' : 'text-gray-800'}`}>
+                                                            <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                                                                 {update.text}
                                                             </p>
                                                         </div>
                                                     ))}
                                                 </div>
-                                                
-                                                <div className={`px-5 py-3 ${darkMode ? 'bg-black' : 'bg-white'}`}>
-                                                    <button className={`text-xs font-bold uppercase tracking-wider w-full text-center ${darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'} transition-colors`}>
-                                                        View Full Coverage →
+
+                                                <div className={`px-6 py-5 border-t ${darkMode ? 'border-white/10' : 'border-slate-200/70'}`}>
+                                                    <button className={`w-full rounded-full px-5 py-3 text-xs font-semibold uppercase tracking-[0.3em] transition-all ${darkMode ? 'bg-white/10 text-white hover:bg-white/20' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+                                                        Follow the story →
                                                     </button>
                                                 </div>
                                             </div>
-                                        )}
-                                    </div>
+                                        </aside>
+                                    )}
                                 </div>
                             </section>
-                        )}
-
                         {/* Category Filter */}
-                        <div className={`mb-12 pb-6 border-b ${darkMode ? 'border-gray-900' : 'border-gray-200'}`}>
-                            <div className="flex items-center space-x-1 overflow-x-auto">
+                        <div className={`mb-12 pb-6 border-b ${darkMode ? 'border-white/10' : 'border-slate-200/70'}`}>
+                            <div className="flex items-center gap-3 overflow-x-auto pb-1">
                                 {categories.map(category => (
                                     <button
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
-                                        className={`category-pill px-5 py-2 text-sm font-medium whitespace-nowrap transition-all ${
+                                        className={`whitespace-nowrap rounded-full border px-6 py-2.5 text-sm font-semibold transition-all ${
                                             selectedCategory === category
-                                                ? darkMode ? 'bg-white text-black' : 'bg-black text-white'
-                                                : darkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'
+                                                ? darkMode
+                                                    ? 'border-white/60 bg-white text-black shadow-[0_12px_40px_-28px_rgba(255,255,255,0.4)]'
+                                                    : 'border-slate-900 bg-slate-900 text-white shadow-[0_12px_40px_-28px_rgba(15,23,42,0.35)]'
+                                                : darkMode
+                                                    ? 'border-white/10 bg-white/5 text-slate-300 hover:border-white/30 hover:bg-white/10'
+                                                    : 'border-slate-200/80 bg-white text-slate-500 hover:border-slate-300 hover:text-slate-900'
                                         }`}
                                     >
                                         {category}
@@ -908,102 +946,150 @@
                                 ))}
                             </div>
                         </div>
-
                         {/* Article Grid */}
                         <section>
-                            <h2 className="text-2xl font-serif font-bold mb-8">Latest Stories</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+                                <div>
+                                    <h2 className="text-3xl font-serif font-black tracking-tight">Latest Stories</h2>
+                                    <p className={`text-sm ${darkMode ? 'text-slate-400' : 'text-slate-500/90'}`}>
+                                        Handpicked reporting from across the OnPoint network.
+                                    </p>
+                                </div>
+                                <button className={`inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] ${darkMode ? 'text-slate-300 hover:text-white' : 'text-slate-600 hover:text-slate-900'}`}>
+                                    View archives
+                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div className="grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
                                 {filteredArticles.map(article => (
-                                    <article 
+                                    <article
                                         key={article.id}
                                         onClick={() => setSelectedArticle(article)}
-                                        className={`overflow-hidden cursor-pointer group article-card ${darkMode ? 'bg-zinc-950 border border-gray-900' : 'bg-white border border-gray-200'}`}
+                                        className={`group article-card cursor-pointer overflow-hidden border transition-all duration-500 ${darkMode ? 'border-white/10 bg-white/5 text-slate-100' : 'border-slate-200/80 bg-white/95 text-slate-900'}`}
                                     >
-                                        <div className="aspect-[16/9] relative overflow-hidden">
-                                            <img 
-                                                src={article.image} 
+                                        <div className="relative h-56 w-full overflow-hidden">
+                                            <img
+                                                src={article.image}
                                                 alt={article.title}
-                                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
                                             />
-                                        </div>
-                                        <div className="p-6">
-                                            <div className="flex items-center space-x-2 mb-3">
-                                                <span className={`text-xs font-semibold uppercase tracking-wider ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent opacity-80"></div>
+                                            <div className="absolute inset-x-0 bottom-0 p-6">
+                                                <span className={`inline-flex items-center rounded-full px-3 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.3em] ${darkMode ? 'bg-white/10 text-white' : 'bg-white/90 text-slate-900'}`}>
                                                     {article.category}
                                                 </span>
-                                                <span className={`text-xs ${darkMode ? 'text-gray-600' : 'text-gray-400'}`}>•</span>
-                                                <span className={`text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                                    {article.readTime}
-                                                </span>
+                                                <h3 className="mt-4 text-xl font-serif font-semibold leading-snug text-white">
+                                                    {article.title}
+                                                </h3>
                                             </div>
-                                            <h3 className={`text-xl font-serif font-bold mb-3 leading-tight line-clamp-2 ${darkMode ? 'group-hover:text-gray-300' : 'group-hover:text-gray-600'} transition-colors`}>
-                                                {article.title}
-                                            </h3>
-                                            <p className={`text-sm mb-4 line-clamp-2 leading-relaxed ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+                                        </div>
+                                        <div className="flex flex-col gap-4 p-6">
+                                            <p className={`text-sm leading-relaxed ${darkMode ? 'text-slate-300/90' : 'text-slate-600'}`}>
                                                 {article.excerpt}
                                             </p>
-                                            <div className={`flex items-center space-x-2 text-xs ${darkMode ? 'text-gray-500' : 'text-gray-500'}`}>
-                                                <span className="font-medium">{article.author}</span>
-                                                <span>•</span>
-                                                <span>{article.date}</span>
+                                            <div className={`flex items-center justify-between text-xs ${darkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                                <div className="flex items-center gap-2">
+                                                    <span className="font-semibold">{article.author}</span>
+                                                    <span>•</span>
+                                                    <span>{article.date}</span>
+                                                </div>
+                                                <span className={`inline-flex items-center gap-2 uppercase tracking-[0.3em] ${darkMode ? 'text-slate-200' : 'text-slate-700'}`}>
+                                                    Read
+                                                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H7" />
+                                                    </svg>
+                                                </span>
                                             </div>
                                         </div>
                                     </article>
                                 ))}
                             </div>
                         </section>
-
                         {/* Newsletter Section */}
-                        <section className={`mt-20 border ${darkMode ? 'bg-zinc-950 border-gray-900' : 'bg-gray-50 border-gray-200'}`}>
-                            <div className="p-12 text-center">
-                                <h2 className="text-2xl font-serif font-bold mb-3">Subscribe to Our Newsletter</h2>
-                                <p className={`text-base mb-8 ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                    Get the most important news delivered to your inbox daily
-                                </p>
-                                <div className="flex max-w-md mx-auto gap-0">
-                                    <input 
-                                        type="email" 
-                                        placeholder="Enter your email address"
-                                        className={`flex-1 px-5 py-3 border focus:outline-none ${darkMode ? 'bg-black border-gray-800 text-white placeholder-gray-600' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'}`}
-                                    />
-                                    <button className={`px-8 py-3 font-semibold transition-colors ${darkMode ? 'bg-white text-black hover:bg-gray-100' : 'bg-black text-white hover:bg-gray-900'}`}>
-                                        Subscribe
-                                    </button>
+                        <section className="mt-20">
+                            <div className={`relative overflow-hidden rounded-3xl border px-10 py-12 sm:px-14 sm:py-16 ${darkMode ? 'border-white/10 bg-gradient-to-br from-zinc-950 via-black to-black text-white' : 'border-slate-200/70 bg-gradient-to-br from-slate-900 via-indigo-900 to-slate-900 text-white shadow-[0_45px_90px_-50px_rgba(15,23,42,0.55)]'}`}>
+                                <div className="absolute inset-0 opacity-40">
+                                    <div className="h-full w-full bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.25),transparent_60%)]"></div>
+                                </div>
+                                <div className="relative flex flex-col gap-10 md:flex-row md:items-center md:justify-between">
+                                    <div className="max-w-xl space-y-4">
+                                        <span className="inline-flex items-center rounded-full border border-white/40 px-4 py-1 text-xs font-semibold uppercase tracking-[0.3em]">Stay ahead</span>
+                                        <h2 className="text-3xl font-serif font-black tracking-tight sm:text-4xl">
+                                            Subscribe for essential insights delivered nightly.
+                                        </h2>
+                                        <p className="text-sm text-white/70">
+                                            Join editors and insiders who rely on The Modern Chronicle for context, depth, and clarity across today’s biggest stories.
+                                        </p>
+                                    </div>
+                                    <form className="w-full max-w-md space-y-4">
+                                        <div className="rounded-full border border-white/40 bg-white/10 p-1 pl-5 focus-within:border-white/70">
+                                            <input
+                                                type="email"
+                                                required
+                                                placeholder="Enter your email address"
+                                                className="w-full rounded-full border-none bg-transparent text-sm text-white placeholder:text-white/60 focus:outline-none"
+                                            />
+                                        </div>
+                                        <button type="submit" className="w-full rounded-full bg-white/90 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-white">
+                                            Subscribe free
+                                        </button>
+                                        <p className="text-[0.65rem] text-white/60">
+                                            No spam. Unsubscribe anytime with a single click.
+                                        </p>
+                                    </form>
                                 </div>
                             </div>
                         </section>
                     </main>
 
                     {/* Footer */}
-                    <footer className={`border-t mt-20 ${darkMode ? 'bg-zinc-950 border-gray-900' : 'bg-white border-gray-200'}`}>
-                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
-                                {[
-                                    { title: "Sections", items: ["World", "Business", "Technology", "Science"] },
-                                    { title: "Company", items: ["About", "Careers", "Contact", "Advertise"] },
-                                    { title: "Legal", items: ["Privacy Policy", "Terms of Service", "Cookie Policy"] },
-                                    { title: "Follow", items: ["Twitter", "LinkedIn", "Instagram", "Facebook"] }
-                                ].map(section => (
-                                    <div key={section.title}>
-                                        <h3 className="font-semibold text-sm mb-4 uppercase tracking-wider">{section.title}</h3>
-                                        <ul className={`space-y-2.5 text-sm ${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                                            {section.items.map(item => (
-                                                <li key={item}>
-                                                    <a href="#" className={`transition-colors ${darkMode ? 'hover:text-white' : 'hover:text-gray-900'}`}>
-                                                        {item}
-                                                    </a>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
-                                ))}
+                    <footer className={`relative mt-24 border-t ${darkMode ? 'border-white/10 bg-black/40 backdrop-blur' : 'border-slate-200/70 bg-white/70 backdrop-blur'}`}>
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(148,163,184,0.15),transparent_65%)]"></div>
+                        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+                            <div className="mb-12 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+                                <div>
+                                    <span className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl text-sm font-black ${darkMode ? 'bg-white text-black' : 'bg-slate-900 text-white'}`}>OPA</span>
+                                    <h2 className="mt-4 text-2xl font-serif font-black tracking-tight">The Modern Chronicle</h2>
+                                    <p className={`mt-2 text-sm ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                                        Illuminating the day’s defining narratives with clarity, pace, and purpose.
+                                    </p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-6 text-sm md:grid-cols-3">
+                                    {[{
+                                        title: 'Sections',
+                                        items: ['World', 'Business', 'Technology', 'Science']
+                                    }, {
+                                        title: 'Company',
+                                        items: ['About', 'Careers', 'Contact', 'Advertise']
+                                    }, {
+                                        title: 'Connect',
+                                        items: ['Twitter', 'LinkedIn', 'Instagram', 'YouTube']
+                                    }].map(section => (
+                                        <div key={section.title}>
+                                            <h3 className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">{section.title}</h3>
+                                            <ul className={`mt-4 space-y-3 ${darkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                                                {section.items.map(item => (
+                                                    <li key={item}>
+                                                        <a href="#" className={`transition-colors ${darkMode ? 'hover:text-white' : 'hover:text-slate-900'}`}>
+                                                            {item}
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
-                            <div className={`pt-8 border-t ${darkMode ? 'border-gray-900 text-gray-500' : 'border-gray-200 text-gray-600'} text-xs`}>
+                            <div className={`flex flex-col gap-4 border-t pt-8 text-xs ${darkMode ? 'border-white/10 text-slate-500' : 'border-slate-200/70 text-slate-500'}`}>
                                 <p>&copy; 2025 OnPoint Articles. All rights reserved.</p>
+                                <p>Built for readers who demand precision and perspective.</p>
                             </div>
                         </div>
                     </footer>
 
+                    {/* Clean Login/Signup Modal */}
                     {/* Clean Login/Signup Modal */}
                     {showLoginModal && (
                         <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black bg-opacity-90 flex items-center justify-center p-4">
