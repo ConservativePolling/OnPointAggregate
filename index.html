@@ -1626,19 +1626,21 @@
         function renderElectionHub() {
             const selector = document.getElementById('election-selector');
 
-            selector.innerHTML = Object.values(elections).map(election => {
-                const status = getElectionStatus(election.date);
-                const statusText = status === 'past' ? 'Past' :
-                                   status === 'current' ? 'Live' :
-                                   'Upcoming';
-                const isSelected = currentElection && currentElection.id === election.id;
+            selector.innerHTML = Object.values(elections)
+                .filter(election => election.id !== 'tn07') // Hide Tennessee election
+                .map(election => {
+                    const status = getElectionStatus(election.date);
+                    const statusText = status === 'past' ? 'Past' :
+                                       status === 'current' ? 'Live' :
+                                       'Upcoming';
+                    const isSelected = currentElection && currentElection.id === election.id;
 
-                return `
-                    <option value="${election.id}" ${isSelected ? 'selected' : ''}>
-                        ${statusText} • ${election.name} ${election.subtitle} • ${election.dateString}
-                    </option>
-                `;
-            }).join('');
+                    return `
+                        <option value="${election.id}" ${isSelected ? 'selected' : ''}>
+                            ${statusText} • ${election.name} ${election.subtitle} • ${election.dateString}
+                        </option>
+                    `;
+                }).join('');
         }
 
         function handleElectionChange(electionId) {
@@ -3861,10 +3863,12 @@
             });
         }
 
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
         if (savedTheme === 'light') {
-            document.documentElement.setAttribute('data-theme', 'light');
             document.getElementById('theme-text').textContent = 'Dark Mode';
+        } else {
+            document.getElementById('theme-text').textContent = 'Light Mode';
         }
 
         // =====================================================
@@ -4130,6 +4134,12 @@
             const select = document.getElementById('county-select');
             select.innerHTML = '<option value="">Select a region...</option>';
 
+            // Add "All Counties" option
+            const allOption = document.createElement('option');
+            allOption.value = 'ALL';
+            allOption.textContent = `All ${currentElection.regionLabelPlural}`;
+            select.appendChild(allOption);
+
             const sortedRegions = [...currentElection.regions].sort();
 
             sortedRegions.forEach(region => {
@@ -4139,11 +4149,9 @@
                 select.appendChild(option);
             });
 
-            // Set default to first region
-            if (sortedRegions.length > 0) {
-                select.value = sortedRegions[0];
-                displayCountyResults();
-            }
+            // Set default to "All Counties"
+            select.value = 'ALL';
+            displayCountyResults();
         }
 
         function displayCountyResults() {
@@ -4157,6 +4165,170 @@
                     <tr>
                         <td colspan="7" class="px-6 py-12 text-center" style="color: var(--text-tertiary);">
                             Select a region to view results
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Handle "All Counties" option
+            if (county === 'ALL') {
+                let html = '';
+                const sortedRegions = [...currentElection.regions].sort();
+
+                sortedRegions.forEach(region => {
+                    let regionCandidates = [];
+
+                    if (currentElection.type === 'primary') {
+                        let demCandidates = ((regionData['democratic'] || {})[region] || []).map(c => ({
+                            ...c,
+                            party: 'D',
+                            partyFull: 'Democratic',
+                            partyColor: '#3b82f6',
+                            raceType: 'democratic'
+                        }));
+                        let repCandidates = ((regionData['republican'] || {})[region] || []).map(c => ({
+                            ...c,
+                            party: 'R',
+                            partyFull: 'Republican',
+                            partyColor: '#ef4444',
+                            raceType: 'republican'
+                        }));
+
+                        demCandidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+                        repCandidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+
+                        if (partyFilterValue === 'democratic') {
+                            repCandidates = [];
+                        } else if (partyFilterValue === 'republican') {
+                            demCandidates = [];
+                        }
+
+                        regionCandidates = [...demCandidates, ...repCandidates];
+                    } else {
+                        regionCandidates = ((regionData['general'] || {})[region] || []).map(c => ({
+                            ...c,
+                            party: (currentElection.candidateTitles[c.name] || '').charAt(0),
+                            partyFull: currentElection.candidateTitles[c.name] || '',
+                            partyColor: currentElection.candidateColors[c.name] || '#666',
+                            raceType: 'general'
+                        }));
+
+                        // Filter out third-party candidates for specific elections
+                        if (currentElection.id === 'nyc') {
+                            regionCandidates = regionCandidates.filter(c =>
+                                ['Andrew Cuomo', 'Zohran Mamdani', 'Curtis Sliwa'].includes(c.name)
+                            );
+                        } else if (currentElection.id === 'nj') {
+                            regionCandidates = regionCandidates.filter(c =>
+                                ['Mikie Sherrill', 'Jack Ciattarelli'].includes(c.name)
+                            );
+                        } else if (currentElection.id === 'va_gov') {
+                            regionCandidates = regionCandidates.filter(c =>
+                                ['Abigail D. Spanberger', 'Winsome Earle-Sears'].includes(c.name)
+                            );
+                        } else if (currentElection.id === 'va_lg') {
+                            regionCandidates = regionCandidates.filter(c =>
+                                ['Ghazala F. Hashmi', 'John J. Reid, II'].includes(c.name)
+                            );
+                        } else if (currentElection.id === 'va_ag') {
+                            regionCandidates = regionCandidates.filter(c =>
+                                ['Jay C. Jones', 'Jason S. Miyares'].includes(c.name)
+                            );
+                        }
+
+                        regionCandidates.sort((a, b) => (b.votes || 0) - (a.votes || 0));
+                    }
+
+                    // Skip regions with no candidates
+                    if (regionCandidates.length === 0) return;
+
+                    // Display candidates for this region
+                    let currentRace = null;
+                    let raceIndex = {};
+
+                    regionCandidates.forEach((candidate, index) => {
+                        const race = candidate.raceType;
+
+                        // Add separator between primaries
+                        if (currentElection.type === 'primary' && currentRace && currentRace !== race) {
+                            html += `
+                                <tr class="party-separator-row">
+                                    <td colspan="7"></td>
+                                </tr>
+                            `;
+                        }
+                        currentRace = race;
+
+                        if (!raceIndex[race]) raceIndex[race] = 0;
+                        const partyIndex = raceIndex[race]++;
+
+                        const percent = candidate.percent || 0;
+                        const votes = candidate.votes || 0;
+                        const color = currentElection.candidateColors[candidate.name] || candidate.partyColor;
+                        const isLeader = partyIndex === 0;
+
+                        const districtCandidate = (districtCandidates[race] || []).find(c => c.name === candidate.name);
+                        const isProjectedWinner = districtCandidate ? districtCandidate.isProjectedWinner : false;
+
+                        let marginHTML = '';
+                        if (isLeader) {
+                            const sameRaceCandidates = regionCandidates.filter(c => c.raceType === race);
+                            if (sameRaceCandidates.length > 1) {
+                                const margin = (percent - (sameRaceCandidates[1].percent || 0)).toFixed(1);
+                                marginHTML = `<span class="margin-badge">+${margin}%</span>`;
+                            }
+                        }
+
+                        const showPartyLogos = currentElection.id === 'nyc' || currentElection.id === 'nj';
+                        const partyLogo = showPartyLogos && currentElection.partyLogos ? currentElection.partyLogos[candidate.partyFull] : null;
+                        const partyBadgeContent = partyLogo
+                            ? `<img src="${partyLogo}" alt="${candidate.partyFull}" style="width: 20px; height: 20px; object-fit: contain;" onerror="this.outerHTML='<span style=\\'font-size: 12px; font-weight: 600; color: white;\\'>${candidate.party}</span>';">`
+                            : `<span style="font-size: 12px; font-weight: 600; color: white;">${candidate.party}</span>`;
+                        const badgeBackground = partyLogo ? 'transparent' : color;
+
+                        html += `
+                            <tr style="border-bottom: 1px solid var(--border-color);">
+                                <td class="px-6 py-4">
+                                    ${index === 0 ? `<span class="county-name-cell">${region}</span>` : ''}
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="party-badge" style="background: ${badgeBackground}; display: flex; align-items: center; justify-content: center;">${partyBadgeContent}</div>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="flex items-center gap-2">
+                                        ${currentElection.candidatePhotos && currentElection.candidatePhotos[candidate.name]
+                                            ? `<img src="${currentElection.candidatePhotos[candidate.name]}" alt="${candidate.name}" style="width: 24px; height: 24px; min-width: 24px; border-radius: 50%; object-fit: cover; border: 2px solid ${color}; flex-shrink: 0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-block';">
+                                               <div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%; display: none;"></div>`
+                                            : `<div style="width: 8px; height: 8px; background: ${color}; border-radius: 50%;"></div>`
+                                        }
+                                        <span class="text-sm" style="color: var(--text-secondary); ${isLeader ? 'font-weight: 600;' : ''}">${candidate.name}</span>
+                                        ${isProjectedWinner ? `<span style="color: ${color}; font-size: 14px; margin-left: 4px; opacity: 0.8;">✓</span>` : ''}
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <span class="tabular-nums text-sm ${isLeader ? 'font-semibold' : ''}">${votes.toLocaleString()}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                    <div class="result-bar-container">
+                                        <div class="result-bar-fill" style="width: ${percent}%; background: ${color}; transition: width 1.2s cubic-bezier(0.4, 0.0, 0.2, 1);"></div>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <span class="font-medium tabular-nums text-sm ${isLeader ? 'font-bold' : ''}">${percent.toFixed(1)}%</span>
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    ${marginHTML}
+                                </td>
+                            </tr>
+                        `;
+                    });
+                });
+
+                tbody.innerHTML = html || `
+                    <tr>
+                        <td colspan="7" class="px-6 py-12 text-center" style="color: var(--text-tertiary);">
+                            No results available yet
                         </td>
                     </tr>
                 `;
@@ -4500,8 +4672,8 @@
             // Clear old snapshots from previous elections
             clearOldSnapshots();
 
-            // Initialize with TN-07 election
-            await switchElection('tn07');
+            // Initialize with NYC election
+            await switchElection('nyc');
             startAutoRefresh();
             updateLastUpdatedDisplay();
         });
