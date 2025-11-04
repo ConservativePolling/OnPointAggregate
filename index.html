@@ -1113,6 +1113,19 @@
             .timeline-slider {
                 height: 32px !important;
             }
+
+            .needle-container {
+                padding: 18px 14px 16px 14px;
+                margin: 0 8px 20px 8px;
+            }
+
+            .needle-percentage {
+                font-size: 34px;
+            }
+
+            .needle-gauge {
+                max-width: 200px;
+            }
         }
 
         /* Responsive Views: CNN-style for mobile, clean cards for desktop */
@@ -1131,6 +1144,84 @@
 
             .clean-desktop-view {
                 display: none;
+            }
+        }
+
+        /* Election Needle Styles */
+        .needle-container {
+            padding: 28px 24px 20px 24px;
+            border-top: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            display: none; /* Hidden by default, shown via JS */
+        }
+
+        .needle-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .needle-percentage {
+            font-size: 52px;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text-primary);
+            letter-spacing: -2px;
+        }
+
+        .needle-subtitle {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-tertiary);
+            font-weight: 600;
+            margin-top: 8px;
+        }
+
+        .needle-gauge {
+            position: relative;
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 2 / 1;
+            margin: 0 auto;
+        }
+
+        .needle-gauge svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+            display: block;
+        }
+
+        .needle-segment {
+            transition: opacity 0.2s ease;
+        }
+
+        .needle-pointer-group {
+            transform-origin: 50% 100%;
+            transition: transform 2.2s cubic-bezier(0.34, 1.4, 0.64, 1);
+        }
+
+        .needle-segment-label {
+            font-size: 8px;
+            font-weight: 600;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            fill: var(--text-tertiary);
+            opacity: 0.8;
+        }
+
+        @media (max-width: 768px) {
+            .needle-container {
+                padding: 20px 16px 18px 16px;
+                margin: 0 12px 24px 12px;
+            }
+
+            .needle-percentage {
+                font-size: 40px;
+            }
+
+            .needle-gauge {
+                max-width: 240px;
             }
         }
     </style>
@@ -1225,6 +1316,33 @@
 
             <div class="flex-1 overflow-y-auto px-12 py-8" id="candidates-container">
                 <!-- Candidates will be populated dynamically -->
+            </div>
+
+            <!-- Election Needle (NJ only) -->
+            <div class="needle-container" id="election-needle">
+                <div class="needle-header">
+                    <div class="needle-percentage" id="needle-percentage">--</div>
+                    <div class="needle-subtitle" id="needle-subtitle">--</div>
+                </div>
+                <div class="needle-gauge" id="needle-gauge">
+                    <svg class="needle-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                        <path d="M 500 500 L 92 500 A 408 408 0 0 1 123.4 343.7 Z" fill="#E8F0F8"/>
+                        <path d="M 500 500 L 123.4 343.7 A 408 408 0 0 1 211.4 211.4 Z" fill="#D1E3F3"/>
+                        <path d="M 500 500 L 211.4 211.4 A 408 408 0 0 1 343.7 123.4 Z" fill="#B8D5ED"/>
+                        <path d="M 500 500 L 343.7 123.4 A 408 408 0 0 1 500 92 Z" fill="#A0C8E8"/>
+                        <path d="M 500 500 L 500 92 A 408 408 0 0 1 656.3 123.4 Z" fill="#FCE8E8"/>
+                        <path d="M 500 500 L 656.3 123.4 A 408 408 0 0 1 788.6 211.4 Z" fill="#F8D5D5"/>
+                        <path d="M 500 500 L 788.6 211.4 A 408 408 0 0 1 876.6 343.7 Z" fill="#F4C2C2"/>
+                        <path d="M 500 500 L 876.6 343.7 A 408 408 0 0 1 908 500 Z" fill="#F0AFAF"/>
+                        <path d="M 92 500 A 408 408 0 0 1 908 500" fill="none" stroke="var(--text-primary)" stroke-width="12" stroke-linecap="square"/>
+                        <path d="M 350 500 A 150 150 0 0 1 650 500" fill="none" stroke="var(--text-primary)" stroke-width="8"/>
+                        <line x1="500" y1="92" x2="500" y2="500" stroke="var(--text-primary)" stroke-width="6"/>
+                        <line x1="500" y1="350" x2="500" y2="500" stroke="var(--text-primary)" stroke-width="6"/>
+                        <line x1="92" y1="500" x2="908" y2="500" stroke="var(--text-primary)" stroke-width="12" stroke-linecap="square"/>
+                        <path d="M 176 265 L 485 500 L 515 500 Z" fill="var(--text-primary)"/>
+                        <circle cx="500" cy="500" r="25" fill="var(--text-primary)"/>
+                    </svg>
+                </div>
             </div>
 
             <div class="px-12 py-4" style="border-top: 1px solid var(--border-color);">
@@ -2127,6 +2245,9 @@
             if (year === 2021) {
                 // Load historical data
                 await loadHistoricalData();
+
+                // Hide needle when viewing 2021 data
+                document.getElementById('election-needle').style.display = 'none';
             } else {
                 // Switch back to live 2025 data
                 isHistoricalMode = false;
@@ -2154,6 +2275,9 @@
 
                 // Reload live data
                 await searchRaces();
+
+                // Show election needle again for 2025
+                renderElectionNeedle(80, 'Sherrill');
             }
         }
 
@@ -3126,6 +3250,11 @@
 
                 await updateResults();
 
+                // Render election needle for NJ (Sherrill 80% chance)
+                if (currentElection.id === 'nj' && !isHistoricalMode) {
+                    renderElectionNeedle(80, 'Sherrill');
+                }
+
                 // Start auto-refresh if timeline is visible
                 if (document.getElementById('timeline-container').style.display !== 'none') {
                     startAutoRefresh();
@@ -3133,6 +3262,73 @@
             } catch (error) {
                 console.error('Error searching races:', error);
                 displayFallbackCandidates();
+            }
+        }
+
+        // =====================================================
+        // ELECTION NEEDLE
+        // =====================================================
+        function renderElectionNeedle(percentage, candidateName) {
+            const container = document.getElementById('election-needle');
+            const gaugeContainer = document.getElementById('needle-gauge');
+            const percentageEl = document.getElementById('needle-percentage');
+            const subtitleEl = document.getElementById('needle-subtitle');
+
+            // Only show for NJ election and not in historical mode
+            if (currentElection.id !== 'nj' || isHistoricalMode) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+
+            const targetPercentage = Number(percentage) || 0;
+            subtitleEl.textContent = `Chance ${candidateName} wins`;
+
+            const svg = gaugeContainer.querySelector('svg');
+            if (svg) {
+                svg.style.transform = 'rotate(0deg)';
+            }
+
+            const updateText = (value) => {
+                const rounded = Math.round(value);
+                percentageEl.textContent = `${rounded}%`;
+                percentageEl.dataset.currentValue = value;
+            };
+
+            const hasAnimated = container.dataset.needleAnimated === 'true';
+
+            if (!hasAnimated) {
+                if (container.dataset.needleAnimating === 'true') {
+                    return;
+                }
+
+                const startValue = 0;
+                const endValue = targetPercentage;
+                const duration = 1200;
+                const startTime = performance.now();
+                container.dataset.needleAnimating = 'true';
+
+                const animate = (now) => {
+                    const elapsed = now - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = 1 - Math.pow(1 - progress, 3); // easeOutCubic
+                    const currentValue = startValue + (endValue - startValue) * eased;
+
+                    updateText(currentValue);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        container.dataset.needleAnimated = 'true';
+                        container.dataset.needleAnimating = 'false';
+                        updateText(endValue);
+                    }
+                };
+
+                requestAnimationFrame(animate);
+            } else {
+                updateText(targetPercentage);
             }
         }
 
