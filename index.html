@@ -3949,6 +3949,20 @@
             const theme = document.documentElement.getAttribute('data-theme');
             const isDark = theme !== 'light';
 
+            // Helper function to normalize region names for Virginia
+            // GeoJSON has "Fairfax" but API may return "Fairfax County"
+            function getMapSelector(regionName, race) {
+                const baseSelector = `path[data-county="${regionName}"][data-party="${race}"]`;
+
+                // For Virginia, also try without " County" suffix
+                if (currentElection.id && currentElection.id.startsWith('va_') && regionName.endsWith(' County')) {
+                    const normalizedName = regionName.replace(' County', '');
+                    return `${baseSelector}, path[data-county="${normalizedName}"][data-party="${race}"]`;
+                }
+
+                return baseSelector;
+            }
+
             Object.values(regionResults).forEach(region => {
                 const regionName = region.name;
 
@@ -4004,13 +4018,13 @@
 
                     if (!leading || leading.votes === 0) {
                         const noDataColor = isDark ? '#1f1f1f' : '#e8e4df';
-                        d3.selectAll(`path[data-county="${regionName}"][data-party="${race}"]`)
+                        d3.selectAll(getMapSelector(regionName, race))
                             .transition()
                             .duration(500)
                             .attr('fill', noDataColor);
                     } else if (voteCirclesEnabled) {
                         const neutralColor = isDark ? '#1f1f1f' : '#e8e4df';
-                        d3.selectAll(`path[data-county="${regionName}"][data-party="${race}"]`)
+                        d3.selectAll(getMapSelector(regionName, race))
                             .transition()
                             .duration(500)
                             .attr('fill', neutralColor);
@@ -4031,7 +4045,7 @@
 
                         const color = `rgba(${rgb[0]}, ${rgb[1]}, ${rgb[2]}, ${opacity})`;
 
-                        d3.selectAll(`path[data-county="${regionName}"][data-party="${race}"]`)
+                        d3.selectAll(getMapSelector(regionName, race))
                             .transition()
                             .duration(500)
                             .attr('fill', color);
@@ -4203,6 +4217,15 @@
                 return;
             }
 
+            // Helper function to normalize region names for GeoJSON matching
+            // Virginia GeoJSON has "Fairfax" but API/config may have "Fairfax County"
+            function getNormalizedRegionName(regionName) {
+                if (currentElection.id && currentElection.id.startsWith('va_') && regionName.endsWith(' County')) {
+                    return regionName.replace(' County', '');
+                }
+                return regionName;
+            }
+
             if (selectedCandidate) {
                 if (selectedCandidate.race !== race) {
                     d3.selectAll(`.vote-circle[data-party="${race}"]`).remove();
@@ -4252,7 +4275,8 @@
 
                     const radius = maxVotes > 0 ? minRadius + ((votes / maxVotes) * (maxRadius - minRadius)) : minRadius;
 
-                    const countyPath = d3.select(`path[data-county="${regionName}"][data-party="${race}"]`);
+                    const normalizedName = getNormalizedRegionName(regionName);
+                    const countyPath = d3.select(`path[data-county="${normalizedName}"][data-party="${race}"]`);
                     if (countyPath.empty()) return;
 
                     const pathNode = countyPath.node();
@@ -4327,7 +4351,8 @@
 
                 const radius = minRadius + ((votes / maxVotes) * (maxRadius - minRadius));
 
-                const countyPath = d3.select(`path[data-county="${regionName}"][data-party="${race}"]`);
+                const normalizedName = getNormalizedRegionName(regionName);
+                const countyPath = d3.select(`path[data-county="${normalizedName}"][data-party="${race}"]`);
                 if (countyPath.empty()) return;
 
                 const pathNode = countyPath.node();
