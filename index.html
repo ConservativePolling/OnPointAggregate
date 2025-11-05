@@ -2312,11 +2312,15 @@
             if (comparisonMode) {
                 btn.classList.add('active');
 
-                // Ensure we have both years of data
+                // Ensure we have 2021 historical data
                 if (!historicalData) {
+                    console.log('📥 Loading 2021 historical data...');
                     await fetch('nj-2021-historical.json')
                         .then(r => r.json())
-                        .then(data => historicalData = data);
+                        .then(data => {
+                            historicalData = data;
+                            console.log('✅ 2021 data loaded:', Object.keys(data.counties).length, 'counties');
+                        });
                 }
 
                 // Switch to 2025 data if not already there
@@ -2324,7 +2328,7 @@
                     await switchToYear(2025);
                 }
 
-                // Calculate and display shifts
+                // Calculate and display shifts (only for counties with actual 2025 data)
                 displayShiftArrows();
             } else {
                 btn.classList.remove('active');
@@ -2338,26 +2342,44 @@
             const data2025 = regionData.general ? regionData.general[countyName] : null;
 
             // Get 2021 data (historical)
-            const data2021 = historicalData && historicalData.regionData ?
-                historicalData.regionData.general[countyName] : null;
+            const county2021 = historicalData && historicalData.counties ?
+                historicalData.counties[countyName] : null;
 
-            if (!data2025 || !data2021) return null;
+            // Check if both years have data
+            if (!data2025 || !county2021) {
+                return null;
+            }
 
-            // Calculate margins for both years
+            // CRITICAL: Check if county has ACTUALLY REPORTED in 2025
+            // Only show arrows for counties with real votes, not 0s or placeholders
+            const total2025Votes = data2025.reduce((sum, c) => sum + (c.votes || 0), 0);
+            if (total2025Votes === 0) {
+                return null; // County hasn't reported yet - no arrow
+            }
+
+            // Calculate 2025 margin
             const sorted2025 = [...data2025].sort((a, b) => b.percent - a.percent);
-            const sorted2021 = [...data2021].sort((a, b) => b.percent - a.percent);
-
-            // Determine party leads
             const dem2025 = sorted2025.find(c => currentElection.candidateTitles[c.name] === 'Democratic')?.percent || 0;
             const rep2025 = sorted2025.find(c => currentElection.candidateTitles[c.name] === 'Republican')?.percent || 0;
-
-            const dem2021 = sorted2021.find(c => c.name === 'Phil Murphy')?.percent || 0;
-            const rep2021 = sorted2021.find(c => c.name === 'Jack Ciattarelli')?.percent || 0;
-
             const margin2025 = dem2025 - rep2025; // Positive = Dem lead
-            const margin2021 = dem2021 - rep2021; // Positive = Dem lead
 
+            // Calculate 2021 margin from vote counts
+            const murphyVotes = county2021.Murphy || 0;
+            const ciattarelliVotes = county2021.Ciattarelli || 0;
+            const total2021 = murphyVotes + ciattarelliVotes;
+
+            if (total2021 === 0) {
+                return null;
+            }
+
+            const murphyPercent = (murphyVotes / total2021) * 100;
+            const ciattarelliPercent = (ciattarelliVotes / total2021) * 100;
+            const margin2021 = murphyPercent - ciattarelliPercent; // Positive = Dem lead
+
+            // Calculate shift
             const shift = margin2025 - margin2021; // Positive = shift to Dem, Negative = shift to Rep
+
+            console.log(`${countyName}: 2025 margin=${margin2025.toFixed(1)}%, 2021 margin=${margin2021.toFixed(1)}%, shift=${shift.toFixed(1)}%`);
 
             return {
                 shift: shift,
@@ -2367,25 +2389,49 @@
         }
 
         function displayShiftArrows() {
+            console.log('🎯 displayShiftArrows() called');
+
             // Remove existing arrows
             document.querySelectorAll('.shift-arrow').forEach(el => el.remove());
 
-            if (!currentElection || currentElection.id !== 'nj') return;
+            if (!currentElection || currentElection.id !== 'nj') {
+                console.log('❌ Not NJ election, exiting');
+                return;
+            }
+
+            console.log('✓ Election is NJ');
+            console.log('✓ historicalData:', historicalData ? 'loaded' : 'NOT loaded');
+            console.log('✓ regionData.general:', regionData.general ? `has ${Object.keys(regionData.general).length} counties` : 'EMPTY');
 
             // Get all SVG maps
             const svgs = document.querySelectorAll('#maps-container svg');
+            console.log(`✓ Found ${svgs.length} SVG maps`);
+
+            let arrowCount = 0;
 
             svgs.forEach(svg => {
                 const mapGroup = svg.querySelector('.map-group');
-                if (!mapGroup) return;
+                if (!mapGroup) {
+                    console.log('❌ No .map-group found in SVG');
+                    return;
+                }
 
                 const counties = svg.querySelectorAll('.county.in-district');
+                console.log(`✓ Found ${counties.length} counties in map`);
 
                 counties.forEach(countyPath => {
                     const countyName = countyPath.getAttribute('data-county');
                     const shiftData = calculateCountyShift(countyName);
 
-                    if (!shiftData || shiftData.magnitude < 0.5) return; // Skip very small shifts
+                    if (!shiftData) {
+                        // Already logged in calculateCountyShift
+                        return;
+                    }
+
+                    if (shiftData.magnitude < 0.5) {
+                        console.log(`⚠️ ${countyName}: shift too small (${shiftData.magnitude.toFixed(1)}%), skipping`);
+                        return;
+                    }
 
                     // Get county centroid
                     const bbox = countyPath.getBBox();
@@ -2400,8 +2446,11 @@
                     // Create arrow
                     const arrow = createShiftArrow(cx, cy, shiftData.direction, arrowSize);
                     mapGroup.appendChild(arrow);
+                    arrowCount++;
                 });
             });
+
+            console.log(`✅ Created ${arrowCount} shift arrows`);
         }
 
         function createShiftArrow(x, y, direction, size) {
