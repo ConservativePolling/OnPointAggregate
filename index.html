@@ -1308,10 +1308,9 @@
 
             <div class="px-12 py-8" style="border-bottom: 1px solid var(--border-color);">
                 <div class="flex items-baseline gap-4">
-                    <span class="reporting-section-title" id="percent-reporting-total">0%</span>
-                    <span class="reporting-section-label">Reporting</span>
+                    <span class="reporting-section-title" id="votes-counted">0 votes</span>
+                    <span class="reporting-section-label">Total Votes</span>
                 </div>
-                <p class="text-sm mt-3" style="color: var(--text-tertiary); font-weight: 500;" id="votes-counted">0 votes counted</p>
             </div>
 
             <div class="flex-1 overflow-y-auto px-12 py-8" id="candidates-container">
@@ -2048,17 +2047,6 @@
             }
 
             // Update UI with restored data (without fetching from API)
-            // Update overall reporting display
-            const availablePercentages = currentElection.races
-                .filter(race => raceIds[race] !== null)
-                .map(race => reportingPercents[race]);
-
-            const overall = availablePercentages.length
-                ? Math.round(availablePercentages.reduce((sum, value) => sum + value, 0) / availablePercentages.length)
-                : 0;
-
-            document.getElementById('percent-reporting-total').textContent = `${overall}%`;
-
             // Update combined vote count
             const total = Object.values(totalVotes).reduce((sum, val) => sum + val, 0);
             document.getElementById('votes-counted').textContent = `${total.toLocaleString()} votes`;
@@ -2510,10 +2498,9 @@
             document.getElementById('election-title').textContent = election.name;
             document.getElementById('election-subtitle').textContent = `${election.subtitle} • ${election.dateString}`;
 
-            // Update reporting
-            document.getElementById('percent-reporting-total').textContent = `${election.percent_reporting}%`;
+            // Update vote count
             const totalVotesCount = candidates.reduce((sum, c) => sum + c.votes, 0);
-            document.getElementById('votes-counted').textContent = `${totalVotesCount.toLocaleString()} votes counted`;
+            document.getElementById('votes-counted').textContent = `${totalVotesCount.toLocaleString()} votes`;
 
             console.log(`Displaying ${candidates.length} candidates, ${Object.keys(counties).length} counties`);
 
@@ -3393,17 +3380,6 @@
                 }
             }
 
-            // Update overall reporting
-            const availablePercentages = currentElection.races
-                .filter(race => raceIds[race] !== null)
-                .map(race => reportingPercents[race]);
-
-            const overall = availablePercentages.length
-                ? Math.round(availablePercentages.reduce((sum, value) => sum + value, 0) / availablePercentages.length)
-                : 0;
-
-            document.getElementById('percent-reporting-total').textContent = `${overall}%`;
-
             // Update combined vote count
             const total = Object.values(totalVotes).reduce((sum, val) => sum + val, 0);
             document.getElementById('votes-counted').textContent = `${total.toLocaleString()} votes`;
@@ -3580,7 +3556,7 @@
 
                         <div style="background: var(--bg-secondary); padding: 16px; border-radius: ${winner ? '0 0 8px 8px' : '8px'}; margin-bottom: 24px;">
                             <div style="font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.5px;">
-                                ${partyName} Primary • ${reporting}% Reporting
+                                ${partyName} Primary
                             </div>
 
                             <table style="width: 100%; border-collapse: collapse;">
@@ -3637,7 +3613,6 @@
                                     <div class="w-1 h-5 ${barColor}"></div>
                                     <h2 class="text-sm font-medium uppercase tracking-wider" style="color: var(--text-secondary);">${partyName} Primary</h2>
                                 </div>
-                                <span class="reporting-badge">${reporting}% reporting</span>
                             </div>
                             <div class="space-y-4">
                                 ${candidates.map((candidate, index) => {
@@ -3788,9 +3763,6 @@
                             </tbody>
                         </table>
 
-                        <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color); display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-secondary);">
-                            <span>${reportingPercents['general'] || 0}% Reporting</span>
-                        </div>
                     </div>
                 </div>
             `;
