@@ -1325,7 +1325,7 @@
                     <div class="needle-subtitle" id="needle-subtitle">--</div>
                 </div>
                 <div class="needle-gauge" id="needle-gauge">
-                    <svg class="needle-svg" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+                    <svg class="needle-svg" data-election="nj" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display: none;">
                         <path d="M 500 500 L 92 500 A 408 408 0 0 1 123.4 343.7 Z" fill="#E8F0F8"/>
                         <path d="M 500 500 L 123.4 343.7 A 408 408 0 0 1 211.4 211.4 Z" fill="#D1E3F3"/>
                         <path d="M 500 500 L 211.4 211.4 A 408 408 0 0 1 343.7 123.4 Z" fill="#B8D5ED"/>
@@ -1340,6 +1340,23 @@
                         <line x1="500" y1="350" x2="500" y2="500" stroke="var(--text-primary)" stroke-width="6"/>
                         <line x1="92" y1="500" x2="908" y2="500" stroke="var(--text-primary)" stroke-width="12" stroke-linecap="square"/>
                         <path d="M 176 265 L 485 500 L 515 500 Z" fill="var(--text-primary)"/>
+                        <circle cx="500" cy="500" r="25" fill="var(--text-primary)"/>
+                    </svg>
+                    <svg class="needle-svg" data-election="va_gov" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display: none;">
+                        <path d="M 500 500 L 92 500 A 408 408 0 0 1 123.4 343.7 Z" fill="#E8F0F8"/>
+                        <path d="M 500 500 L 123.4 343.7 A 408 408 0 0 1 211.4 211.4 Z" fill="#D1E3F3"/>
+                        <path d="M 500 500 L 211.4 211.4 A 408 408 0 0 1 343.7 123.4 Z" fill="#B8D5ED"/>
+                        <path d="M 500 500 L 343.7 123.4 A 408 408 0 0 1 500 92 Z" fill="#A0C8E8"/>
+                        <path d="M 500 500 L 500 92 A 408 408 0 0 1 656.3 123.4 Z" fill="#FCE8E8"/>
+                        <path d="M 500 500 L 656.3 123.4 A 408 408 0 0 1 788.6 211.4 Z" fill="#F8D5D5"/>
+                        <path d="M 500 500 L 788.6 211.4 A 408 408 0 0 1 876.6 343.7 Z" fill="#F4C2C2"/>
+                        <path d="M 500 500 L 876.6 343.7 A 408 408 0 0 1 908 500 Z" fill="#F0AFAF"/>
+                        <path d="M 92 500 A 408 408 0 0 1 908 500" fill="none" stroke="var(--text-primary)" stroke-width="12" stroke-linecap="square"/>
+                        <path d="M 350 500 A 150 150 0 0 1 650 500" fill="none" stroke="var(--text-primary)" stroke-width="8"/>
+                        <line x1="500" y1="92" x2="500" y2="500" stroke="var(--text-primary)" stroke-width="6"/>
+                        <line x1="500" y1="350" x2="500" y2="500" stroke="var(--text-primary)" stroke-width="6"/>
+                        <line x1="92" y1="500" x2="908" y2="500" stroke="var(--text-primary)" stroke-width="12" stroke-linecap="square"/>
+                        <path d="M 114 396 L 485 500 L 515 500 Z" fill="var(--text-primary)"/>
                         <circle cx="500" cy="500" r="25" fill="var(--text-primary)"/>
                     </svg>
                 </div>
@@ -1693,6 +1710,11 @@
         // =====================================================
         const API_BASE_URL = 'https://civicapi.org/api/v2';
         const REFRESH_INTERVAL = 30000;
+
+        const NEEDLE_CONFIG = {
+            nj: { percentage: 80, candidateName: 'Sherrill' },
+            va_gov: { percentage: 92, candidateName: 'Hashmi' }
+        };
 
         let currentElection = null;
         let raceIds = {};
@@ -2247,7 +2269,7 @@
                 await loadHistoricalData();
 
                 // Hide needle when viewing 2021 data
-                document.getElementById('election-needle').style.display = 'none';
+                renderElectionNeedle(0, '', null);
             } else {
                 // Switch back to live 2025 data
                 isHistoricalMode = false;
@@ -2277,7 +2299,10 @@
                 await searchRaces();
 
                 // Show election needle again for 2025
-                renderElectionNeedle(80, 'Sherrill');
+                const needleConfig = NEEDLE_CONFIG[currentElection.id];
+                if (needleConfig) {
+                    renderElectionNeedle(needleConfig.percentage, needleConfig.candidateName, currentElection.id);
+                }
             }
         }
 
@@ -3250,9 +3275,11 @@
 
                 await updateResults();
 
-                // Render election needle for NJ (Sherrill 80% chance)
-                if (currentElection.id === 'nj' && !isHistoricalMode) {
-                    renderElectionNeedle(80, 'Sherrill');
+                const needleConfig = NEEDLE_CONFIG[currentElection.id];
+                if (!isHistoricalMode && needleConfig) {
+                    renderElectionNeedle(needleConfig.percentage, needleConfig.candidateName, currentElection.id);
+                } else {
+                    renderElectionNeedle(0, '', currentElection.id);
                 }
 
                 // Start auto-refresh if timeline is visible
@@ -3268,16 +3295,31 @@
         // =====================================================
         // ELECTION NEEDLE
         // =====================================================
-        function renderElectionNeedle(percentage, candidateName) {
+        function renderElectionNeedle(percentage, candidateName, electionId) {
             const container = document.getElementById('election-needle');
             const gaugeContainer = document.getElementById('needle-gauge');
             const percentageEl = document.getElementById('needle-percentage');
             const subtitleEl = document.getElementById('needle-subtitle');
+            const supportedConfig = NEEDLE_CONFIG[electionId];
 
-            // Only show for NJ election and not in historical mode
-            if (currentElection.id !== 'nj' || isHistoricalMode) {
+            if (!supportedConfig || isHistoricalMode) {
                 container.style.display = 'none';
+                percentageEl.textContent = '--';
+                subtitleEl.textContent = '--';
+                delete container.dataset.activeElection;
+                delete container.dataset.needleAnimated;
+                delete container.dataset.needleAnimating;
+
+                gaugeContainer.querySelectorAll('svg[data-election]').forEach(svg => {
+                    svg.style.display = 'none';
+                });
                 return;
+            }
+
+            if (container.dataset.activeElection !== electionId) {
+                container.dataset.activeElection = electionId;
+                delete container.dataset.needleAnimated;
+                delete container.dataset.needleAnimating;
             }
 
             container.style.display = 'block';
@@ -3285,9 +3327,19 @@
             const targetPercentage = Number(percentage) || 0;
             subtitleEl.textContent = `Chance ${candidateName} wins`;
 
-            const svg = gaugeContainer.querySelector('svg');
-            if (svg) {
-                svg.style.transform = 'rotate(0deg)';
+            let activeSvg = null;
+            gaugeContainer.querySelectorAll('svg[data-election]').forEach(svg => {
+                if (svg.dataset.election === electionId) {
+                    svg.style.display = 'block';
+                    svg.style.transform = 'rotate(0deg)';
+                    activeSvg = svg;
+                } else {
+                    svg.style.display = 'none';
+                }
+            });
+
+            if (!activeSvg) {
+                return;
             }
 
             const updateText = (value) => {
