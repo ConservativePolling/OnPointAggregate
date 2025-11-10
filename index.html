@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,7 +8,7 @@
     <script src="https://d3js.org/topojson.v3.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
 
         :root {
             --bg-primary: #000000;
@@ -25,17 +25,17 @@
         }
 
         [data-theme="light"] {
-            --bg-primary: #faf8f5;
-            --bg-secondary: #f2ede7;
-            --bg-tertiary: #e8e2da;
-            --bg-map: #faf8f5;
-            --bg-card: #f2ede7;
-            --text-primary: #1a1410;
-            --text-secondary: rgba(26,20,16,0.75);
-            --text-tertiary: rgba(26,20,16,0.5);
-            --border-color: rgba(26,20,16,0.12);
-            --border-subtle: rgba(26,20,16,0.06);
-            --accent-blue: #3b82f6;
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #e2e8f0;
+            --bg-map: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.92);
+            --text-primary: #0f172a;
+            --text-secondary: rgba(15, 23, 42, 0.75);
+            --text-tertiary: rgba(15, 23, 42, 0.55);
+            --border-color: rgba(15, 23, 42, 0.12);
+            --border-subtle: rgba(15, 23, 42, 0.06);
+            --accent-blue: #2563eb;
         }
 
         body {
@@ -47,20 +47,160 @@
             -moz-osx-font-smoothing: grayscale;
         }
 
+        .app-shell {
+            position: relative;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .brand-mark {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+        }
+
+        .brand-mark span {
+            color: var(--accent-blue);
+        }
+
+        .nav-link {
+            position: relative;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--text-primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -10px;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 9999px;
+        }
+
+        .hero-heading {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: 1.1;
+            color: var(--text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            max-width: 32rem;
+        }
+
+        .hero-stat {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(18px);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+            min-width: 160px;
+        }
+
+        [data-theme="dark"] .hero-stat {
+            background: rgba(17, 24, 39, 0.55);
+            box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45);
+        }
+
+        .hero-stat-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+        }
+
+        .hero-stat-value {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .hero-live-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-live-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-live-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        .surface-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(16px);
+        }
+
+        [data-theme="dark"] .surface-card {
+            box-shadow: 0 24px 48px rgba(0, 0, 0, 0.45);
+        }
+
+        .surface-section {
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .surface-section:last-of-type {
+            border-bottom: none;
+        }
+
         /* Simplified Election Selector - Clean */
         .election-hub {
             position: sticky;
-            top: 0;
-            z-index: 900;
-            background: var(--bg-primary);
-            border-bottom: 1px solid var(--border-color);
-            padding: 16px 32px;
-            backdrop-filter: blur(8px);
-            transition: box-shadow 0.3s ease;
+            top: 88px;
+            z-index: 60;
+            background: rgba(255, 255, 255, 0.92);
+            border-bottom: 1px solid var(--border-subtle);
+            padding: 18px 32px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 16px 30px rgba(15, 23, 42, 0.06);
+            transition: box-shadow 0.3s ease, transform 0.3s ease;
+        }
+
+        [data-theme="dark"] .election-hub {
+            background: rgba(15, 23, 42, 0.8);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
         }
 
         .election-hub:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            box-shadow: 0 20px 36px rgba(15, 23, 42, 0.12);
+            transform: translateY(-1px);
         }
 
         .election-selector {
@@ -337,46 +477,43 @@
             background: #555;
         }
 
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 8px 16px;
-            cursor: pointer;
+        .toggle-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 9999px;
+            padding: 9px 16px;
             font-size: 12px;
-            transition: all 0.3s;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text-secondary);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(18px);
         }
 
-        .theme-toggle:hover {
-            opacity: 0.8;
+        [data-theme="dark"] .toggle-chip {
+            background: rgba(17, 24, 39, 0.65);
+            color: var(--text-secondary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
         }
 
+        .toggle-chip:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        .theme-toggle,
         .vote-circles-toggle {
-            position: fixed;
-            top: 60px;
-            right: 20px;
-            z-index: 1000;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 8px 16px;
             cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s;
-            color: var(--text-primary);
-        }
-
-        .vote-circles-toggle:hover {
-            opacity: 0.8;
         }
 
         .vote-circles-toggle.active {
-            background: var(--text-primary);
-            color: var(--bg-primary);
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(37, 99, 235, 0.04));
+            color: var(--accent-blue);
+            box-shadow: 0 12px 32px rgba(37, 99, 235, 0.18);
         }
 
         /* Historical election year toggle */
@@ -636,9 +773,9 @@
         }
 
         /* County Results Section */
-        .county-results-section {
-            border-top: 1px solid var(--border-color);
-            background: var(--bg-primary);
+        #county-results-section {
+            border-top: none;
+            background: transparent;
         }
 
         .party-badge {
@@ -878,18 +1015,6 @@
                 line-height: 1 !important;
             }
 
-            .theme-toggle {
-                padding: 8px 12px !important;
-                font-size: 12px !important;
-                top: 160px !important;
-            }
-
-            .vote-circles-toggle {
-                padding: 8px 12px !important;
-                font-size: 12px !important;
-                top: 200px !important;
-            }
-
             .county-table-wrapper {
                 overflow-x: auto !important;
                 overflow-y: visible !important;
@@ -1017,20 +1142,6 @@
                 display: none;
             }
 
-            .theme-toggle {
-                padding: 6px 10px !important;
-                font-size: 11px !important;
-                top: 180px !important;
-                right: 8px !important;
-            }
-
-            .vote-circles-toggle {
-                padding: 6px 10px !important;
-                font-size: 11px !important;
-                top: 220px !important;
-                right: 8px !important;
-            }
-
             .candidate-percent {
                 font-size: 1.25rem !important;
             }
@@ -1148,10 +1259,17 @@
         }
 
         /* Election Needle Styles */
+        #needle-wrapper {
+            display: none;
+        }
+
         .needle-container {
             padding: 28px 24px 20px 24px;
-            border-top: 1px solid var(--border-color);
-            background: var(--bg-primary);
+            border-top: none;
+            background: var(--bg-secondary);
+            background: linear-gradient(180deg, color-mix(in srgb, var(--accent-blue) 12%, transparent) 0%, transparent 100%);
+            border-radius: 20px;
+            border: 1px solid var(--border-subtle);
             display: none; /* Hidden by default, shown via JS */
         }
 
@@ -1226,9 +1344,82 @@
         }
     </style>
 </head>
-<body class="antialiased">
-    <!-- Election Hub -->
-    <div class="election-hub">
+<body data-page="dashboard" class="antialiased text-slate-900">
+    <div class="app-shell relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+        <div class="pointer-events-none absolute inset-x-0 -top-64 h-[28rem] bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.16),transparent_60%)]"></div>
+        <header id="top" class="global-header sticky top-0 z-50 border-b border-slate-200/60" style="background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(20px);">
+            <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:flex-nowrap sm:gap-6 sm:px-6 lg:px-8">
+                <a href="index.html" class="flex items-center gap-3">
+                    <span class="brand-mark">OnPoint<span>•</span></span>
+                    <span class="hidden text-xs font-semibold uppercase tracking-[0.4em] sm:inline" style="color: var(--text-tertiary);">Election Desk</span>
+                </a>
+                <nav class="flex items-center gap-6">
+                    <a href="index.html" class="nav-link active">Live Results</a>
+                    <a href="articles.html" class="nav-link">Articles</a>
+                    <a href="#county-results-section" class="nav-link hidden lg:inline-block">Counties</a>
+                </nav>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button class="toggle-chip theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">
+                        <span class="inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                        <span id="theme-text">Light Mode</span>
+                    </button>
+                    <button class="toggle-chip vote-circles-toggle" type="button" onclick="toggleVoteCircles()" aria-label="Toggle vote circles">
+                        <span class="inline-flex h-2 w-2 rounded-full bg-slate-400"></span>
+                        <span id="circles-text">Show Vote Circles</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+        <section class="hero-section relative mx-auto max-w-7xl px-4 pt-20 pb-10 sm:px-6 lg:px-8 lg:pb-16">
+            <div class="grid items-center gap-12 lg:grid-cols-[1.05fr,0.95fr]">
+                <div class="space-y-6">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em]" style="color: var(--accent-blue);">Live election coverage</span>
+                    <h1 class="hero-heading" id="hero-race-title">Election Results Dashboard</h1>
+                    <p class="hero-subtitle" id="hero-race-subtitle">Tracking the races shaping the nation with minute-by-minute reporting and interactive precinct-level context.</p>
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="hero-stat">
+                            <span class="hero-stat-label">Total votes tallied</span>
+                            <span class="hero-stat-value" id="hero-votes-counted">0 votes</span>
+                        </div>
+                        <div class="hero-stat">
+                            <span class="hero-stat-label">Latest update</span>
+                            <span class="hero-stat-value" id="hero-last-updated">Updated --</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="#county-results-section" class="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-700">Explore detailed map</a>
+                        <a href="articles.html" class="inline-flex items-center justify-center rounded-full border border-slate-300/80 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:text-slate-800">Browse coverage</a>
+                    </div>
+                </div>
+                <div class="hero-live-card surface-card p-8">
+                    <div class="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.35em]" style="color: var(--text-tertiary);">
+                        <span>Live leader</span>
+                        <span id="hero-reporting">Reporting --</span>
+                    </div>
+                    <div class="mt-6 flex items-center gap-4">
+                        <div id="hero-leader-photo" class="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-slate-200/70 bg-white/80 shadow-inner">
+                            <span class="text-lg font-semibold text-slate-500" id="hero-leader-initial">--</span>
+                            <img id="hero-leader-photo-img" alt="" class="absolute inset-0 hidden h-full w-full object-cover" />
+                        </div>
+                        <div class="min-w-0">
+                            <h3 class="text-2xl font-semibold tracking-tight" id="hero-leader-name" style="color: var(--text-primary);">Awaiting results</h3>
+                            <p class="text-sm font-medium" id="hero-leader-title" style="color: var(--text-secondary);">We'll surface the projected leader once returns arrive.</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 space-y-4">
+                        <div class="flex items-center justify-between text-sm font-semibold">
+                            <span id="hero-leader-percent" style="color: var(--text-primary);">--%</span>
+                            <span class="text-xs font-semibold uppercase tracking-[0.35em]" id="hero-leader-margin" style="color: var(--text-tertiary);">Margin --</span>
+                        </div>
+                        <div class="h-2 w-full overflow-hidden rounded-full" style="background: var(--border-subtle);">
+                            <div id="hero-leader-bar" class="h-full rounded-full" style="width: 0%; background: var(--accent-blue);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Election Hub -->
+        <div class="election-hub">
         <div class="max-w-7xl mx-auto flex items-center gap-6 justify-between">
             <div class="flex items-center gap-4">
                 <span class="text-xs font-bold uppercase tracking-wider" style="color: var(--text-secondary);">Elections</span>
@@ -1290,40 +1481,35 @@
         </div>
     </div>
 
-    <button class="theme-toggle" onclick="toggleTheme()">
-        <span id="theme-text">Light Mode</span>
-    </button>
+    <main class="relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+            <section class="main-container flex flex-col gap-8 lg:flex-row">
+                <!-- Left Panel: Candidates -->
+                <div class="left-panel surface-card w-full lg:w-2/5 flex flex-col overflow-hidden">
+                    <div class="surface-section px-10 py-8">
+                        <h1 class="election-main-title mb-1" id="election-title">Loading...</h1>
+                        <p class="election-main-subtitle" id="election-subtitle">Loading...</p>
+                    </div>
 
-    <button class="vote-circles-toggle" onclick="toggleVoteCircles()">
-        <span id="circles-text">Show Vote Circles</span>
-    </button>
+                    <div class="surface-section px-10 py-8">
+                        <div class="flex items-baseline gap-4">
+                            <span class="reporting-section-title" id="votes-counted">0 votes</span>
+                            <span class="reporting-section-label">Total Votes</span>
+                        </div>
+                    </div>
 
-    <div class="flex h-screen w-screen main-container">
-        <!-- Left Panel: Candidates -->
-        <div class="w-2/5 flex flex-col left-panel" style="border-right: 1px solid var(--border-color);">
-            <div class="px-12 py-8" style="border-bottom: 1px solid var(--border-color);">
-                <h1 class="election-main-title mb-1" id="election-title">Loading...</h1>
-                <p class="election-main-subtitle" id="election-subtitle">Loading...</p>
-            </div>
+                    <div class="surface-section flex-1 overflow-y-auto px-10 py-8" id="candidates-container">
+                        <!-- Candidates will be populated dynamically -->
+                    </div>
 
-            <div class="px-12 py-8" style="border-bottom: 1px solid var(--border-color);">
-                <div class="flex items-baseline gap-4">
-                    <span class="reporting-section-title" id="votes-counted">0 votes</span>
-                    <span class="reporting-section-label">Total Votes</span>
-                </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto px-12 py-8" id="candidates-container">
-                <!-- Candidates will be populated dynamically -->
-            </div>
-
-            <!-- Election Needle (NJ only) -->
-            <div class="needle-container" id="election-needle">
-                <div class="needle-header">
-                    <div class="needle-percentage" id="needle-percentage">--</div>
-                    <div class="needle-subtitle" id="needle-subtitle">--</div>
-                </div>
-                <div class="needle-gauge" id="needle-gauge">
+                    <!-- Election Needle (NJ only) -->
+                    <div class="surface-section px-8" id="needle-wrapper">
+                        <div class="needle-container" id="election-needle">
+                            <div class="needle-header">
+                                <div class="needle-percentage" id="needle-percentage">--</div>
+                                <div class="needle-subtitle" id="needle-subtitle">--</div>
+                            </div>
+                            <div class="needle-gauge" id="needle-gauge">
                     <svg class="needle-svg" data-election="nj" viewBox="0 0 1000 500" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" style="display: none;">
                         <path d="M 500 500 L 92 500 A 408 408 0 0 1 123.4 343.7 Z" fill="#E8F0F8"/>
                         <path d="M 500 500 L 123.4 343.7 A 408 408 0 0 1 211.4 211.4 Z" fill="#D1E3F3"/>
@@ -1358,32 +1544,118 @@
                         <path d="M 114 396 L 485 500 L 515 500 Z" fill="var(--text-primary)"/>
                         <circle cx="500" cy="500" r="25" fill="var(--text-primary)"/>
                     </svg>
-                </div>
-            </div>
+                            </div>
+                        </div>
+                    </div>
 
-            <div class="px-12 py-4" style="border-top: 1px solid var(--border-color);">
-                <p class="text-xs" style="color: var(--text-tertiary);" id="last-updated">Last updated: --</p>
-            </div>
-        </div>
-
-        <!-- Right Panel: Maps -->
-        <div class="flex-1 flex flex-col p-8 gap-6 right-panel">
-            <!-- Historical Election Viewer (only shown for NJ) -->
-            <div id="historical-viewer" style="display: none; margin-bottom: -1rem;">
-                <div class="flex items-center justify-between">
-                    <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Election Year</span>
-                    <div class="flex gap-2">
-                        <button class="year-toggle" data-year="2025" onclick="switchToYear(2025)">2025</button>
-                        <button class="year-toggle" data-year="2021" onclick="switchToYear(2021)">2021</button>
-                        <button class="comparison-toggle" id="comparison-btn" onclick="toggleComparisonMode()">Look at the shift</button>
+                    <div class="surface-section px-10 py-4">
+                        <p class="text-xs" style="color: var(--text-tertiary);" id="last-updated">Last updated: --</p>
                     </div>
                 </div>
-            </div>
 
-            <div id="maps-container">
-                <!-- Maps will be populated dynamically -->
-            </div>
+                <!-- Right Panel: Maps -->
+                <div class="right-panel surface-card flex-1 flex flex-col gap-8 p-8">
+                    <!-- Historical Election Viewer (only shown for NJ) -->
+                    <div id="historical-viewer" style="display: none; margin-bottom: -1rem;">
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-tertiary);">Election Year</span>
+                            <div class="flex gap-2">
+                                <button class="year-toggle" data-year="2025" onclick="switchToYear(2025)">2025</button>
+                                <button class="year-toggle" data-year="2021" onclick="switchToYear(2021)">2021</button>
+                                <button class="comparison-toggle" id="comparison-btn" onclick="toggleComparisonMode()">Look at the shift</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="maps-container">
+                        <!-- Maps will be populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+            <section class="space-y-8">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="space-y-3">
+                        <span class="text-xs font-semibold uppercase tracking-[0.3em]" style="color: var(--text-tertiary);">Coverage highlights</span>
+                        <h2 class="section-title mt-1">Featured election reporting</h2>
+                        <p class="section-subtitle max-w-2xl">Revisit the moments that defined our biggest calls, curated by the OnPoint newsroom.</p>
+                    </div>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="articles.html" class="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-700">View the archive</a>
+                        <a href="#county-results-section" class="inline-flex items-center justify-center rounded-full border border-slate-300/80 bg-white/80 px-5 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:text-slate-800">Skip to county results</a>
+                    </div>
+                </div>
+
+                <div id="articles-grid" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
+
+                <div class="flex justify-end">
+                    <a id="articles-more-link" href="articles.html" class="hidden inline-flex items-center gap-2 rounded-full border border-slate-300/80 bg-white/80 px-5 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:text-slate-800">
+                        Browse all election coverage
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </section>
+
+            <section class="surface-card p-8 sm:p-10 space-y-6" id="county-results-section">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-[0.3em]" style="color: var(--text-tertiary);">Detailed vote breakdown</span>
+                        <h2 class="section-title mt-1" id="region-results-title">Region Results</h2>
+                        <p class="section-subtitle" id="region-results-subtitle"></p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-4 sm:flex-row filter-controls">
+                    <div class="flex-1">
+                        <select id="county-select" class="px-4 py-3 rounded-lg text-sm w-full" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                            <option value="">Select a region...</option>
+                        </select>
+                    </div>
+                    <div id="party-filter-container" class="min-w-[200px]">
+                        <select id="party-filter" class="px-4 py-3 rounded-lg text-sm w-full" style="background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border-color);">
+                            <option value="both">Both Primaries</option>
+                            <option value="democratic">Democrats Only</option>
+                            <option value="republican">Republicans Only</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="county-table-wrapper rounded-2xl" style="border: 1px solid var(--border-color); background: var(--bg-secondary);">
+                    <table class="county-table w-full">
+                        <thead>
+                            <tr class="text-xs uppercase tracking-wider" style="color: var(--text-tertiary);">
+                                <th class="text-left px-6 py-4 font-medium" id="region-header">Region</th>
+                                <th class="text-left px-6 py-4 font-medium" id="party-header">Party</th>
+                                <th class="text-left px-6 py-4 font-medium">Candidate</th>
+                                <th class="text-right px-6 py-4 font-medium">Votes</th>
+                                <th class="text-left px-6 py-4 font-medium" style="min-width: 200px;">Bar</th>
+                                <th class="text-right px-6 py-4 font-medium">Percentage</th>
+                                <th class="text-right px-6 py-4 font-medium">Margin</th>
+                            </tr>
+                        </thead>
+                        <tbody id="county-results-tbody">
+                            <tr>
+                                <td colspan="7" class="px-6 py-12 text-center" style="color: var(--text-tertiary);">
+                                    Select a region to view results
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
         </div>
+    </main>
+
+        <footer class="relative border-t border-slate-200/70" style="background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(18px);">
+            <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                <p style="color: var(--text-tertiary);">© 2025 OnPoint Newsroom Election Desk. All rights reserved.</p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <a href="index.html" class="nav-link">Live Results</a>
+                    <a href="articles.html" class="nav-link">Coverage Archive</a>
+                    <a href="#top" class="nav-link hidden md:inline-block">Back to top</a>
+                </div>
+            </div>
+        </footer>
     </div>
 
     <div class="tooltip" id="tooltip"></div>
@@ -1401,54 +1673,6 @@
             <div style="padding: 16px 24px; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
                 <button class="modal-close" onclick="clearCandidateSelection()">Show All</button>
                 <button class="modal-close" onclick="closeCandidateModal()">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- County Results Section -->
-    <div class="county-results-section">
-        <div class="max-w-7xl mx-auto px-12 py-12">
-            <div class="mb-8">
-                <h2 class="section-title mb-2" id="region-results-title">Region Results</h2>
-                <p class="section-subtitle" id="region-results-subtitle"></p>
-            </div>
-
-            <div class="mb-6 flex gap-4 filter-controls">
-                <div class="flex-1">
-                    <select id="county-select" class="px-4 py-3 rounded-lg text-sm w-full">
-                        <option value="">Select a region...</option>
-                    </select>
-                </div>
-                <div style="min-width: 200px;" id="party-filter-container">
-                    <select id="party-filter" class="px-4 py-3 rounded-lg text-sm w-full">
-                        <option value="both">Both Primaries</option>
-                        <option value="democratic">Democrats Only</option>
-                        <option value="republican">Republicans Only</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="rounded-lg county-table-wrapper" style="border: 1px solid var(--border-color);">
-                <table class="county-table w-full">
-                    <thead>
-                        <tr class="text-xs uppercase tracking-wider" style="color: var(--text-tertiary);">
-                            <th class="text-left px-6 py-4 font-medium" id="region-header">Region</th>
-                            <th class="text-left px-6 py-4 font-medium" id="party-header">Party</th>
-                            <th class="text-left px-6 py-4 font-medium">Candidate</th>
-                            <th class="text-right px-6 py-4 font-medium">Votes</th>
-                            <th class="text-left px-6 py-4 font-medium" style="min-width: 200px;">Bar</th>
-                            <th class="text-right px-6 py-4 font-medium">Percentage</th>
-                            <th class="text-right px-6 py-4 font-medium">Margin</th>
-                        </tr>
-                    </thead>
-                    <tbody id="county-results-tbody">
-                        <tr>
-                            <td colspan="7" class="px-6 py-12 text-center" style="color: var(--text-tertiary);">
-                                Select a region to view results
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
             </div>
         </div>
     </div>
@@ -1715,6 +1939,185 @@
             va_gov: { percentage: 100, candidateName: 'Spanberger' }
         };
 
+        function setTextIfExists(id, text) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = text;
+            }
+        }
+
+        function resetHeroCard() {
+            setTextIfExists('hero-leader-name', 'Awaiting results');
+            setTextIfExists('hero-leader-title', 'We\'ll surface the projected leader once returns arrive.');
+            setTextIfExists('hero-leader-percent', '--%');
+            setTextIfExists('hero-leader-margin', 'Margin --');
+            setTextIfExists('hero-reporting', 'Reporting --');
+            setTextIfExists('hero-last-updated', 'Updated --');
+
+            const bar = document.getElementById('hero-leader-bar');
+            if (bar) {
+                bar.style.width = '0%';
+                bar.style.background = 'var(--accent-blue)';
+            }
+
+            const photoImg = document.getElementById('hero-leader-photo-img');
+            const initials = document.getElementById('hero-leader-initial');
+            if (photoImg) {
+                photoImg.classList.add('hidden');
+            }
+            if (initials) {
+                initials.textContent = '--';
+            }
+        }
+
+        function updateHeroLeader(race, candidates, reporting) {
+            if (!currentElection) return;
+
+            const heroName = document.getElementById('hero-leader-name');
+            if (!heroName) return;
+
+            const heroTitle = document.getElementById('hero-leader-title');
+            const heroPercent = document.getElementById('hero-leader-percent');
+            const heroMargin = document.getElementById('hero-leader-margin');
+            const heroReporting = document.getElementById('hero-reporting');
+            const heroBar = document.getElementById('hero-leader-bar');
+            const heroPhoto = document.getElementById('hero-leader-photo-img');
+            const heroInitial = document.getElementById('hero-leader-initial');
+
+            const isPrimary = currentElection.type === 'primary';
+            if (!isPrimary && race !== 'general') {
+                return;
+            }
+            if (isPrimary && !['democratic', 'republican'].includes(race)) {
+                return;
+            }
+
+            const reportingLabel = isPrimary
+                ? `${race === 'democratic' ? 'Democratic' : 'Republican'} reporting`
+                : 'Overall reporting';
+
+            if (heroReporting) {
+                heroReporting.textContent = reporting
+                    ? `${reportingLabel} ${Math.round(reporting)}%`
+                    : `${reportingLabel} --`;
+            }
+
+            if (!candidates || candidates.length === 0) {
+                heroName.textContent = 'Awaiting results';
+                if (heroTitle) {
+                    heroTitle.textContent = 'We\'ll surface the projected leader once returns arrive.';
+                }
+                if (heroPercent) heroPercent.textContent = '--%';
+                if (heroMargin) heroMargin.textContent = 'Margin --';
+                if (heroBar) {
+                    heroBar.style.width = '0%';
+                    heroBar.style.background = 'var(--accent-blue)';
+                }
+                if (heroPhoto) heroPhoto.classList.add('hidden');
+                if (heroInitial) heroInitial.textContent = '--';
+                return;
+            }
+
+            const leader = candidates[0];
+            const runnerUp = candidates[1];
+            const percent = leader.percent || 0;
+            const marginValue = runnerUp ? percent - (runnerUp.percent || 0) : percent;
+            const marginLabel = Number.isFinite(marginValue) ? `Margin ${marginValue > 0 ? '+' : ''}${marginValue.toFixed(1)} pts` : 'Margin --';
+            const candidateTitles = currentElection.candidateTitles || {};
+            const candidateColors = currentElection.candidateColors || {};
+            const candidatePhotos = currentElection.candidatePhotos || {};
+
+            heroName.textContent = leader.name;
+            if (heroTitle) {
+                heroTitle.textContent = candidateTitles[leader.name] || '';
+            }
+            if (heroPercent) heroPercent.textContent = `${percent.toFixed(1)}%`;
+            if (heroMargin) heroMargin.textContent = marginLabel;
+
+            if (heroBar) {
+                heroBar.style.width = `${Math.min(100, percent)}%`;
+                heroBar.style.background = candidateColors[leader.name] || 'var(--accent-blue)';
+            }
+
+            const photoUrl = candidatePhotos[leader.name] || null;
+            if (heroPhoto && heroInitial) {
+                if (photoUrl) {
+                    heroPhoto.src = photoUrl;
+                    heroPhoto.alt = leader.name;
+                    heroPhoto.classList.remove('hidden');
+                    heroInitial.textContent = '';
+                } else {
+                    heroPhoto.classList.add('hidden');
+                    heroInitial.textContent = leader.name ? leader.name.charAt(0) : '—';
+                }
+            }
+        }
+
+        let historicalArticles = [];
+        let historicalArticlesLoaded = false;
+
+        async function loadHistoricalArticles() {
+            if (historicalArticlesLoaded) {
+                return historicalArticles;
+            }
+
+            try {
+                const response = await fetch('historical-articles.json');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch historical articles (${response.status})`);
+                }
+                const data = await response.json();
+                historicalArticles = Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error('Failed to load coverage archive:', error);
+                historicalArticles = [];
+            } finally {
+                historicalArticlesLoaded = true;
+            }
+
+            return historicalArticles;
+        }
+
+        async function renderHistoricalArticles() {
+            const grid = document.getElementById('articles-grid');
+            if (!grid) return;
+
+            const articles = await loadHistoricalArticles();
+            const pageMode = document.body?.dataset?.page || 'dashboard';
+            const displayCount = pageMode === 'articles' ? articles.length : Math.min(3, articles.length);
+            const articlesToDisplay = articles.slice(0, displayCount);
+
+            if (articlesToDisplay.length === 0) {
+                grid.innerHTML = '<p class="text-sm" style="color: var(--text-tertiary);">Coverage archive coming soon.</p>';
+            } else {
+                grid.innerHTML = articlesToDisplay.map(article => `
+                    <article class="surface-card article-card flex flex-col gap-5 p-6 transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl">
+                        <div class="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.35em]" style="color: var(--text-tertiary);">
+                            <span>${article.badge}</span>
+                            <span>${article.published}</span>
+                        </div>
+                        <div class="space-y-3">
+                            <h3 class="text-xl font-semibold leading-tight" style="color: var(--text-primary);">${article.title}</h3>
+                            <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">${article.description}</p>
+                        </div>
+                        <a class="inline-flex items-center gap-2 text-sm font-semibold transition" style="color: var(--accent-blue);" href="${article.href}" target="_blank" rel="noopener">
+                            View recap
+                            <span aria-hidden="true">→</span>
+                        </a>
+                    </article>
+                `).join('');
+            }
+
+            const moreLink = document.getElementById('articles-more-link');
+            if (moreLink) {
+                if (pageMode !== 'articles' && articles.length > articlesToDisplay.length) {
+                    moreLink.classList.remove('hidden');
+                } else {
+                    moreLink.classList.add('hidden');
+                }
+            }
+        }
+
         let currentElection = null;
         let raceIds = {};
         let regionData = {};
@@ -1821,6 +2224,10 @@
             renderElectionHub();
             document.getElementById('election-title').textContent = currentElection.name;
             document.getElementById('election-subtitle').textContent = `${currentElection.subtitle} • ${currentElection.dateString}`;
+            resetHeroCard();
+            setTextIfExists('hero-race-title', currentElection.name);
+            setTextIfExists('hero-race-subtitle', `${currentElection.subtitle} • ${currentElection.dateString}`);
+            setTextIfExists('hero-votes-counted', '0 votes');
             document.getElementById('region-results-title').textContent = `${currentElection.regionLabelPlural} Results`;
             document.getElementById('region-results-subtitle').textContent = currentElection.note || '';
             document.getElementById('region-header').textContent = currentElection.regionLabel;
@@ -2050,6 +2457,8 @@
             // Update combined vote count
             const total = Object.values(totalVotes).reduce((sum, val) => sum + val, 0);
             document.getElementById('votes-counted').textContent = `${total.toLocaleString()} votes`;
+            setTextIfExists('hero-votes-counted', `${total.toLocaleString()} votes`);
+            setTextIfExists('hero-votes-counted', `${total.toLocaleString()} votes`);
 
             // Display candidates from snapshot
             for (const race of currentElection.races) {
@@ -2546,10 +2955,14 @@
             // Update title and subtitle
             document.getElementById('election-title').textContent = election.name;
             document.getElementById('election-subtitle').textContent = `${election.subtitle} • ${election.dateString}`;
+            setTextIfExists('hero-race-title', election.name);
+            setTextIfExists('hero-race-subtitle', `${election.subtitle} • ${election.dateString}`);
 
             // Update vote count
             const totalVotesCount = candidates.reduce((sum, c) => sum + c.votes, 0);
             document.getElementById('votes-counted').textContent = `${totalVotesCount.toLocaleString()} votes`;
+            setTextIfExists('hero-votes-counted', `${totalVotesCount.toLocaleString()} votes`);
+            updateHeroLeader('general', candidates, 100);
 
             console.log(`Displaying ${candidates.length} candidates, ${Object.keys(counties).length} counties`);
 
@@ -2714,6 +3127,7 @@
 
             // Update last updated text
             document.getElementById('last-updated').textContent = 'Last updated: Nov 2, 2021 (Final Results)';
+            setTextIfExists('hero-last-updated', 'Last updated: Nov 2, 2021 (Final Results)');
         }
 
         async function loadElectionMaps() {
@@ -3122,7 +3536,7 @@
                 }
                 displayCountyResults();
 
-                const countySection = document.querySelector('.county-results-section');
+                const countySection = document.getElementById('county-results-section');
                 if (countySection) {
                     countySection.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }
@@ -3336,10 +3750,14 @@
             const gaugeContainer = document.getElementById('needle-gauge');
             const percentageEl = document.getElementById('needle-percentage');
             const subtitleEl = document.getElementById('needle-subtitle');
+            const wrapper = document.getElementById('needle-wrapper');
             const supportedConfig = NEEDLE_CONFIG[electionId];
 
             if (!supportedConfig || isHistoricalMode) {
                 container.style.display = 'none';
+                if (wrapper) {
+                    wrapper.style.display = 'none';
+                }
                 percentageEl.textContent = '--';
                 subtitleEl.textContent = '--';
                 delete container.dataset.activeElection;
@@ -3358,6 +3776,9 @@
                 delete container.dataset.needleAnimating;
             }
 
+            if (wrapper) {
+                wrapper.style.display = 'block';
+            }
             container.style.display = 'block';
 
             const targetPercentage = Number(percentage) || 0;
@@ -3559,6 +3980,7 @@
             }));
 
             districtCandidates[race] = candidatesWithWinner;
+            updateHeroLeader(race, candidatesWithWinner, reporting);
 
             // Render candidates based on election type
             if (currentElection.type === 'primary') {
@@ -4937,6 +5359,7 @@
             const relative = formatRelativeTime(latestTimestamp);
 
             label.textContent = relative ? `Updated ${relative}` : 'Updated --';
+            setTextIfExists('hero-last-updated', label.textContent);
         }
 
         // Auto-refresh is handled by startAutoRefresh() function defined earlier (line 1639)
@@ -4949,9 +5372,11 @@
         // =====================================================
         // EVENT LISTENERS & INITIALIZATION
         // =====================================================
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             const countySelect = document.getElementById('county-select');
             const partyFilter = document.getElementById('party-filter');
+
+            await renderHistoricalArticles();
 
             if (countySelect) {
                 countySelect.addEventListener('change', displayCountyResults);

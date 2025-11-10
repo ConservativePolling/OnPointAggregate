@@ -1,0 +1,34 @@
+[
+  {
+    "id": "2024-presidential",
+    "badge": "Presidential",
+    "title": "Inside the 2024 Presidential finish line",
+    "description": "See how turnout swings in Pennsylvania and Georgia reshaped the national map during the final reporting push.",
+    "href": "https://onpoint.news/coverage/2024-presidential",
+    "published": "Nov 6, 2024"
+  },
+  {
+    "id": "2021-nj-governor",
+    "badge": "Governor",
+    "title": "New Jersey 2021: A razor-thin replay",
+    "description": "Dive into every county shift from the Ciattarelli–Murphy showdown with refreshed precinct-level analysis.",
+    "href": "https://onpoint.news/coverage/2021-new-jersey-governor",
+    "published": "Nov 3, 2021"
+  },
+  {
+    "id": "2022-tn07-primary",
+    "badge": "House Primary",
+    "title": "Tennessee 7th District turnout story",
+    "description": "How suburban Nashville and rural western counties traded the lead on primary night, minute by minute.",
+    "href": "https://onpoint.news/coverage/tn-7th-primary",
+    "published": "Aug 5, 2022"
+  },
+  {
+    "id": "2023-virginia-offyear",
+    "badge": "Statewide",
+    "title": "Virginia 2023: Lessons ahead of 2025",
+    "description": "A precinct-level look at the coalitions that powered the off-year sweep and what it signals for the upcoming ticket.",
+    "href": "https://onpoint.news/coverage/virginia-2023",
+    "published": "Nov 8, 2023"
+  }
+]
