@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Coverage Archive • OnPoint</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-card: rgba(255, 255, 255, 0.92);
+            --text-primary: #0f172a;
+            --text-secondary: rgba(15, 23, 42, 0.75);
+            --text-tertiary: rgba(15, 23, 42, 0.55);
+            --border-color: rgba(15, 23, 42, 0.12);
+            --border-subtle: rgba(15, 23, 42, 0.06);
+            --accent-blue: #2563eb;
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #020617;
+            --bg-secondary: #0f172a;
+            --bg-card: rgba(15, 23, 42, 0.85);
+            --text-primary: #f8fafc;
+            --text-secondary: rgba(226, 232, 240, 0.85);
+            --text-tertiary: rgba(148, 163, 184, 0.65);
+            --border-color: rgba(148, 163, 184, 0.2);
+            --border-subtle: rgba(148, 163, 184, 0.12);
+            --accent-blue: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .app-shell {
+            position: relative;
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .brand-mark {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+        }
+
+        .brand-mark span {
+            color: var(--accent-blue);
+        }
+
+        .nav-link {
+            position: relative;
+            font-size: 0.875rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-secondary);
+        }
+
+        .nav-link.active {
+            color: var(--text-primary);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -10px;
+            height: 2px;
+            background: var(--accent-blue);
+            border-radius: 9999px;
+        }
+
+        .toggle-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 9999px;
+            padding: 9px 16px;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text-secondary);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+            backdrop-filter: blur(18px);
+        }
+
+        [data-theme="dark"] .toggle-chip {
+            background: rgba(17, 24, 39, 0.65);
+            color: var(--text-secondary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .toggle-chip:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 32px rgba(15, 23, 42, 0.12);
+        }
+
+        .hero-heading {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2.75rem, 4vw, 3.75rem);
+            font-weight: 600;
+            letter-spacing: -0.04em;
+            line-height: 1.05;
+            color: var(--text-primary);
+        }
+
+        .hero-subtitle {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            max-width: 34rem;
+        }
+
+        .surface-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            box-shadow: 0 22px 48px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(16px);
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: clamp(2rem, 3vw, 2.5rem);
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            color: var(--text-primary);
+        }
+
+        .section-subtitle {
+            font-size: 1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+        }
+
+        .filter-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-tertiary);
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            color: var(--text-secondary);
+            border-color: var(--accent-blue);
+        }
+
+        .filter-chip.active {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.14), rgba(37, 99, 235, 0.04));
+            color: var(--accent-blue);
+            border-color: transparent;
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.16);
+        }
+
+        [data-theme="dark"] .filter-chip {
+            background: rgba(17, 24, 39, 0.55);
+            border-color: rgba(148, 163, 184, 0.25);
+            color: var(--text-secondary);
+        }
+
+        [data-theme="dark"] .filter-chip.active {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.28), rgba(37, 99, 235, 0.12));
+            color: rgba(191, 219, 254, 1);
+            box-shadow: 0 14px 32px rgba(37, 99, 235, 0.28);
+        }
+
+        .article-card {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .article-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.06), transparent 70%);
+            pointer-events: none;
+        }
+
+        .article-card > * {
+            position: relative;
+            z-index: 1;
+        }
+
+        footer .nav-link::after {
+            display: none;
+        }
+    </style>
+</head>
+<body data-page="articles" class="antialiased text-slate-900">
+    <div class="app-shell relative overflow-hidden bg-gradient-to-br from-slate-50 via-white to-slate-100">
+        <div class="pointer-events-none absolute inset-x-0 -top-64 h-[28rem] bg-[radial-gradient(circle_at_top,rgba(37,99,235,0.16),transparent_60%)]"></div>
+        <header id="top" class="global-header sticky top-0 z-50 border-b border-slate-200/60" style="background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(20px);">
+            <div class="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-4 sm:flex-nowrap sm:gap-6 sm:px-6 lg:px-8">
+                <a href="index.html" class="flex items-center gap-3">
+                    <span class="brand-mark">OnPoint<span>•</span></span>
+                    <span class="hidden text-xs font-semibold uppercase tracking-[0.4em] sm:inline" style="color: var(--text-tertiary);">Election Desk</span>
+                </a>
+                <nav class="flex items-center gap-6">
+                    <a href="index.html" class="nav-link">Live Results</a>
+                    <a href="articles.html" class="nav-link active">Articles</a>
+                    <a href="#archive" class="nav-link hidden lg:inline-block">Archive</a>
+                </nav>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button class="toggle-chip theme-toggle" type="button" onclick="toggleTheme()" aria-label="Toggle theme">
+                        <span class="inline-flex h-2 w-2 rounded-full bg-blue-500"></span>
+                        <span id="theme-text">Light Mode</span>
+                    </button>
+                    <a href="index.html" class="toggle-chip" aria-label="Return to live results">
+                        <span class="inline-flex h-2 w-2 rounded-full bg-slate-400"></span>
+                        <span>Back to Results</span>
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <section class="relative mx-auto max-w-7xl px-4 pt-20 pb-10 sm:px-6 lg:px-8 lg:pb-16">
+            <div class="grid items-start gap-12 lg:grid-cols-[1.1fr,0.9fr]">
+                <div class="space-y-6">
+                    <span class="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-[0.35em]" style="color: var(--accent-blue);">Coverage archive</span>
+                    <h1 class="hero-heading">Election reporting you can revisit</h1>
+                    <p class="hero-subtitle">Browse the OnPoint desk’s most consequential race night stories, complete with the original precinct-level insights and interactive recaps.</p>
+                    <div class="flex flex-wrap gap-3">
+                        <a href="#archive" class="inline-flex items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-slate-700">Jump to articles</a>
+                        <a href="index.html#county-results-section" class="inline-flex items-center justify-center rounded-full border border-slate-300/80 bg-white/80 px-6 py-3 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-400 hover:text-slate-800">See live county results</a>
+                    </div>
+                </div>
+                <div class="surface-card p-8">
+                    <div class="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.35em]" style="color: var(--text-tertiary);">
+                        <span>Archive digest</span>
+                        <span id="archive-count">0 pieces</span>
+                    </div>
+                    <div class="mt-6 space-y-4 text-sm" style="color: var(--text-secondary);">
+                        <p>Filter by the election night you care about most. Each recap includes our updated visuals, turnout context, and who broke through when polls closed.</p>
+                        <p class="text-xs uppercase tracking-[0.4em]" style="color: var(--text-tertiary);">Updated weekly with newsroom selects.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <main id="archive" class="relative">
+            <div class="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+                <section class="space-y-10">
+                    <div class="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                        <div class="space-y-3">
+                            <span class="text-xs font-semibold uppercase tracking-[0.3em]" style="color: var(--text-tertiary);">Browse by desk</span>
+                            <h2 class="section-title">Filter election night storytelling</h2>
+                            <p class="section-subtitle">Tap a category to surface the race coverage you want—presidential showdowns, governor cliffhangers, or primary night upsets.</p>
+                        </div>
+                        <div id="article-filters" class="flex flex-wrap gap-3"></div>
+                    </div>
+
+                    <div id="articles-grid" class="grid gap-6 sm:grid-cols-2 xl:grid-cols-3"></div>
+                </section>
+            </div>
+        </main>
+
+        <footer class="relative border-t border-slate-200/70" style="background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(18px);">
+            <div class="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-6 text-sm sm:flex-row sm:items-center sm:justify-between sm:px-6 lg:px-8">
+                <p style="color: var(--text-tertiary);">© 2025 OnPoint Newsroom Election Desk. All rights reserved.</p>
+                <div class="flex flex-wrap items-center gap-4">
+                    <a href="index.html" class="nav-link">Live Results</a>
+                    <a href="articles.html" class="nav-link active">Coverage Archive</a>
+                    <a href="#top" class="nav-link hidden md:inline-block">Back to top</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        const storedTheme = localStorage.getItem('theme');
+        if (storedTheme) {
+            document.documentElement.setAttribute('data-theme', storedTheme);
+        }
+
+        let articles = [];
+        let activeFilter = 'all';
+
+        function syncThemeLabel() {
+            const themeText = document.getElementById('theme-text');
+            if (!themeText) return;
+            const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+            themeText.textContent = currentTheme === 'light' ? 'Dark Mode' : 'Light Mode';
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme') || 'light';
+            const nextTheme = currentTheme === 'light' ? 'dark' : 'light';
+            html.setAttribute('data-theme', nextTheme);
+            localStorage.setItem('theme', nextTheme);
+            syncThemeLabel();
+        }
+
+        function renderFilters() {
+            const filtersContainer = document.getElementById('article-filters');
+            if (!filtersContainer) return;
+
+            const categories = Array.from(new Set(articles.map(article => article.badge)));
+            const filters = ['All', ...categories];
+
+            filtersContainer.innerHTML = filters.map(category => {
+                const isActive = (activeFilter === 'all' && category === 'All') || activeFilter === category.toLowerCase();
+                return `
+                    <button type="button" class="filter-chip ${isActive ? 'active' : ''}" data-filter="${category.toLowerCase()}">
+                        ${category}
+                    </button>
+                `;
+            }).join('');
+
+            filtersContainer.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', () => {
+                    activeFilter = button.dataset.filter;
+                    renderFilters();
+                    renderArticles();
+                });
+            });
+        }
+
+        function renderArticles() {
+            const grid = document.getElementById('articles-grid');
+            if (!grid) return;
+
+            const filtered = activeFilter === 'all'
+                ? articles
+                : articles.filter(article => article.badge.toLowerCase() === activeFilter);
+
+            const countLabel = document.getElementById('archive-count');
+            if (countLabel) {
+                const label = `${filtered.length} ${filtered.length === 1 ? 'piece' : 'pieces'}`;
+                countLabel.textContent = label;
+            }
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<article class="surface-card p-8 text-sm" style="color: var(--text-secondary);">No articles match this filter yet—check back soon as we add more coverage.</article>';
+                return;
+            }
+
+            grid.innerHTML = filtered.map(article => `
+                <article class="surface-card article-card flex h-full flex-col gap-5 p-6 transition-transform duration-200 hover:-translate-y-1 hover:shadow-xl">
+                    <div class="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[0.35em]" style="color: var(--text-tertiary);">
+                        <span>${article.badge}</span>
+                        <span>${article.published}</span>
+                    </div>
+                    <div class="space-y-3">
+                        <h3 class="text-xl font-semibold leading-tight" style="color: var(--text-primary);">${article.title}</h3>
+                        <p class="text-sm leading-relaxed" style="color: var(--text-secondary);">${article.description}</p>
+                    </div>
+                    <a class="inline-flex items-center gap-2 text-sm font-semibold transition" style="color: var(--accent-blue);" href="${article.href}" target="_blank" rel="noopener">
+                        Read recap
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </article>
+            `).join('');
+        }
+
+        async function loadArticles() {
+            try {
+                const response = await fetch('historical-articles.json');
+                if (!response.ok) {
+                    throw new Error(`Unable to fetch archive (${response.status})`);
+                }
+                const data = await response.json();
+                articles = Array.isArray(data) ? data : [];
+            } catch (error) {
+                console.error('Failed to load articles archive:', error);
+                articles = [];
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            syncThemeLabel();
+            await loadArticles();
+            renderFilters();
+            renderArticles();
+        });
+    </script>
+</body>
+</html>
