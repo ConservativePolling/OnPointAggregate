@@ -8,7 +8,15 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="https://unpkg.com/gotrue-js@0.9.29/dist/gotrue.js"></script>
+    <script>
+        // Initialize GoTrue
+        const auth = new GoTrue({
+            APIUrl: window.location.origin + '/.netlify/identity',
+            audience: '',
+            setCookie: true
+        });
+    </script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -138,8 +146,8 @@
                 return;
             }
 
-            // Production - use Netlify Identity
-            const user = netlifyIdentity.currentUser();
+            // Production - use GoTrue
+            const user = auth.currentUser();
 
             if (!user) {
                 window.location.href = '/login.html';
@@ -171,21 +179,23 @@
         }
 
         function signOut() {
-            netlifyIdentity.logout();
+            const user = auth.currentUser();
+            if (user) {
+                user.logout().then(() => {
+                    window.location.href = '/login.html';
+                });
+            } else {
+                window.location.href = '/login.html';
+            }
         }
 
-        // Initialize
-        netlifyIdentity.on('init', user => {
-            if (!user) {
-                window.location.href = '/login.html';
-            } else {
-                checkAccess();
-            }
-        });
-
-        netlifyIdentity.on('logout', () => {
+        // Initialize - check immediately
+        const user = auth.currentUser();
+        if (!user) {
             window.location.href = '/login.html';
-        });
+        } else {
+            checkAccess();
+        }
     </script>
 </body>
 </html>
