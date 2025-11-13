@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/gotrue-js@0.9.29/dist/gotrue.min.js"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -113,44 +113,21 @@
     </div>
 
     <script>
-        // Initialize GoTrue globally
-        let auth;
+        // Initialize using Netlify Identity
+        netlifyIdentity.on('init', user => {
+            console.log('Netlify Identity initialized');
 
-        // Initialize on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            if (typeof GoTrue === 'undefined') {
-                console.error('GoTrue not loaded');
-                alert('Authentication system failed to load. Redirecting to login...');
+            if (!user) {
+                console.log('No user found, redirecting to login');
                 window.location.href = '/login.html';
-                return;
-            }
-
-            try {
-                auth = new GoTrue({
-                    APIUrl: window.location.origin + '/.netlify/identity',
-                    audience: '',
-                    setCookie: true
-                });
-
-                console.log('GoTrue initialized successfully');
-
-                // Check auth immediately after initialization
-                const user = auth.currentUser();
-                if (!user) {
-                    console.log('No user found, redirecting to login');
-                    window.location.href = '/login.html';
-                } else {
-                    console.log('User found:', user.email);
-                    loadWaitlist();
-                }
-            } catch (error) {
-                console.error('Error initializing GoTrue:', error);
-                window.location.href = '/login.html';
+            } else {
+                console.log('User found:', user.email);
+                loadWaitlist();
             }
         });
 
         async function loadWaitlist() {
-            const user = auth.currentUser();
+            const user = netlifyIdentity.currentUser();
 
             if (!user) {
                 window.location.href = '/login.html';
@@ -228,7 +205,7 @@
                 return;
             }
 
-            const user = auth.currentUser();
+            const user = netlifyIdentity.currentUser();
 
             try {
                 const response = await fetch('/.netlify/functions/approve-user', {
@@ -265,15 +242,12 @@
         }
 
         function signOut() {
-            const user = auth.currentUser();
-            if (user) {
-                user.logout().then(() => {
-                    window.location.href = '/login.html';
-                });
-            } else {
-                window.location.href = '/login.html';
-            }
+            netlifyIdentity.logout();
         }
+
+        netlifyIdentity.on('logout', () => {
+            window.location.href = '/login.html';
+        });
     </script>
 </body>
 </html>

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In — OnPointAggregate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load GoTrue from CDN -->
-    <script src="https://cdn.jsdelivr.net/npm/gotrue-js@0.9.29/dist/gotrue.min.js"></script>
+    <!-- Load Netlify Identity Widget (we'll use it programmatically) -->
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <style>
         /* COMPLETELY HIDE AND DISABLE NETLIFY IDENTITY WIDGET */
         #netlify-identity-widget,
@@ -404,65 +404,16 @@
     </div>
 
     <script>
-        // Initialize GoTrue globally (NO WIDGET, NO MODAL)
-        let auth;
+        // Initialize Netlify Identity (use underlying GoTrue API)
+        netlifyIdentity.on('init', user => {
+            console.log('Netlify Identity initialized');
 
-        // Wait for GoTrue library to load
-        window.addEventListener('DOMContentLoaded', () => {
-            // Check if GoTrue is available
-            if (typeof GoTrue === 'undefined') {
-                console.error('GoTrue not loaded');
-                alert('Authentication system failed to load. Please refresh the page.');
-                return;
-            }
-
-            try {
-                auth = new GoTrue({
-                    APIUrl: `${window.location.origin}/.netlify/identity`,
-                    audience: '',
-                    setCookie: true
-                });
-
-                console.log('GoTrue initialized successfully');
-
-                // Check if user is already logged in
-                const currentUser = auth.currentUser();
-                if (currentUser) {
-                    console.log('User already logged in, redirecting...');
-                    window.location.href = '/dashboard.html';
-                    return;
-                }
-
-                // Check for OAuth callback (when returning from Google/GitHub)
-                const hash = window.location.hash;
-                if (hash && hash.includes('access_token')) {
-                    console.log('OAuth callback detected');
-                    handleOAuthCallback(hash);
-                }
-            } catch (error) {
-                console.error('Error initializing GoTrue:', error);
-                alert('Authentication system error: ' + error.message);
+            // If user is already logged in, redirect to dashboard
+            if (user) {
+                console.log('User already logged in:', user.email);
+                window.location.href = '/dashboard.html';
             }
         });
-
-        // Handle OAuth callback
-        async function handleOAuthCallback(hash) {
-            try {
-                // Parse the OAuth response and create user session
-                const user = await auth.createUser(hash.substring(1), true);
-                console.log('OAuth login successful:', user);
-
-                // Clear the hash from URL
-                window.location.hash = '';
-
-                // Redirect to dashboard
-                window.location.href = '/dashboard.html';
-            } catch (error) {
-                console.error('OAuth callback error:', error);
-                alert('Authentication failed. Please try again.');
-                window.location.href = '/login.html';
-            }
-        }
 
         let isAnimating = false;
 
@@ -544,14 +495,9 @@
             }, 100);
         });
 
-        // Handle email/password Sign In - Use GoTrue SDK
+        // Handle email/password Sign In - Use netlifyIdentity GoTrue API directly
         document.getElementById('signinForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            if (!auth) {
-                alert('Authentication system not ready. Please refresh the page.');
-                return;
-            }
 
             const email = e.target.querySelector('input[type="email"]').value;
             const password = e.target.querySelector('input[type="password"]').value;
@@ -561,8 +507,8 @@
                 button.disabled = true;
                 button.textContent = 'Signing in...';
 
-                // Use GoTrue SDK login method (NO MODAL!)
-                const user = await auth.login(email, password, true);
+                // Use the underlying GoTrue instance (NO MODAL!)
+                const user = await netlifyIdentity.gotrue.login(email, password, true);
 
                 console.log('Login successful:', user);
                 window.location.href = '/dashboard.html';
@@ -574,14 +520,9 @@
             }
         });
 
-        // Handle email/password Sign Up - Use GoTrue SDK
+        // Handle email/password Sign Up - Use netlifyIdentity GoTrue API directly
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
-            if (!auth) {
-                alert('Authentication system not ready. Please refresh the page.');
-                return;
-            }
 
             const name = e.target.querySelector('input[type="text"]').value;
             const email = e.target.querySelectorAll('input[type="email"]')[0].value;
@@ -603,8 +544,8 @@
                 button.disabled = true;
                 button.textContent = 'Creating account...';
 
-                // Use GoTrue SDK signup method (NO MODAL!)
-                const user = await auth.signup(email, password, {
+                // Use the underlying GoTrue instance (NO MODAL!)
+                const user = await netlifyIdentity.gotrue.signup(email, password, {
                     full_name: name
                 });
 
@@ -612,7 +553,7 @@
                 alert('Account created successfully! Logging you in...');
 
                 // Auto-login after signup
-                const loggedInUser = await auth.login(email, password, true);
+                const loggedInUser = await netlifyIdentity.gotrue.login(email, password, true);
                 console.log('Auto-login successful:', loggedInUser);
 
                 window.location.href = '/dashboard.html';
@@ -629,12 +570,6 @@
             btn.addEventListener('click', () => {
                 console.log('OAuth button clicked, index:', index);
 
-                if (!auth) {
-                    console.error('Auth not initialized');
-                    alert('Authentication system not ready. Please refresh the page.');
-                    return;
-                }
-
                 const provider = index === 0 ? 'google' : 'github';
                 console.log('Provider:', provider);
 
@@ -643,11 +578,11 @@
                     btn.disabled = true;
                     btn.style.opacity = '0.7';
 
-                    // Use GoTrue to get OAuth URL and redirect
-                    const url = auth.loginExternalUrl(provider);
+                    // Use netlifyIdentity's underlying GoTrue to get OAuth URL and redirect
+                    const url = netlifyIdentity.gotrue.loginExternalUrl(provider);
                     console.log('OAuth URL:', url);
 
-                    // Redirect to OAuth provider
+                    // Redirect to OAuth provider (NO MODAL!)
                     window.location.href = url;
                 } catch (error) {
                     console.error('OAuth error:', error);
@@ -656,6 +591,17 @@
                     btn.style.opacity = '1';
                 }
             });
+        });
+
+        // Handle OAuth callback when returning from Google/GitHub
+        netlifyIdentity.on('login', user => {
+            console.log('User logged in:', user.email);
+            window.location.href = '/dashboard.html';
+        });
+
+        netlifyIdentity.on('signup', user => {
+            console.log('User signed up:', user.email);
+            window.location.href = '/dashboard.html';
         });
     </script>
 </body>
