@@ -3,105 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trump Approval Rating Aggregate</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>OnPointAggregate</title>
+    <meta http-equiv="refresh" content="0;url=/login.html">
+    <script>
+        // Immediate redirect to login
+        window.location.href = '/login.html';
+    </script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .loading {
+            text-align: center;
+            color: #64748b;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Trump Approval Rating Aggregate</h1>
-            <p class="subtitle">Time-weighted polling aggregate with 14-day half-life</p>
-        </header>
-
-        <main>
-            <!-- Aggregate Switcher -->
-            <div id="aggregate-switcher-container"></div>
-
-            <!-- Chart Section -->
-            <section class="chart-section">
-                <div class="chart-header">
-                    <h2>Approval Over Time</h2>
-                    <div class="word-switch-container" id="word-switch"></div>
-                </div>
-                <div class="chart-container">
-                    <canvas id="approvalChart"></canvas>
-                </div>
-            </section>
-
-            <!-- Seat Projection UI -->
-            <div id="seat-projection-ui"></div>
-
-            <!-- Poll Box Section -->
-            <section class="poll-box-section">
-                <div class="poll-box-container">
-                    <table id="pollBoxTable" class="poll-box-table">
-                        <thead>
-                            <tr>
-                                <th class="sortable" data-sort="date">Dates</th>
-                                <th class="sortable" data-sort="sample">Sample</th>
-                                <th class="sortable" data-sort="pollster">Pollster</th>
-                                <th class="sortable" data-sort="sponsor">Sponsor</th>
-                                <th class="sortable" data-sort="approve">Approve</th>
-                                <th class="sortable" data-sort="disapprove">Disapprove</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pollBoxTableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Filters -->
-            <section class="filters-section">
-                <h3>Filter Polls</h3>
-                <div class="filter-options" id="pollster-filter"></div>
-            </section>
-
-            <!-- Table Section -->
-            <section class="table-section">
-                <h2>Poll Results</h2>
-                <div class="table-container">
-                    <table id="pollTable">
-                        <thead>
-                            <tr>
-                                <th data-sort="pollster">Pollster</th>
-                                <th data-sort="date">Date</th>
-                                <th data-sort="sample">Sample</th>
-                                <th data-sort="population">Population</th>
-                                <th data-sort="approve">Approve</th>
-                                <th data-sort="disapprove">Disapprove</th>
-                                <th data-sort="net">Net</th>
-                            </tr>
-                        </thead>
-                        <tbody id="pollTableBody">
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
-
-        <footer>
-            <p>Data compiled from various polling organizations. Methodology inspired by FiveThirtyEight.</p>
-        </footer>
+    <div class="loading">
+        <p>Redirecting to login...</p>
     </div>
-
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
-    <!-- Dark Mode -->
-    <script src="darkmode.js"></script>
-
-    <!-- Application Scripts -->
-    <script src="data.js"></script>
-    <script src="districts-2024.js"></script>
-    <script src="ballot-data.js"></script>
-    <script src="seat-projection.js"></script>
-    <script src="seat-projection-ui.js"></script>
-    <script src="aggregate-switcher.js"></script>
-    <script src="pollster-filter.js"></script>
-    <script src="wordswitch.js"></script>
-    <script src="chart.js"></script>
-    <script src="table.js"></script>
 </body>
 </html>
