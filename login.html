@@ -20,9 +20,16 @@
         });
     </script>
     <style>
-        /* Hide the Netlify Identity modal completely */
-        #netlify-identity-widget {
+        /* Hide the Netlify Identity modal completely - no popup ever */
+        #netlify-identity-widget,
+        .netlify-identity-widget,
+        iframe[title*="Netlify"],
+        div[data-netlify-identity-menu],
+        div[data-netlify-identity-button] {
             display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -271,112 +278,10 @@
 
             <!-- Glass Card -->
             <div id="glassCard" class="glass-card rounded-3xl p-8">
-                <!-- Toggle Between Sign In / Sign Up -->
-                <div class="flex items-center justify-center space-x-8 mb-8">
-                    <button onclick="switchMode('signin')" id="signinToggle" class="toggle-btn active text-lg font-semibold text-gray-500">
-                        Sign In
-                    </button>
-                    <button onclick="switchMode('signup')" id="signupToggle" class="toggle-btn text-lg font-semibold text-gray-500">
-                        Create Account
-                    </button>
-                </div>
-
-                <!-- Form Wrapper for Smooth Height Transition -->
-                <div id="formWrapper" class="form-wrapper">
-                    <!-- Sign In Form -->
-                    <form id="signinForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-2">Email</label>
-                        <input
-                            type="email"
-                            placeholder="you@example.com"
-                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
-                            required
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-2">Password</label>
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
-                            required
-                        >
-                    </div>
-
-                    <div class="flex items-center justify-between text-sm">
-                        <label class="flex items-center space-x-2 cursor-pointer">
-                            <input type="checkbox" class="w-4 h-4 rounded border-gray-300">
-                            <span class="text-gray-700 font-medium">Remember me</span>
-                        </label>
-                        <a href="#" class="text-gray-700 hover:text-gray-900 font-medium transition-colors">
-                            Forgot password?
-                        </a>
-                    </div>
-
-                    <button type="submit" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
-                        Sign In
-                    </button>
-                </form>
-
-                <!-- Sign Up Form (Hidden by default) -->
-                <form id="signupForm" class="space-y-4 hidden">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-2">Full Name</label>
-                        <input
-                            type="text"
-                            placeholder="John Doe"
-                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
-                            required
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-2">Email</label>
-                        <input
-                            type="email"
-                            placeholder="you@example.com"
-                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
-                            required
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-2">Password</label>
-                        <input
-                            type="password"
-                            placeholder="Create a password"
-                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
-                            required
-                        >
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-2">Confirm Password</label>
-                        <input
-                            type="password"
-                            placeholder="Confirm your password"
-                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
-                            required
-                        >
-                    </div>
-
-                    <button type="submit" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
-                        Create Account
-                    </button>
-                </form>
-                </div>
-                <!-- End Form Wrapper -->
-
-                <!-- Divider -->
-                <div class="relative my-6">
-                    <div class="absolute inset-0 flex items-center">
-                        <div class="w-full border-t border-gray-300/50"></div>
-                    </div>
-                    <div class="relative flex justify-center text-sm">
-                        <span class="px-4 bg-white/60 text-gray-600 font-medium rounded-full">or continue with</span>
-                    </div>
+                <!-- Title -->
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Sign in to continue</h2>
+                    <p class="text-sm text-gray-600">Choose your preferred authentication method</p>
                 </div>
 
                 <!-- OAuth Buttons -->
@@ -403,151 +308,18 @@
     </div>
 
     <script>
-        let isAnimating = false;
-
-        function switchMode(mode) {
-            // Prevent multiple clicks during animation
-            if (isAnimating) return;
-            isAnimating = true;
-
-            const signinForm = document.getElementById('signinForm');
-            const signupForm = document.getElementById('signupForm');
-            const signinToggle = document.getElementById('signinToggle');
-            const signupToggle = document.getElementById('signupToggle');
-            const formWrapper = document.getElementById('formWrapper');
-            const glassCard = document.getElementById('glassCard');
-
-            // Get current and target forms
-            const currentForm = mode === 'signin' ? signupForm : signinForm;
-            const targetForm = mode === 'signin' ? signinForm : signupForm;
-
-            // Don't animate if already showing the target form
-            if (!currentForm.classList.contains('hidden')) {
-                // Add micro-scale effect to glass card
-                glassCard.classList.add('morphing');
-
-                // Set wrapper height to current form height
-                formWrapper.style.height = currentForm.offsetHeight + 'px';
-
-                // Fade out current form
-                currentForm.classList.add('fade-out');
-
-                // After fade out completes, switch forms
-                setTimeout(() => {
-                    // Hide current form
-                    currentForm.classList.add('hidden');
-                    currentForm.classList.remove('fade-out');
-
-                    // Show target form and immediately add fade-in class (before removing hidden)
-                    // This prevents any flash of visible content
-                    targetForm.classList.add('fade-in');
-                    targetForm.classList.remove('hidden');
-
-                    // Measure target form height
-                    const targetHeight = targetForm.offsetHeight;
-
-                    // Animate height change
-                    formWrapper.style.height = targetHeight + 'px';
-
-                    // Remove fade-in class after animation completes
-                    setTimeout(() => {
-                        targetForm.classList.remove('fade-in');
-                        formWrapper.style.height = 'auto';
-                        glassCard.classList.remove('morphing');
-                        isAnimating = false;
-                    }, 650);
-                }, 200);
-
-                // Update toggle states
-                if (mode === 'signin') {
-                    signinToggle.classList.add('active');
-                    signupToggle.classList.remove('active');
-                } else {
-                    signinToggle.classList.remove('active');
-                    signupToggle.classList.add('active');
-                }
-            } else {
-                isAnimating = false;
-            }
-        }
-
-        // Set initial wrapper height
-        window.addEventListener('DOMContentLoaded', () => {
-            const signinForm = document.getElementById('signinForm');
-            const formWrapper = document.getElementById('formWrapper');
-            formWrapper.style.height = signinForm.offsetHeight + 'px';
-
-            // Set to auto after initial render
-            setTimeout(() => {
-                formWrapper.style.height = 'auto';
-            }, 100);
-        });
-
-        // Handle email/password Sign In
-        document.getElementById('signinForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = e.target.querySelector('input[type="email"]').value;
-            const password = e.target.querySelector('input[type="password"]').value;
-            const button = e.target.querySelector('button[type="submit"]');
-
-            try {
-                button.disabled = true;
-                button.textContent = 'Signing in...';
-
-                // Use Netlify Identity for email/password login
-                netlifyIdentity.open('login');
-                netlifyIdentity.on('login', user => {
-                    window.location.href = '/dashboard.html';
-                });
-            } catch (error) {
-                console.error('Sign in error:', error);
-                button.disabled = false;
-                button.textContent = 'Sign In';
-            }
-        });
-
-        // Handle email/password Sign Up
-        document.getElementById('signupForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = e.target.querySelector('input[type="text"]').value;
-            const email = e.target.querySelectorAll('input[type="email"]')[0].value;
-            const password = e.target.querySelectorAll('input[type="password"]')[0].value;
-            const confirmPassword = e.target.querySelectorAll('input[type="password"]')[1].value;
-            const button = e.target.querySelector('button[type="submit"]');
-
-            if (password !== confirmPassword) {
-                alert('Passwords do not match!');
-                return;
-            }
-
-            try {
-                button.disabled = true;
-                button.textContent = 'Creating account...';
-
-                // Use Netlify Identity for signup
-                netlifyIdentity.open('signup');
-                netlifyIdentity.on('signup', user => {
-                    alert('Account created! You are on the waitlist.');
-                    window.location.href = '/dashboard.html';
-                });
-            } catch (error) {
-                console.error('Sign up error:', error);
-                button.disabled = false;
-                button.textContent = 'Create Account';
-            }
-        });
-
-        // Handle OAuth buttons - Use Netlify Identity widget but hide UI
+        // Handle OAuth buttons - Direct redirect to Google/GitHub
         document.querySelectorAll('.btn-oauth').forEach((btn, index) => {
             btn.addEventListener('click', () => {
                 const provider = index === 0 ? 'google' : 'github';
 
-                console.log('Attempting OAuth login with:', provider);
+                // Show loading state
+                btn.disabled = true;
+                btn.style.opacity = '0.7';
+                btn.innerHTML = `<span>Redirecting to ${provider === 'google' ? 'Google' : 'GitHub'}...</span>`;
 
-                // Method 1: Try direct OAuth URL construction
+                // Direct redirect to OAuth provider (NO MODAL!)
                 const siteURL = window.location.origin;
-
-                // Netlify Identity external auth endpoint
                 window.location.href = `${siteURL}/.netlify/identity/authorize?provider=${provider}`;
             });
         });
