@@ -7,6 +7,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
+        // Initialize with configuration to only show external providers
+        netlifyIdentity.init({
+            locale: 'en'
+        });
+
         // Check if user is already logged in
         netlifyIdentity.on('init', user => {
             if (user) {
@@ -14,6 +19,12 @@
             }
         });
     </script>
+    <style>
+        /* Hide the Netlify Identity modal completely */
+        #netlify-identity-widget {
+            display: none !important;
+        }
+    </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -526,17 +537,18 @@
             }
         });
 
-        // Handle OAuth buttons - Direct Google/GitHub login (NO MODAL!)
+        // Handle OAuth buttons - Use Netlify Identity widget but hide UI
         document.querySelectorAll('.btn-oauth').forEach((btn, index) => {
             btn.addEventListener('click', () => {
                 const provider = index === 0 ? 'google' : 'github';
 
-                // Direct OAuth URL - goes straight to Google/GitHub, not Netlify modal
-                const baseUrl = window.location.origin;
-                const oauthUrl = `${baseUrl}/.netlify/identity/authorize?provider=${provider}`;
+                console.log('Attempting OAuth login with:', provider);
 
-                // Redirect directly to OAuth provider
-                window.location.href = oauthUrl;
+                // Method 1: Try direct OAuth URL construction
+                const siteURL = window.location.origin;
+
+                // Netlify Identity external auth endpoint
+                window.location.href = `${siteURL}/.netlify/identity/authorize?provider=${provider}`;
             });
         });
 
