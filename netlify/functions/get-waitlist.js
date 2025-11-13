@@ -1,5 +1,3 @@
-const fetch = require('node-fetch');
-
 exports.handler = async (event, context) => {
   // Get the admin user from Netlify Identity context
   const { user } = context.clientContext;
