@@ -5,7 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In — OnPointAggregate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/gotrue-js@0.9.29/dist/gotrue.js"></script>
+    <!-- Load GoTrue from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/gotrue-js@0.9.29/dist/gotrue.min.js"></script>
+    <script>
+        // Verify GoTrue loaded
+        if (typeof GoTrue === 'undefined') {
+            console.error('GoTrue failed to load from CDN');
+            alert('Authentication library failed to load. Please check your internet connection and refresh.');
+        }
+    </script>
     <style>
         /* COMPLETELY HIDE AND DISABLE NETLIFY IDENTITY WIDGET */
         #netlify-identity-widget,
@@ -408,22 +416,39 @@
 
         // Wait for GoTrue library to load
         window.addEventListener('DOMContentLoaded', () => {
-            auth = new GoTrue({
-                APIUrl: `${window.location.origin}/.netlify/identity`,
-                audience: '',
-                setCookie: true
-            });
-
-            // Check if user is already logged in
-            const currentUser = auth.currentUser();
-            if (currentUser) {
-                window.location.href = '/dashboard.html';
+            // Check if GoTrue is available
+            if (typeof GoTrue === 'undefined') {
+                console.error('GoTrue not loaded');
+                alert('Authentication system failed to load. Please refresh the page.');
+                return;
             }
 
-            // Check for OAuth callback (when returning from Google/GitHub)
-            const hash = window.location.hash;
-            if (hash && hash.includes('access_token')) {
-                handleOAuthCallback(hash);
+            try {
+                auth = new GoTrue({
+                    APIUrl: `${window.location.origin}/.netlify/identity`,
+                    audience: '',
+                    setCookie: true
+                });
+
+                console.log('GoTrue initialized successfully');
+
+                // Check if user is already logged in
+                const currentUser = auth.currentUser();
+                if (currentUser) {
+                    console.log('User already logged in, redirecting...');
+                    window.location.href = '/dashboard.html';
+                    return;
+                }
+
+                // Check for OAuth callback (when returning from Google/GitHub)
+                const hash = window.location.hash;
+                if (hash && hash.includes('access_token')) {
+                    console.log('OAuth callback detected');
+                    handleOAuthCallback(hash);
+                }
+            } catch (error) {
+                console.error('Error initializing GoTrue:', error);
+                alert('Authentication system error: ' + error.message);
             }
         });
 
@@ -609,20 +634,34 @@
         // Handle OAuth buttons - DIRECT REDIRECT (NO MODAL!)
         document.querySelectorAll('.btn-oauth').forEach((btn, index) => {
             btn.addEventListener('click', () => {
+                console.log('OAuth button clicked, index:', index);
+
                 if (!auth) {
+                    console.error('Auth not initialized');
                     alert('Authentication system not ready. Please refresh the page.');
                     return;
                 }
 
                 const provider = index === 0 ? 'google' : 'github';
+                console.log('Provider:', provider);
 
-                // Show loading state
-                btn.disabled = true;
-                btn.style.opacity = '0.7';
+                try {
+                    // Show loading state
+                    btn.disabled = true;
+                    btn.style.opacity = '0.7';
 
-                // Use GoTrue to get OAuth URL and redirect
-                const url = auth.loginExternalUrl(provider);
-                window.location.href = url;
+                    // Use GoTrue to get OAuth URL and redirect
+                    const url = auth.loginExternalUrl(provider);
+                    console.log('OAuth URL:', url);
+
+                    // Redirect to OAuth provider
+                    window.location.href = url;
+                } catch (error) {
+                    console.error('OAuth error:', error);
+                    alert('Failed to start OAuth login: ' + error.message);
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
             });
         });
     </script>
