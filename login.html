@@ -5,21 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In — OnPointAggregate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/gotrue-js@0.9.29"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-        // Initialize GoTrue for authentication
-        const auth = new GoTrue({
-            APIUrl: window.location.origin + '/.netlify/identity',
-            setCookie: true
-        });
-
         // Check if user is already logged in
-        (function() {
-            const user = auth.currentUser();
+        netlifyIdentity.on('init', user => {
             if (user) {
                 window.location.href = '/dashboard.html';
             }
-        })();
+        });
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -259,11 +252,9 @@
         <div class="w-full max-w-md form-container">
             <!-- Logo/Brand -->
             <div class="text-center mb-8">
-                <a href="verbal-landing.html" class="inline-block">
-                    <h1 class="font-heading text-3xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition-opacity">
-                        OnPoint<span class="text-black">A</span>ggregate
-                    </h1>
-                </a>
+                <h1 class="font-heading text-3xl font-bold tracking-tight text-gray-900">
+                    OnPoint<span class="text-black">A</span>ggregate
+                </h1>
                 <p class="text-sm text-gray-600 mt-2 font-medium">Real-time polling and analysis</p>
             </div>
 
@@ -397,13 +388,6 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Footer Link -->
-            <div class="text-center mt-6">
-                <a href="verbal-landing.html" class="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                    ← Back to home
-                </a>
-            </div>
         </div>
     </div>
 
@@ -486,28 +470,7 @@
             setTimeout(() => {
                 formWrapper.style.height = 'auto';
             }, 100);
-
-            // Check if we're coming back from an OAuth callback
-            handleOAuthCallback();
         });
-
-        // Handle OAuth callback
-        async function handleOAuthCallback() {
-            const hash = window.location.hash;
-            if (hash && hash.includes('access_token')) {
-                try {
-                    // GoTrue will automatically parse the hash and store the user
-                    const user = await auth.createUser(hash, true);
-                    if (user) {
-                        window.location.href = '/dashboard.html';
-                    }
-                } catch (error) {
-                    console.error('OAuth callback error:', error);
-                    alert('Authentication failed. Please try again.');
-                    window.location.href = '/login.html';
-                }
-            }
-        }
 
         // Handle email/password Sign In
         document.getElementById('signinForm').addEventListener('submit', async (e) => {
@@ -520,13 +483,13 @@
                 button.disabled = true;
                 button.textContent = 'Signing in...';
 
-                const user = await auth.login(email, password, true);
-                if (user) {
+                // Use Netlify Identity for email/password login
+                netlifyIdentity.open('login');
+                netlifyIdentity.on('login', user => {
                     window.location.href = '/dashboard.html';
-                }
+                });
             } catch (error) {
                 console.error('Sign in error:', error);
-                alert(error.message || 'Failed to sign in. Please check your credentials.');
                 button.disabled = false;
                 button.textContent = 'Sign In';
             }
@@ -550,36 +513,40 @@
                 button.disabled = true;
                 button.textContent = 'Creating account...';
 
-                const user = await auth.signup(email, password, { full_name: name });
-                if (user) {
-                    alert('Account created! Please check your email to confirm your account.');
-                    switchMode('signin');
-                }
+                // Use Netlify Identity for signup
+                netlifyIdentity.open('signup');
+                netlifyIdentity.on('signup', user => {
+                    alert('Account created! You are on the waitlist.');
+                    window.location.href = '/dashboard.html';
+                });
             } catch (error) {
                 console.error('Sign up error:', error);
-                alert(error.message || 'Failed to create account. Please try again.');
-            } finally {
                 button.disabled = false;
                 button.textContent = 'Create Account';
             }
         });
 
-        // Handle OAuth buttons - Direct Google/GitHub login
+        // Handle OAuth buttons - Direct Google/GitHub login (NO MODAL!)
         document.querySelectorAll('.btn-oauth').forEach((btn, index) => {
-            btn.addEventListener('click', async () => {
-                try {
-                    const provider = index === 0 ? 'google' : 'github';
+            btn.addEventListener('click', () => {
+                const provider = index === 0 ? 'google' : 'github';
 
-                    // Get the OAuth URL directly
-                    const url = auth.loginExternalUrl(provider);
+                // Direct OAuth URL - goes straight to Google/GitHub, not Netlify modal
+                const baseUrl = window.location.origin;
+                const oauthUrl = `${baseUrl}/.netlify/identity/authorize?provider=${provider}`;
 
-                    // Redirect to Google/GitHub OAuth screen (not Netlify modal!)
-                    window.location.href = url;
-                } catch (error) {
-                    console.error('OAuth error:', error);
-                    alert('Failed to initiate OAuth login. Please try again.');
-                }
+                // Redirect directly to OAuth provider
+                window.location.href = oauthUrl;
             });
+        });
+
+        // Handle successful login/signup redirects
+        netlifyIdentity.on('login', user => {
+            window.location.href = '/dashboard.html';
+        });
+
+        netlifyIdentity.on('signup', user => {
+            window.location.href = '/dashboard.html';
         });
     </script>
 </body>
