@@ -7,10 +7,17 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <script>
-        // Initialize with configuration to only show external providers
+        // Initialize with configuration
         netlifyIdentity.init({
             locale: 'en'
         });
+
+        // OVERRIDE: Prevent modal from EVER opening
+        const originalOpen = netlifyIdentity.open;
+        netlifyIdentity.open = function() {
+            console.log('Blocked Netlify Identity modal from opening');
+            return false; // Block it
+        };
 
         // Check if user is already logged in
         netlifyIdentity.on('init', user => {
@@ -20,9 +27,22 @@
         });
     </script>
     <style>
-        /* Hide the Netlify Identity modal completely */
-        #netlify-identity-widget {
+        /* COMPLETELY HIDE AND DISABLE NETLIFY IDENTITY WIDGET */
+        #netlify-identity-widget,
+        .netlify-identity-widget,
+        .netlify-identity-popup,
+        div[role="dialog"],
+        iframe[title*="Netlify"],
+        iframe[title*="netlify"],
+        [data-netlify-identity-menu],
+        [data-netlify-identity-button] {
             display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            position: absolute !important;
+            left: -9999px !important;
+            z-index: -9999 !important;
         }
     </style>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -483,7 +503,7 @@
             }, 100);
         });
 
-        // Handle email/password Sign In
+        // Handle email/password Sign In - Direct API call (NO MODAL)
         document.getElementById('signinForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = e.target.querySelector('input[type="email"]').value;
@@ -494,19 +514,34 @@
                 button.disabled = true;
                 button.textContent = 'Signing in...';
 
-                // Use Netlify Identity for email/password login
-                netlifyIdentity.open('login');
-                netlifyIdentity.on('login', user => {
-                    window.location.href = '/dashboard.html';
+                // Direct login via Netlify Identity API (no modal)
+                const response = await fetch(`${window.location.origin}/.netlify/identity/token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        grant_type: 'password',
+                        username: email,
+                        password: password
+                    })
                 });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    // Store token and redirect
+                    localStorage.setItem('netlify_token', data.access_token);
+                    window.location.href = '/dashboard.html';
+                } else {
+                    throw new Error('Invalid credentials');
+                }
             } catch (error) {
                 console.error('Sign in error:', error);
+                alert('Failed to sign in. Please check your credentials.');
                 button.disabled = false;
                 button.textContent = 'Sign In';
             }
         });
 
-        // Handle email/password Sign Up
+        // Handle email/password Sign Up - Direct API call (NO MODAL)
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = e.target.querySelector('input[type="text"]').value;
@@ -524,30 +559,42 @@
                 button.disabled = true;
                 button.textContent = 'Creating account...';
 
-                // Use Netlify Identity for signup
-                netlifyIdentity.open('signup');
-                netlifyIdentity.on('signup', user => {
-                    alert('Account created! You are on the waitlist.');
-                    window.location.href = '/dashboard.html';
+                // Direct signup via Netlify Identity API (no modal)
+                const response = await fetch(`${window.location.origin}/.netlify/identity/signup`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password,
+                        data: { full_name: name }
+                    })
                 });
+
+                if (response.ok) {
+                    alert('Account created! Please check your email to confirm.');
+                    switchMode('signin');
+                } else {
+                    throw new Error('Signup failed');
+                }
             } catch (error) {
                 console.error('Sign up error:', error);
+                alert('Failed to create account. Please try again.');
                 button.disabled = false;
                 button.textContent = 'Create Account';
             }
         });
 
-        // Handle OAuth buttons - Use Netlify Identity widget but hide UI
+        // Handle OAuth buttons - DIRECT REDIRECT (NO MODAL!)
         document.querySelectorAll('.btn-oauth').forEach((btn, index) => {
             btn.addEventListener('click', () => {
                 const provider = index === 0 ? 'google' : 'github';
 
-                console.log('Attempting OAuth login with:', provider);
+                // Show loading state
+                btn.disabled = true;
+                btn.style.opacity = '0.7';
 
-                // Method 1: Try direct OAuth URL construction
+                // DIRECT redirect to Google/GitHub OAuth (bypasses Netlify modal completely)
                 const siteURL = window.location.origin;
-
-                // Netlify Identity external auth endpoint
                 window.location.href = `${siteURL}/.netlify/identity/authorize?provider=${provider}`;
             });
         });
