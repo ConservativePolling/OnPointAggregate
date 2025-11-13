@@ -6,20 +6,6 @@
     <title>Sign In — OnPointAggregate</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/gotrue-js@0.9.29/dist/gotrue.js"></script>
-    <script>
-        // Initialize GoTrue directly (NO WIDGET, NO MODAL)
-        const auth = new GoTrue({
-            APIUrl: `${window.location.origin}/.netlify/identity`,
-            audience: '',
-            setCookie: true
-        });
-
-        // Check if user is already logged in
-        const currentUser = auth.currentUser();
-        if (currentUser) {
-            window.location.href = '/dashboard.html';
-        }
-    </script>
     <style>
         /* COMPLETELY HIDE AND DISABLE NETLIFY IDENTITY WIDGET */
         #netlify-identity-widget,
@@ -417,6 +403,49 @@
     </div>
 
     <script>
+        // Initialize GoTrue globally (NO WIDGET, NO MODAL)
+        let auth;
+
+        // Wait for GoTrue library to load
+        window.addEventListener('DOMContentLoaded', () => {
+            auth = new GoTrue({
+                APIUrl: `${window.location.origin}/.netlify/identity`,
+                audience: '',
+                setCookie: true
+            });
+
+            // Check if user is already logged in
+            const currentUser = auth.currentUser();
+            if (currentUser) {
+                window.location.href = '/dashboard.html';
+            }
+
+            // Check for OAuth callback (when returning from Google/GitHub)
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                handleOAuthCallback(hash);
+            }
+        });
+
+        // Handle OAuth callback
+        async function handleOAuthCallback(hash) {
+            try {
+                // Parse the OAuth response and create user session
+                const user = await auth.createUser(hash.substring(1), true);
+                console.log('OAuth login successful:', user);
+
+                // Clear the hash from URL
+                window.location.hash = '';
+
+                // Redirect to dashboard
+                window.location.href = '/dashboard.html';
+            } catch (error) {
+                console.error('OAuth callback error:', error);
+                alert('Authentication failed. Please try again.');
+                window.location.href = '/login.html';
+            }
+        }
+
         let isAnimating = false;
 
         function switchMode(mode) {
@@ -500,6 +529,12 @@
         // Handle email/password Sign In - Use GoTrue SDK
         document.getElementById('signinForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!auth) {
+                alert('Authentication system not ready. Please refresh the page.');
+                return;
+            }
+
             const email = e.target.querySelector('input[type="email"]').value;
             const password = e.target.querySelector('input[type="password"]').value;
             const button = e.target.querySelector('button[type="submit"]');
@@ -524,6 +559,12 @@
         // Handle email/password Sign Up - Use GoTrue SDK
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+
+            if (!auth) {
+                alert('Authentication system not ready. Please refresh the page.');
+                return;
+            }
+
             const name = e.target.querySelector('input[type="text"]').value;
             const email = e.target.querySelectorAll('input[type="email"]')[0].value;
             const password = e.target.querySelectorAll('input[type="password"]')[0].value;
@@ -550,10 +591,12 @@
                 });
 
                 console.log('Signup successful:', user);
-                alert('Account created successfully! You are now on the waitlist.');
+                alert('Account created successfully! Logging you in...');
 
                 // Auto-login after signup
                 const loggedInUser = await auth.login(email, password, true);
+                console.log('Auto-login successful:', loggedInUser);
+
                 window.location.href = '/dashboard.html';
             } catch (error) {
                 console.error('Sign up error:', error);
@@ -566,6 +609,11 @@
         // Handle OAuth buttons - DIRECT REDIRECT (NO MODAL!)
         document.querySelectorAll('.btn-oauth').forEach((btn, index) => {
             btn.addEventListener('click', () => {
+                if (!auth) {
+                    alert('Authentication system not ready. Please refresh the page.');
+                    return;
+                }
+
                 const provider = index === 0 ? 'google' : 'github';
 
                 // Show loading state
@@ -576,28 +624,6 @@
                 const url = auth.loginExternalUrl(provider);
                 window.location.href = url;
             });
-        });
-
-        // Check for OAuth callback (when returning from Google/GitHub)
-        window.addEventListener('load', async () => {
-            const hash = window.location.hash;
-
-            // If we have a hash with access_token, it's an OAuth callback
-            if (hash && hash.includes('access_token')) {
-                try {
-                    // Parse the OAuth response and create user session
-                    const user = await auth.createUser(hash.substring(1), true);
-
-                    console.log('OAuth login successful:', user);
-
-                    // Redirect to dashboard
-                    window.location.href = '/dashboard.html';
-                } catch (error) {
-                    console.error('OAuth callback error:', error);
-                    alert('Authentication failed. Please try again.');
-                    window.location.href = '/login.html';
-                }
-            }
         });
     </script>
 </body>
