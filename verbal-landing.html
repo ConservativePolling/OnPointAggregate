@@ -1,0 +1,1318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OnPointAggregate — Thoughtful Ideas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Refined pop-in animations */
+        .article-card {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+                        transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .article-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Professional hover effects */
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+        }
+
+        /* Chart thumbnail gradient background - Light Blue */
+        .chart-thumbnail-bg {
+            background: linear-gradient(135deg,
+                #dbeafe 0%,
+                #bfdbfe 50%,
+                #93c5fd 100%
+            );
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(59, 130, 246, 0.3);
+        }
+
+        /* State map background - Pink */
+        .state-map-bg {
+            background: linear-gradient(135deg,
+                #fce7f3 0%,
+                #fbcfe8 50%,
+                #f9a8d4 100%
+            );
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(236, 72, 153, 0.3);
+        }
+
+
+        /* Nav underline */
+        .nav-link {
+            position: relative;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: currentColor;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .aspect-editorial { aspect-ratio: 16 / 10; }
+
+        /* Chart canvas container */
+        .chart-wrapper-inner {
+            position: absolute;
+            inset: 0;
+            padding: 3rem;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        #thumbnailChart {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        /* Modal animations */
+        #signupModal {
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #signupModal.modal-show {
+            opacity: 1;
+        }
+
+        #signupModal > div:last-child {
+            transform: translateY(20px);
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        #signupModal.modal-show > div:last-child {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 640px) {
+            #signupModal > div:last-child {
+                transform: translateY(100%);
+            }
+
+            #signupModal.modal-show > div:last-child {
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900 antialiased">
+
+    <!-- Navigation -->
+    <nav class="sticky top-0 z-50 bg-white/98 backdrop-blur-lg border-b border-gray-100">
+        <div class="max-w-[1400px] mx-auto px-6 lg:px-12">
+            <div class="flex items-center justify-between h-16">
+                <a href="#home" class="font-heading text-2xl font-bold tracking-tight hover:opacity-80 transition-opacity">
+                    OnPoint<span class="text-black">A</span>ggregate
+                </a>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#home" class="nav-link text-sm font-medium text-gray-600 hover:text-gray-900">Latest</a>
+                    <a href="#home" class="nav-link text-sm font-medium text-gray-600 hover:text-gray-900">Featured</a>
+                    <a href="#home" class="nav-link text-sm font-medium text-gray-600 hover:text-gray-900">Topics</a>
+                    <a href="#home" class="nav-link text-sm font-medium text-gray-600 hover:text-gray-900">About</a>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="login.html" class="hidden sm:block text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+                        Sign In
+                    </a>
+                    <a href="login.html" class="w-9 h-9 rounded-full bg-black flex items-center justify-center text-white text-sm font-semibold hover:shadow-lg transition-all">
+                        A
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Bottom Signup Banner - Glassmorphic UI -->
+    <div class="fixed bottom-0 left-0 right-0 z-50" style="
+        backdrop-filter: blur(32px) saturate(180%);
+        -webkit-backdrop-filter: blur(32px) saturate(180%);
+        background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.35) 0%,
+            rgba(255, 255, 255, 0.25) 100%);
+        border-top: 1px solid rgba(255, 255, 255, 0.25);
+        box-shadow:
+            0 -8px 32px rgba(0, 0, 0, 0.08),
+            0 -2px 8px rgba(0, 0, 0, 0.04),
+            inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    ">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <!-- Text Content -->
+                <div class="text-center sm:text-left">
+                    <h3 class="font-heading text-xl font-semibold text-gray-900 mb-1.5" style="
+                        letter-spacing: -0.03em;
+                        text-shadow: 0 1px 3px rgba(255, 255, 255, 0.9), 0 0 1px rgba(0, 0, 0, 0.1);
+                    ">
+                        Join OnPoint<span class="text-gray-500">A</span>ggregate
+                    </h3>
+                    <p class="text-sm text-gray-800 font-medium" style="text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);">
+                        Real-time polling updates and exclusive analysis
+                    </p>
+                </div>
+
+                <!-- CTA Section -->
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <input
+                        type="email"
+                        placeholder="Enter your email"
+                        class="flex-1 sm:w-72 px-4 py-3 text-gray-900 placeholder-gray-500 rounded-2xl focus:outline-none transition-all duration-300 text-sm font-medium"
+                        style="
+                            backdrop-filter: blur(16px) saturate(180%);
+                            -webkit-backdrop-filter: blur(16px) saturate(180%);
+                            background: rgba(255, 255, 255, 0.4);
+                            border: 1.5px solid rgba(255, 255, 255, 0.4);
+                            box-shadow:
+                                0 4px 24px rgba(0, 0, 0, 0.06),
+                                0 2px 8px rgba(0, 0, 0, 0.04),
+                                inset 0 1px 1px rgba(255, 255, 255, 0.8),
+                                inset 0 -1px 1px rgba(0, 0, 0, 0.02);
+                        "
+                        onfocus="this.style.background='rgba(255, 255, 255, 0.6)'; this.style.borderColor='rgba(255, 255, 255, 0.5)'; this.style.boxShadow='0 4px 32px rgba(0, 0, 0, 0.08), 0 2px 12px rgba(0, 0, 0, 0.06), inset 0 1px 1px rgba(255, 255, 255, 0.9), inset 0 -1px 1px rgba(0, 0, 0, 0.02)';"
+                        onblur="this.style.background='rgba(255, 255, 255, 0.4)'; this.style.borderColor='rgba(255, 255, 255, 0.4)'; this.style.boxShadow='0 4px 24px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0, 0, 0, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.8), inset 0 -1px 1px rgba(0, 0, 0, 0.02)';"
+                    >
+                    <button class="px-8 py-3 text-white font-semibold rounded-2xl transition-all duration-300 whitespace-nowrap text-sm" style="
+                        backdrop-filter: blur(16px);
+                        -webkit-backdrop-filter: blur(16px);
+                        background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8));
+                        border: 1.5px solid rgba(255, 255, 255, 0.12);
+                        box-shadow:
+                            0 8px 32px rgba(0, 0, 0, 0.2),
+                            0 4px 16px rgba(0, 0, 0, 0.15),
+                            inset 0 1px 1px rgba(255, 255, 255, 0.12),
+                            inset 0 -1px 1px rgba(0, 0, 0, 0.1);
+                    "
+                    onmouseover="this.style.background='linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.9))'; this.style.transform='translateY(-1px)'; this.style.boxShadow='0 12px 40px rgba(0, 0, 0, 0.25), 0 6px 20px rgba(0, 0, 0, 0.18), inset 0 1px 1px rgba(255, 255, 255, 0.15), inset 0 -1px 1px rgba(0, 0, 0, 0.1)';"
+                    onmouseout="this.style.background='linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.8))'; this.style.transform='translateY(0)'; this.style.boxShadow='0 8px 32px rgba(0, 0, 0, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.12), inset 0 -1px 1px rgba(0, 0, 0, 0.1)';">
+                        Sign Up
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="home" class="min-h-screen">
+        <!-- Hero Section -->
+        <section class="max-w-[1400px] mx-auto px-6 lg:px-12 pt-16 pb-20">
+            <!-- Two Featured Articles Grid -->
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Main Article -->
+                <article class="article-card cursor-pointer group" onclick="navigateToAggregate()">
+                    <div class="chart-thumbnail-bg rounded-2xl aspect-editorial mb-8 overflow-hidden relative">
+                        <div class="chart-wrapper-inner">
+                            <canvas id="thumbnailChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="flex items-center space-x-3 text-xs font-medium">
+                            <span class="px-3 py-1.5 bg-gradient-to-r from-blue-50 to-purple-50 text-indigo-700 rounded-md uppercase tracking-wider text-[0.6875rem] font-semibold">Live Analysis</span>
+                            <span class="text-gray-400">•</span>
+                            <time class="text-gray-500">Updated Daily</time>
+                            <span class="text-gray-400">•</span>
+                            <span class="text-gray-500">Interactive</span>
+                        </div>
+                        <h1 class="font-heading text-4xl font-bold leading-[1.05] tracking-tight group-hover:text-gray-600 transition-colors">
+                            Trump Approval Rating Aggregate
+                        </h1>
+                        <p class="text-lg text-gray-600 leading-relaxed">
+                            Live, time-weighted average of high-quality polls tracking President Trump's approval.
+                            Our methodology uses a 14-day half-life to weight recent polls more heavily while
+                            maintaining historical context.
+                        </p>
+                        <div class="flex items-center space-x-4 pt-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                <span class="text-sm font-medium text-gray-700">Approve</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-pink-500"></div>
+                                <span class="text-sm font-medium text-gray-700">Disapprove</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+
+                <!-- Side Article - State Map -->
+                <article class="article-card cursor-pointer group">
+                    <div class="state-map-bg rounded-2xl aspect-editorial mb-8 overflow-hidden relative flex items-center justify-center">
+                        <svg id="usMap" viewBox="0 0 960 600" class="w-full h-full p-8"></svg>
+                    </div>
+                    <div class="space-y-5">
+                        <div class="flex items-center space-x-3 text-xs font-medium">
+                            <span class="px-3 py-1.5 bg-gradient-to-r from-pink-50 to-rose-50 text-rose-700 rounded-md uppercase tracking-wider text-[0.6875rem] font-semibold">State Analysis</span>
+                            <span class="text-gray-400">•</span>
+                            <time class="text-gray-500">Updated Weekly</time>
+                        </div>
+                        <h2 class="font-heading text-4xl font-bold leading-[1.05] tracking-tight group-hover:text-gray-600 transition-colors">
+                            Trump's Approval in All 50 States
+                        </h2>
+                        <p class="text-lg text-gray-600 leading-relaxed">
+                            Explore state-by-state approval ratings with our interactive electoral map.
+                            See how approval varies across the country with detailed breakdowns by region.
+                        </p>
+                        <div class="flex items-center space-x-4 pt-3">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                <span class="text-sm font-medium text-gray-700">High Approval</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <span class="text-sm font-medium text-gray-700">Low Approval</span>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+
+            <!-- Subtitle Section -->
+            <div class="max-w-5xl mx-auto mt-16 pt-16 border-t border-gray-100">
+                <div class="text-center space-y-4">
+                    <h2 class="font-heading text-2xl font-bold tracking-tight text-gray-900">
+                        Data-Driven Political Analysis
+                    </h2>
+                    <p class="text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                        Our aggregate combines polls from top-tier pollsters, weighted by recency and quality.
+                        Explore the full interactive experience with detailed poll breakdowns, historical trends,
+                        and confidence intervals.
+                    </p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-100 mt-16">
+        <div class="max-w-[1400px] mx-auto px-6 lg:px-12 py-14">
+            <div class="grid md:grid-cols-4 gap-10 mb-10">
+                <div>
+                    <div class="font-heading text-xl font-bold mb-3 tracking-tight">OnPoint<span class="text-black">A</span>ggregate</div>
+                    <p class="text-sm text-gray-600 leading-relaxed">
+                        Real-time polling data and political analysis you can trust.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm mb-4 tracking-wide">Content</h3>
+                    <ul class="space-y-2.5 text-sm text-gray-600">
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Latest</a></li>
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Featured</a></li>
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Topics</a></li>
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Authors</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm mb-4 tracking-wide">Company</h3>
+                    <ul class="space-y-2.5 text-sm text-gray-600">
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">About</a></li>
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Careers</a></li>
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold text-sm mb-4 tracking-wide">Legal</h3>
+                    <ul class="space-y-2.5 text-sm text-gray-600">
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Privacy</a></li>
+                        <li><a href="#" class="hover:text-gray-900 transition-colors">Terms</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500">
+                <p>© 2025 OnPointAggregate. All rights reserved.</p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="hover:text-gray-900 transition-colors">Twitter</a>
+                    <a href="#" class="hover:text-gray-900 transition-colors">LinkedIn</a>
+                    <a href="#" class="hover:text-gray-900 transition-colors">GitHub</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Navigation function
+        function navigateToAggregate() {
+            window.location.href = 'OnPointAggregate3.0/index.html';
+        }
+
+        // Modal functions
+        function showSignupModal() {
+            const modal = document.getElementById('signupModal');
+            modal.style.display = 'flex';
+            setTimeout(() => {
+                modal.classList.add('modal-show');
+            }, 10);
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeSignupModal() {
+            const modal = document.getElementById('signupModal');
+            modal.classList.remove('modal-show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+            document.body.style.overflow = '';
+            localStorage.setItem('signupModalShown', 'true');
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const email = document.getElementById('email').value;
+            console.log('Sign up with email:', email);
+            // Add your signup logic here
+            closeSignupModal();
+            alert('Thanks for signing up! We\'ll be in touch soon.');
+        }
+
+        // Show modal on page load (with delay) if not shown before
+        window.addEventListener('load', () => {
+            const hasSeenModal = localStorage.getItem('signupModalShown');
+            if (!hasSeenModal) {
+                setTimeout(() => {
+                    showSignupModal();
+                }, 2000); // Show after 2 seconds
+            }
+        });
+
+        //ALL 266 POLLS FROM ACTUAL AGGREGATE - 100% ACCURATE
+        const rawPolls = [
+            { endDate: '2025-10-28', pollster: 'Big Data Poll', approve: 45, disapprove: 51 },
+            { endDate: '2025-10-27', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-27', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-26', pollster: 'Ipsos', approve: 40, disapprove: 57 },
+            { endDate: '2025-10-23', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 52 },
+            { endDate: '2025-10-20', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-20', pollster: 'Ipsos', approve: 42, disapprove: 56 },
+            { endDate: '2025-10-20', pollster: 'Echelon Insights', approve: 46, disapprove: 53 },
+            { endDate: '2025-10-20', pollster: 'Quinnipiac University', approve: 40, disapprove: 54 },
+            { endDate: '2025-10-20', pollster: 'University of Massachusetts Department of Political Science/YouGov', approve: 42, disapprove: 58 },
+            { endDate: '2025-10-16', pollster: 'Gallup', approve: 41, disapprove: 54 },
+            { endDate: '2025-10-16', pollster: 'The Argument/Verasight', approve: 44, disapprove: 54 },
+            { endDate: '2025-10-15', pollster: 'J.L. Partners', approve: 46, disapprove: 44 },
+            { endDate: '2025-10-14', pollster: 'Emerson College', approve: 45, disapprove: 48 },
+            { endDate: '2025-10-13', pollster: 'YouGov', approve: 44, disapprove: 54 },
+            { endDate: '2025-10-12', pollster: 'John Zogby Strategies', approve: 44, disapprove: 51 },
+            { endDate: '2025-10-12', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 44, disapprove: 52 },
+            { endDate: '2025-10-12', pollster: 'Ipsos', approve: 40, disapprove: 58 },
+            { endDate: '2025-10-07', pollster: 'Quantus Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-10-06', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-03', pollster: 'YouGov', approve: 42, disapprove: 58 },
+            { endDate: '2025-10-02', pollster: 'TIPP Insights', approve: 42, disapprove: 46 },
+            { endDate: '2025-09-30', pollster: 'InsiderAdvantage', approve: 52, disapprove: 46 },
+            { endDate: '2025-09-29', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-09-29', pollster: 'YouGov', approve: 44, disapprove: 55 },
+            { endDate: '2025-09-28', pollster: 'Pew Research Center', approve: 40, disapprove: 58 },
+            { endDate: '2025-09-27', pollster: 'The New York Times/Siena College', approve: 43, disapprove: 54 },
+            { endDate: '2025-09-26', pollster: 'Marist College', approve: 42, disapprove: 53 },
+            { endDate: '2025-09-24', pollster: 'Marquette University Law School', approve: 45, disapprove: 55 },
+            { endDate: '2025-09-22', pollster: 'Echelon Insights', approve: 45, disapprove: 53 },
+            { endDate: '2025-09-22', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-09-21', pollster: 'Quantus Insights', approve: 48, disapprove: 50 },
+            { endDate: '2025-09-21', pollster: 'Quinnipiac University', approve: 38, disapprove: 54 },
+            { endDate: '2025-09-19', pollster: 'Verasight', approve: 42, disapprove: 55 },
+            { endDate: '2025-09-18', pollster: 'The Argument/Verasight', approve: 42, disapprove: 56 },
+            { endDate: '2025-09-16', pollster: 'AtlasIntel', approve: 47, disapprove: 52 },
+            { endDate: '2025-09-16', pollster: 'Gallup', approve: 40, disapprove: 56 },
+            { endDate: '2025-09-16', pollster: 'TIPP Insights', approve: 45, disapprove: 49 },
+            { endDate: '2025-09-15', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-09-15', pollster: 'YouGov', approve: 41, disapprove: 55 },
+            { endDate: '2025-09-15', pollster: 'Ipsos', approve: 45, disapprove: 55 },
+            { endDate: '2025-09-11', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 52 },
+            { endDate: '2025-09-09', pollster: 'Ipsos', approve: 42, disapprove: 56 },
+            { endDate: '2025-09-09', pollster: 'Beacon Research/Shaw & Co. Research', approve: 46, disapprove: 54 },
+            { endDate: '2025-09-08', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-09-08', pollster: 'Public Religion Research Institute', approve: 42, disapprove: 56 },
+            { endDate: '2025-09-05', pollster: 'YouGov', approve: 44, disapprove: 56 },
+            { endDate: '2025-09-02', pollster: 'YouGov', approve: 44, disapprove: 55 },
+            { endDate: '2025-09-02', pollster: 'YouGov', approve: 40, disapprove: 55 },
+            { endDate: '2025-09-01', pollster: 'J.L. Partners', approve: 55, disapprove: 45 },
+            { endDate: '2025-08-30', pollster: 'John Zogby Strategies', approve: 46, disapprove: 52 },
+            { endDate: '2025-08-29', pollster: 'TIPP Insights', approve: 43, disapprove: 47 },
+            { endDate: '2025-08-26', pollster: 'Emerson College', approve: 45, disapprove: 47 },
+            { endDate: '2025-08-26', pollster: 'Quantus Insights', approve: 48, disapprove: 51 },
+            { endDate: '2025-08-25', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-08-25', pollster: 'Quinnipiac University', approve: 37, disapprove: 55 },
+            { endDate: '2025-08-24', pollster: 'Ipsos', approve: 40, disapprove: 54 },
+            { endDate: '2025-08-21', pollster: 'Verasight', approve: 41, disapprove: 56 },
+            { endDate: '2025-08-20', pollster: 'Gallup', approve: 40, disapprove: 56 },
+            { endDate: '2025-08-19', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-08-18', pollster: 'Echelon Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-08-18', pollster: 'Ipsos', approve: 40, disapprove: 54 },
+            { endDate: '2025-08-17', pollster: 'InsiderAdvantage', approve: 54, disapprove: 44 },
+            { endDate: '2025-08-17', pollster: 'The Argument/Verasight', approve: 43, disapprove: 55 },
+            { endDate: '2025-08-13', pollster: 'Quantus Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-08-11', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-08-10', pollster: 'Pew Research Center', approve: 38, disapprove: 60 },
+            { endDate: '2025-08-04', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-08-03', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 46, disapprove: 51 },
+            { endDate: '2025-08-02', pollster: 'TIPP Insights', approve: 45, disapprove: 46 },
+            { endDate: '2025-07-31', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 51 },
+            { endDate: '2025-07-30', pollster: 'University of Massachusetts Department of Political Science/YouGov', approve: 38, disapprove: 58 },
+            { endDate: '2025-07-29', pollster: 'John Zogby Strategies', approve: 43, disapprove: 54 },
+            { endDate: '2025-07-28', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-07-28', pollster: 'YouGov', approve: 44, disapprove: 54 },
+            { endDate: '2025-07-27', pollster: 'Ipsos', approve: 40, disapprove: 56 },
+            { endDate: '2025-07-23', pollster: 'Quantus Insights', approve: 47, disapprove: 50 },
+            { endDate: '2025-07-22', pollster: 'J.L. Partners', approve: 45, disapprove: 46 },
+            { endDate: '2025-07-22', pollster: 'Emerson College', approve: 46, disapprove: 47 },
+            { endDate: '2025-07-21', pollster: 'YouGov', approve: 43, disapprove: 56 },
+            { endDate: '2025-07-21', pollster: 'Beacon Research/Shaw & Co. Research', approve: 46, disapprove: 54 },
+            { endDate: '2025-07-21', pollster: 'Gallup', approve: 37, disapprove: 58 },
+            { endDate: '2025-07-21', pollster: 'YouGov', approve: 39, disapprove: 56 },
+            { endDate: '2025-07-21', pollster: 'GBAO Strategies', approve: 45, disapprove: 55 },
+            { endDate: '2025-07-18', pollster: 'AtlasIntel', approve: 44, disapprove: 55 },
+            { endDate: '2025-07-18', pollster: 'YouGov', approve: 42, disapprove: 58 },
+            { endDate: '2025-07-16', pollster: 'Ipsos', approve: 41, disapprove: 54 },
+            { endDate: '2025-07-16', pollster: 'Quantus Insights', approve: 48, disapprove: 50 },
+            { endDate: '2025-07-16', pollster: 'Verasight', approve: 42, disapprove: 57 },
+            { endDate: '2025-07-16', pollster: 'Marquette University Law School', approve: 46, disapprove: 54 },
+            { endDate: '2025-07-14', pollster: 'Echelon Insights', approve: 45, disapprove: 53 },
+            { endDate: '2025-07-14', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-07-14', pollster: 'Quinnipiac University', approve: 40, disapprove: 54 },
+            { endDate: '2025-07-14', pollster: 'Big Data Poll', approve: 48, disapprove: 49 },
+            { endDate: '2025-07-13', pollster: 'YouGov', approve: 39, disapprove: 56 },
+            { endDate: '2025-07-13', pollster: 'CNN/SSRS', approve: 42, disapprove: 58 },
+            { endDate: '2025-07-10', pollster: 'J.L. Partners', approve: 48, disapprove: 52 },
+            { endDate: '2025-07-07', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-07-02', pollster: 'Quantus Insights', approve: 47, disapprove: 49 },
+            { endDate: '2025-06-30', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-30', pollster: 'YouGov', approve: 45, disapprove: 54 },
+            { endDate: '2025-06-27', pollster: 'TIPP Insights', approve: 44, disapprove: 45 },
+            { endDate: '2025-06-25', pollster: 'Emerson College', approve: 45, disapprove: 46 },
+            { endDate: '2025-06-25', pollster: 'John Zogby Strategies', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-25', pollster: 'Quantus Insights', approve: 47, disapprove: 50 },
+            { endDate: '2025-06-25', pollster: 'Marist College', approve: 44, disapprove: 53 },
+            { endDate: '2025-06-24', pollster: 'Quinnipiac University', approve: 41, disapprove: 54 },
+            { endDate: '2025-06-23', pollster: 'Ipsos', approve: 41, disapprove: 57 },
+            { endDate: '2025-06-23', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-06-22', pollster: 'Ipsos', approve: 41, disapprove: 54 },
+            { endDate: '2025-06-19', pollster: 'Gallup', approve: 40, disapprove: 57 },
+            { endDate: '2025-06-18', pollster: 'Echelon Insights', approve: 48, disapprove: 52 },
+            { endDate: '2025-06-17', pollster: 'Echelon Insights', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-16', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-06-16', pollster: 'Ipsos', approve: 42, disapprove: 54 },
+            { endDate: '2025-06-16', pollster: 'InsiderAdvantage', approve: 54, disapprove: 44 },
+            { endDate: '2025-06-16', pollster: 'Beacon Research/Shaw & Co. Research', approve: 46, disapprove: 54 },
+            { endDate: '2025-06-14', pollster: 'Clarity Campaign Labs', approve: 47, disapprove: 50 },
+            { endDate: '2025-06-12', pollster: 'Verasight', approve: 42, disapprove: 56 },
+            { endDate: '2025-06-11', pollster: 'Quantus Insights', approve: 48, disapprove: 49 },
+            { endDate: '2025-06-11', pollster: 'TIPP Insights', approve: 43, disapprove: 50 },
+            { endDate: '2025-06-09', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-09', pollster: 'Quinnipiac University', approve: 38, disapprove: 54 },
+            { endDate: '2025-06-08', pollster: 'Pew Research Center', approve: 41, disapprove: 58 },
+            { endDate: '2025-06-06', pollster: 'YouGov', approve: 45, disapprove: 55 },
+            { endDate: '2025-06-06', pollster: 'J.L. Partners', approve: 47, disapprove: 53 },
+            { endDate: '2025-06-04', pollster: 'Quantus Insights', approve: 49, disapprove: 48 },
+            { endDate: '2025-06-02', pollster: 'YouGov', approve: 46, disapprove: 51 },
+            { endDate: '2025-05-30', pollster: 'TIPP Insights', approve: 43, disapprove: 45 },
+            { endDate: '2025-05-29', pollster: 'John Zogby Strategies', approve: 48, disapprove: 49 },
+            { endDate: '2025-05-27', pollster: 'AtlasIntel', approve: 45, disapprove: 55 },
+            { endDate: '2025-05-27', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-05-26', pollster: 'YouGov', approve: 46, disapprove: 52 },
+            { endDate: '2025-05-20', pollster: 'Civiqs', approve: 47, disapprove: 52 },
+            { endDate: '2025-05-20', pollster: 'Quantus Insights', approve: 48, disapprove: 48 },
+            { endDate: '2025-05-19', pollster: 'YouGov', approve: 45, disapprove: 52 },
+            { endDate: '2025-05-19', pollster: 'Fabrizio Ward', approve: 46, disapprove: 49 },
+            { endDate: '2025-05-18', pollster: 'InsiderAdvantage', approve: 55, disapprove: 44 },
+            { endDate: '2025-05-18', pollster: 'Ipsos', approve: 42, disapprove: 52 },
+            { endDate: '2025-05-18', pollster: 'Gallup', approve: 43, disapprove: 53 },
+            { endDate: '2025-05-15', pollster: 'Marquette University Law School', approve: 46, disapprove: 54 },
+            { endDate: '2025-05-13', pollster: 'Ipsos', approve: 44, disapprove: 52 },
+            { endDate: '2025-05-12', pollster: 'Echelon Insights', approve: 46, disapprove: 52 },
+            { endDate: '2025-05-12', pollster: 'YouGov', approve: 45, disapprove: 52 },
+            { endDate: '2025-05-09', pollster: 'co/efficient', approve: 49, disapprove: 51 },
+            { endDate: '2025-05-08', pollster: 'YouGov', approve: 42, disapprove: 50 },
+            { endDate: '2025-05-07', pollster: 'Quantus Insights', approve: 48, disapprove: 48 },
+            { endDate: '2025-05-06', pollster: 'Verasight', approve: 40, disapprove: 56 },
+            { endDate: '2025-05-05', pollster: 'YouGov', approve: 44, disapprove: 52 },
+            { endDate: '2025-05-05', pollster: 'Big Data Poll', approve: 48, disapprove: 47 },
+            { endDate: '2025-05-02', pollster: 'TIPP Insights', approve: 42, disapprove: 47 },
+            { endDate: '2025-04-28', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-04-28', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-04-28', pollster: 'J.L. Partners', approve: 45, disapprove: 55 },
+            { endDate: '2025-04-28', pollster: 'Emerson College', approve: 45, disapprove: 45 },
+            { endDate: '2025-04-27', pollster: 'Ipsos', approve: 42, disapprove: 53 },
+            { endDate: '2025-04-25', pollster: 'YouGov', approve: 45, disapprove: 55 },
+            { endDate: '2025-04-25', pollster: 'Ipsos', approve: 42, disapprove: 55 },
+            { endDate: '2025-04-24', pollster: 'The New York Times/Siena College', approve: 42, disapprove: 54 },
+            { endDate: '2025-04-24', pollster: 'CNN/SSRS', approve: 43, disapprove: 57 },
+            { endDate: '2025-04-23', pollster: 'Quantus Insights', approve: 48, disapprove: 50 },
+            { endDate: '2025-04-23', pollster: 'John Zogby Strategies', approve: 48, disapprove: 50 },
+            { endDate: '2025-04-23', pollster: 'YouGov', approve: 44, disapprove: 52 },
+            { endDate: '2025-04-23', pollster: 'Marist College', approve: 42, disapprove: 53 },
+            { endDate: '2025-04-22', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-04-21', pollster: 'Ipsos', approve: 42, disapprove: 53 },
+            { endDate: '2025-04-21', pollster: 'Beacon Research/Shaw & Co. Research', approve: 44, disapprove: 55 },
+            { endDate: '2025-04-18', pollster: 'Civiqs', approve: 46, disapprove: 53 },
+            { endDate: '2025-04-15', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-04-14', pollster: 'Echelon Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-04-14', pollster: 'J.L. Partners', approve: 48, disapprove: 42 },
+            { endDate: '2025-04-14', pollster: 'Gallup', approve: 44, disapprove: 53 },
+            { endDate: '2025-04-14', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 49 },
+            { endDate: '2025-04-14', pollster: 'AtlasIntel', approve: 46, disapprove: 52 },
+            { endDate: '2025-04-13', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 44, disapprove: 51 },
+            { endDate: '2025-04-13', pollster: 'Pew Research Center', approve: 40, disapprove: 59 },
+            { endDate: '2025-04-11', pollster: 'YouGov', approve: 47, disapprove: 53 },
+            { endDate: '2025-04-10', pollster: 'YouGov', approve: 41, disapprove: 54 },
+            { endDate: '2025-04-09', pollster: 'TIPP Insights', approve: 43, disapprove: 50 },
+            { endDate: '2025-04-09', pollster: 'Quantus Insights', approve: 47, disapprove: 50 },
+            { endDate: '2025-04-09', pollster: 'University of Massachusetts Department of Political Science/YouGov', approve: 44, disapprove: 51 },
+            { endDate: '2025-04-08', pollster: 'YouGov', approve: 45, disapprove: 52 },
+            { endDate: '2025-04-07', pollster: 'Quinnipiac University', approve: 41, disapprove: 53 },
+            { endDate: '2025-04-03', pollster: 'J.L. Partners', approve: 47, disapprove: 42 },
+            { endDate: '2025-04-03', pollster: 'Cygnal', approve: 47, disapprove: 51 },
+            { endDate: '2025-04-02', pollster: 'Ipsos', approve: 43, disapprove: 53 },
+            { endDate: '2025-04-01', pollster: 'YouGov', approve: 46, disapprove: 51 },
+            { endDate: '2025-03-28', pollster: 'TIPP Insights', approve: 44, disapprove: 45 },
+            { endDate: '2025-03-27', pollster: 'J.L. Partners', approve: 45, disapprove: 46 },
+            { endDate: '2025-03-27', pollster: 'Quantus Insights', approve: 49, disapprove: 46 },
+            { endDate: '2025-03-27', pollster: 'Marquette University Law School', approve: 48, disapprove: 52 },
+            { endDate: '2025-03-26', pollster: 'YouGov', approve: 50, disapprove: 50 },
+            { endDate: '2025-03-25', pollster: 'YouGov', approve: 48, disapprove: 50 },
+            { endDate: '2025-03-24', pollster: 'YouGov', approve: 44, disapprove: 50 },
+            { endDate: '2025-03-23', pollster: 'Ipsos', approve: 45, disapprove: 51 },
+            { endDate: '2025-03-23', pollster: 'GBAO Strategies', approve: 48, disapprove: 50 },
+            { endDate: '2025-03-20', pollster: 'Public Religion Research Institute', approve: 43, disapprove: 54 },
+            { endDate: '2025-03-18', pollster: 'YouGov', approve: 47, disapprove: 50 },
+            { endDate: '2025-03-17', pollster: 'Beacon Research/Shaw & Co. Research', approve: 49, disapprove: 51 },
+            { endDate: '2025-03-17', pollster: 'North Star Opinion Research', approve: 46, disapprove: 51 },
+            { endDate: '2025-03-16', pollster: 'Gallup', approve: 43, disapprove: 53 },
+            { endDate: '2025-03-14', pollster: 'Blueprint Polling', approve: 45, disapprove: 51 },
+            { endDate: '2025-03-13', pollster: 'Echelon Insights', approve: 49, disapprove: 48 },
+            { endDate: '2025-03-12', pollster: 'Ipsos', approve: 44, disapprove: 52 },
+            { endDate: '2025-03-12', pollster: 'AtlasIntel', approve: 47, disapprove: 52 },
+            { endDate: '2025-03-12', pollster: 'Quantus Insights', approve: 50, disapprove: 47 },
+            { endDate: '2025-03-11', pollster: 'YouGov', approve: 48, disapprove: 49 },
+            { endDate: '2025-03-11', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 47, disapprove: 51 },
+            { endDate: '2025-03-10', pollster: 'Emerson College', approve: 47, disapprove: 45 },
+            { endDate: '2025-03-10', pollster: 'Quinnipiac University', approve: 42, disapprove: 53 },
+            { endDate: '2025-03-10', pollster: 'Clarity Campaign Labs', approve: 50, disapprove: 46 },
+            { endDate: '2025-03-09', pollster: 'CNN/SSRS', approve: 45, disapprove: 54 },
+            { endDate: '2025-03-07', pollster: 'J.L. Partners', approve: 49, disapprove: 51 },
+            { endDate: '2025-03-06', pollster: 'TIPP Insights', approve: 43, disapprove: 48 },
+            { endDate: '2025-03-05', pollster: 'Cygnal', approve: 47, disapprove: 51 },
+            { endDate: '2025-03-04', pollster: 'Ipsos', approve: 44, disapprove: 51 },
+            { endDate: '2025-03-04', pollster: 'YouGov', approve: 48, disapprove: 46 },
+            { endDate: '2025-03-03', pollster: 'Emerson College', approve: 48, disapprove: 43 },
+            { endDate: '2025-03-03', pollster: 'Civiqs', approve: 48, disapprove: 52 },
+            { endDate: '2025-03-02', pollster: 'Public Opinion Strategies', approve: 51, disapprove: 49 },
+            { endDate: '2025-03-01', pollster: 'John Zogby Strategies', approve: 48, disapprove: 48 },
+            { endDate: '2025-02-28', pollster: 'YouGov', approve: 51, disapprove: 49 },
+            { endDate: '2025-02-28', pollster: 'CNN/SSRS', approve: 48, disapprove: 52 },
+            { endDate: '2025-02-28', pollster: 'TIPP Insights', approve: 46, disapprove: 43 },
+            { endDate: '2025-02-28', pollster: 'AtlasIntel', approve: 50, disapprove: 50 },
+            { endDate: '2025-02-26', pollster: 'Quantus Insights', approve: 51, disapprove: 45 },
+            { endDate: '2025-02-26', pollster: 'Marist College', approve: 45, disapprove: 51 },
+            { endDate: '2025-02-25', pollster: 'YouGov', approve: 48, disapprove: 47 },
+            { endDate: '2025-02-25', pollster: 'J.L. Partners', approve: 45, disapprove: 39 },
+            { endDate: '2025-02-23', pollster: 'Ipsos', approve: 44, disapprove: 50 },
+            { endDate: '2025-02-20', pollster: 'Echelon Insights', approve: 48, disapprove: 49 },
+            { endDate: '2025-02-20', pollster: 'YouGov', approve: 48, disapprove: 44 },
+            { endDate: '2025-02-18', pollster: 'YouGov', approve: 50, disapprove: 47 },
+            { endDate: '2025-02-18', pollster: 'Ipsos', approve: 44, disapprove: 51 },
+            { endDate: '2025-02-18', pollster: 'Ipsos', approve: 48, disapprove: 51 },
+            { endDate: '2025-02-18', pollster: 'YouGov', approve: 46, disapprove: 46 },
+            { endDate: '2025-02-17', pollster: 'Emerson College', approve: 48, disapprove: 42 },
+            { endDate: '2025-02-17', pollster: 'CNN/SSRS', approve: 46, disapprove: 54 },
+            { endDate: '2025-02-17', pollster: 'co/efficient', approve: 48, disapprove: 48 },
+            { endDate: '2025-02-17', pollster: 'Quinnipiac University', approve: 45, disapprove: 49 },
+            { endDate: '2025-02-17', pollster: 'Blueprint Polling', approve: 47, disapprove: 48 },
+            { endDate: '2025-02-16', pollster: 'SurveyUSA', approve: 51, disapprove: 45 },
+            { endDate: '2025-02-16', pollster: 'Gallup', approve: 45, disapprove: 51 },
+            { endDate: '2025-02-13', pollster: 'Echelon Insights', approve: 52, disapprove: 46 },
+            { endDate: '2025-02-12', pollster: 'Quantus Insights', approve: 53, disapprove: 44 },
+            { endDate: '2025-02-11', pollster: 'YouGov', approve: 47, disapprove: 49 },
+            { endDate: '2025-02-11', pollster: 'YouGov', approve: 45, disapprove: 41 },
+            { endDate: '2025-02-07', pollster: 'YouGov', approve: 53, disapprove: 47 },
+            { endDate: '2025-02-06', pollster: 'Clarity Campaign Labs', approve: 48, disapprove: 43 },
+            { endDate: '2025-02-05', pollster: 'Cygnal', approve: 50, disapprove: 48 },
+            { endDate: '2025-02-05', pollster: 'Marquette University Law School', approve: 48, disapprove: 52 },
+            { endDate: '2025-02-04', pollster: 'YouGov', approve: 48, disapprove: 47 },
+            { endDate: '2025-02-03', pollster: 'Quantus Insights', approve: 52, disapprove: 45 },
+            { endDate: '2025-02-02', pollster: 'Pew Research Center', approve: 47, disapprove: 51 },
+            { endDate: '2025-01-31', pollster: 'TIPP Insights', approve: 46, disapprove: 41 },
+            { endDate: '2025-01-28', pollster: 'YouGov', approve: 50, disapprove: 46 },
+            { endDate: '2025-01-28', pollster: 'Emerson College', approve: 49, disapprove: 41 },
+            { endDate: '2025-01-28', pollster: 'co/efficient', approve: 52, disapprove: 47 },
+            { endDate: '2025-01-27', pollster: 'Quinnipiac University', approve: 46, disapprove: 43 },
+            { endDate: '2025-01-27', pollster: 'Gallup', approve: 47, disapprove: 48 },
+            { endDate: '2025-01-26', pollster: 'Ipsos', approve: 45, disapprove: 46 },
+            { endDate: '2025-01-24', pollster: 'Echelon Insights', approve: 51, disapprove: 43 },
+            { endDate: '2025-01-23', pollster: 'AtlasIntel', approve: 50, disapprove: 50 },
+            { endDate: '2025-01-23', pollster: 'Quantus Insights', approve: 54, disapprove: 40 },
+            { endDate: '2025-01-22', pollster: 'Big Data Poll', approve: 56, disapprove: 37 },
+            { endDate: '2025-01-21', pollster: 'Ipsos', approve: 47, disapprove: 41 }
+        ];
+
+        // Parse date function
+        function parseDate(dateStr) {
+            const currentYear = 2025;
+
+            // Handle ISO date format (e.g., "2025-10-28")
+            if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                return new Date(dateStr);
+            }
+
+            // Handle date ranges (e.g., "Oct. 28-30")
+            if (dateStr.includes('-')) {
+                const parts = dateStr.split('-');
+                let endDate = parts[parts.length - 1].trim();
+
+                let month, day;
+                if (endDate.includes('.')) {
+                    const dateParts = endDate.split('.');
+                    if (dateParts.length === 2) {
+                        month = dateParts[0].trim();
+                        day = parseInt(dateParts[1].trim());
+                    }
+                } else if (endDate.match(/^\d+$/)) {
+                    day = parseInt(endDate);
+                    const firstPart = parts[0].trim();
+                    month = firstPart.split('.')[0].trim();
+                }
+
+                const monthMap = {
+                    'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                    'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+                };
+
+                const monthNum = monthMap[month];
+                if (monthNum !== undefined && day) {
+                    return new Date(currentYear, monthNum, day);
+                }
+            }
+
+            // Handle simple dates (e.g., "Oct. 28")
+            if (dateStr.includes('.')) {
+                const parts = dateStr.split('.');
+                if (parts.length >= 2) {
+                    const month = parts[0].trim();
+                    const day = parseInt(parts[1].trim());
+
+                    const monthMap = {
+                        'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                        'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+                    };
+
+                    const monthNum = monthMap[month];
+                    if (monthNum !== undefined && !isNaN(day)) {
+                        return new Date(currentYear, monthNum, day);
+                    }
+                }
+            }
+
+            console.warn('Could not parse date:', dateStr);
+            return new Date();
+        }
+
+        // Calculate time-weighted average with 10-day half-life (EXACT algorithm from aggregate)
+        function calculateTimeWeightedAverage(pollsData, field) {
+            // Group polls by pollster
+            const pollsterGroups = {};
+            pollsData.forEach(poll => {
+                if (!pollsterGroups[poll.pollster]) {
+                    pollsterGroups[poll.pollster] = [];
+                }
+                pollsterGroups[poll.pollster].push({
+                    date: parseDate(poll.endDate),
+                    value: poll[field]
+                });
+            });
+
+            // Sort each pollster's polls by date
+            Object.keys(pollsterGroups).forEach(pollster => {
+                pollsterGroups[pollster].sort((a, b) => a.date - b.date);
+            });
+
+            // Get date range
+            const allDates = pollsData.map(p => parseDate(p.endDate));
+            const minDate = new Date(Math.min(...allDates));
+            const maxDate = new Date(Math.max(...allDates));
+
+            // Calculate weighted average every 6 hours for detail
+            const result = [];
+            const startTime = minDate.getTime();
+            const endTime = maxDate.getTime();
+            const hoursIncrement = 6;
+            const timeStep = hoursIncrement * 60 * 60 * 1000;
+
+            let currentTime = startTime;
+
+            while (currentTime <= endTime) {
+                const currentDate = new Date(currentTime);
+                let totalWeight = 0;
+                let weightedSum = 0;
+
+                // For each pollster
+                Object.keys(pollsterGroups).forEach(pollster => {
+                    const polls = pollsterGroups[pollster];
+                    const relevantPolls = polls.filter(p => p.date <= currentDate);
+
+                    if (relevantPolls.length > 0) {
+                        let pollsterWeight = 0;
+                        let pollsterWeightedSum = 0;
+
+                        relevantPolls.forEach(poll => {
+                            const daysAgo = (currentDate - poll.date) / (1000 * 60 * 60 * 24);
+                            // 10-day half-life
+                            const weight = Math.pow(0.5, daysAgo / 10);
+                            pollsterWeight += weight;
+                            pollsterWeightedSum += poll.value * weight;
+                        });
+
+                        const pollsterAvg = pollsterWeightedSum / pollsterWeight;
+
+                        // Most recent poll determines pollster weight
+                        const mostRecentPoll = relevantPolls[relevantPolls.length - 1];
+                        const daysAgo = (currentDate - mostRecentPoll.date) / (1000 * 60 * 60 * 24);
+                        const pollsterOverallWeight = Math.pow(0.5, daysAgo / 10);
+
+                        totalWeight += pollsterOverallWeight;
+                        weightedSum += pollsterAvg * pollsterOverallWeight;
+                    }
+                });
+
+                if (totalWeight > 0) {
+                    // Calculate weighted standard error for confidence interval
+                    let varianceSum = 0;
+                    let pollsterCount = 0;
+
+                    Object.keys(pollsterGroups).forEach(pollster => {
+                        const polls = pollsterGroups[pollster];
+                        const relevantPolls = polls.filter(p => p.date <= currentDate);
+
+                        if (relevantPolls.length > 0) {
+                            let pollsterWeight = 0;
+                            let pollsterWeightedSum = 0;
+
+                            relevantPolls.forEach(poll => {
+                                const daysAgo = (currentDate - poll.date) / (1000 * 60 * 60 * 24);
+                                const weight = Math.pow(0.5, daysAgo / 10);
+                                pollsterWeight += weight;
+                                pollsterWeightedSum += poll.value * weight;
+                            });
+
+                            const pollsterAvg = pollsterWeightedSum / pollsterWeight;
+                            const avgValue = weightedSum / totalWeight;
+                            varianceSum += Math.pow(pollsterAvg - avgValue, 2);
+                            pollsterCount++;
+                        }
+                    });
+
+                    // Standard error based on pollster variability
+                    const standardError = pollsterCount > 1
+                        ? Math.sqrt(varianceSum / pollsterCount) / Math.sqrt(pollsterCount)
+                        : 1.5; // Default uncertainty when limited data
+
+                    const avgValue = weightedSum / totalWeight;
+                    result.push({
+                        date: new Date(currentTime),
+                        value: avgValue,
+                        upper: avgValue + (3.0 * standardError), // Slightly bigger CI
+                        lower: avgValue - (3.0 * standardError)
+                    });
+                }
+
+                currentTime += timeStep;
+            }
+
+            return result;
+        }
+
+        // Create miniature chart with actual time-weighted aggregate lines
+        function createThumbnailChart() {
+            const canvas = document.getElementById('thumbnailChart');
+            const ctx = canvas.getContext('2d');
+
+            console.log('Creating chart...'); // Debug
+            console.log('Raw polls count:', rawPolls.length);
+
+            // Test date parsing
+            const testDate = parseDate(rawPolls[0].endDate);
+            console.log('Test date parse:', rawPolls[0].endDate, '=>', testDate);
+
+            // Calculate actual trend lines using the same algorithm as main aggregate
+            const approveTrend = calculateTimeWeightedAverage(rawPolls, 'approve');
+            const disapproveTrend = calculateTimeWeightedAverage(rawPolls, 'disapprove');
+
+            console.log('Approve trend points:', approveTrend.length); // Debug
+            console.log('Disapprove trend points:', disapproveTrend.length); // Debug
+
+            if (approveTrend.length > 0) {
+                console.log('First approve point:', approveTrend[0]);
+                console.log('Last approve point:', approveTrend[approveTrend.length - 1]);
+            }
+
+            const chartData = {
+                datasets: [
+                    // Disapprove confidence interval
+                    {
+                        label: 'Disapprove CI Upper',
+                        data: disapproveTrend.map(d => ({ x: d.date, y: d.upper })),
+                        borderColor: 'transparent',
+                        backgroundColor: 'rgba(236, 72, 153, 0.25)',
+                        borderWidth: 0,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: '+1',
+                        order: 10
+                    },
+                    {
+                        label: 'Disapprove CI Lower',
+                        data: disapproveTrend.map(d => ({ x: d.date, y: d.lower })),
+                        borderColor: 'transparent',
+                        backgroundColor: 'rgba(236, 72, 153, 0.25)',
+                        borderWidth: 0,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 10
+                    },
+                    // Approve confidence interval
+                    {
+                        label: 'Approve CI Upper',
+                        data: approveTrend.map(d => ({ x: d.date, y: d.upper })),
+                        borderColor: 'transparent',
+                        backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                        borderWidth: 0,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: '+1',
+                        order: 10
+                    },
+                    {
+                        label: 'Approve CI Lower',
+                        data: approveTrend.map(d => ({ x: d.date, y: d.lower })),
+                        borderColor: 'transparent',
+                        backgroundColor: 'rgba(16, 185, 129, 0.25)',
+                        borderWidth: 0,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 10
+                    },
+                    // Outer glow for disapprove line
+                    {
+                        label: 'Disapprove Glow',
+                        data: disapproveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgba(236, 72, 153, 0.3)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 16,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 5
+                    },
+                    // Shadow for disapprove line
+                    {
+                        label: 'Disapprove Shadow',
+                        data: disapproveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgba(0, 0, 0, 0.25)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 12,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 4
+                    },
+                    // White outline for disapprove line
+                    {
+                        label: 'Disapprove Outline',
+                        data: disapproveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgba(255, 255, 255, 0.95)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 12,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 2
+                    },
+                    // Main disapprove line
+                    {
+                        label: 'Disapprove',
+                        data: disapproveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgb(244, 63, 94)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 6,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 1
+                    },
+                    // Outer glow for approve line
+                    {
+                        label: 'Approve Glow',
+                        data: approveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgba(16, 185, 129, 0.3)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 16,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 5
+                    },
+                    // Shadow for approve line
+                    {
+                        label: 'Approve Shadow',
+                        data: approveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgba(0, 0, 0, 0.25)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 12,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 4
+                    },
+                    // White outline for approve line
+                    {
+                        label: 'Approve Outline',
+                        data: approveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgba(255, 255, 255, 0.95)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 12,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 2
+                    },
+                    // Main approve line
+                    {
+                        label: 'Approve',
+                        data: approveTrend.map(d => ({ x: d.date, y: d.value })),
+                        borderColor: 'rgb(5, 150, 105)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 6,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        fill: false,
+                        order: 1
+                    }
+                ]
+            };
+
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    devicePixelRatio: 2,
+                    layout: {
+                        padding: {
+                            top: 40,
+                            right: 40,
+                            bottom: 40,
+                            left: 40
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            type: 'time',
+                            display: false,
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        },
+                        y: {
+                            display: false,
+                            min: 38,
+                            max: 58,
+                            grid: {
+                                display: false,
+                                drawBorder: false
+                            },
+                            border: {
+                                display: false
+                            }
+                        }
+                    },
+                    elements: {
+                        line: {
+                            borderJoinStyle: 'round',
+                            borderCapStyle: 'round'
+                        }
+                    },
+                    animation: {
+                        duration: 1500,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+
+            console.log('Chart created successfully!', {
+                datasets: chart.data.datasets.length,
+                approvePoints: approveTrend.length,
+                disapprovePoints: disapproveTrend.length
+            });
+        }
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.article-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Initialize chart when page loads
+        window.addEventListener('load', () => {
+            console.log('Page loaded, initializing chart...');
+            try {
+                createThumbnailChart();
+            } catch (error) {
+                console.error('Error creating chart:', error);
+            }
+        });
+
+        // Also try to initialize after DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOM ready');
+        });
+
+        // Draw US Electoral Map
+        async function drawUSMap() {
+            const svg = document.getElementById('usMap');
+            if (!svg) return;
+
+            // Fetch the actual US map SVG
+            try {
+                const response = await fetch('https://raw.githubusercontent.com/pursuitofleisure/usa-electoral-map/master/blank-us-map.svg');
+                const svgText = await response.text();
+
+                // Parse the SVG
+                const parser = new DOMParser();
+                const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+
+                // State approval ratings (simulated data)
+                const stateApprovals = {
+                    'HI': 38, 'AK': 55, 'FL': 52, 'NH': 43, 'MI': 44, 'VT': 36, 'ME': 41,
+                    'RI': 37, 'NY': 39, 'PA': 47, 'NJ': 40, 'DE': 43, 'MD': 42, 'VA': 45,
+                    'WV': 61, 'OH': 48, 'IN': 55, 'IL': 40, 'CT': 38, 'WI': 46, 'NC': 51,
+                    'DC': 12, 'MA': 34, 'TN': 56, 'AR': 58, 'MO': 54, 'GA': 50, 'SC': 54,
+                    'KY': 58, 'AL': 59, 'LA': 53, 'MS': 57, 'IA': 49, 'MN': 43, 'OK': 60,
+                    'TX': 52, 'NM': 44, 'KS': 55, 'NE': 58, 'SD': 59, 'ND': 60, 'WY': 61,
+                    'MT': 59, 'CO': 47, 'ID': 58, 'UT': 54, 'AZ': 48, 'NV': 45, 'OR': 41,
+                    'WA': 42, 'CA': 38
+                };
+
+                // Color scale function - matching screenshot palette
+                function getColor(approval) {
+                    if (approval < 40) return 'rgb(194, 80, 72)'; // Dark red
+                    if (approval < 45) return 'rgb(207, 114, 107)'; // Medium red
+                    if (approval < 50) return 'rgb(230, 180, 180)'; // Light pink
+                    if (approval < 55) return 'rgb(160, 200, 160)'; // Light green
+                    if (approval < 60) return 'rgb(70, 150, 70)'; // Medium green
+                    return 'rgb(40, 120, 40)'; // Dark green
+                }
+
+                // Create defs for gradients and filters
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+
+                // Create inner shadow filter for depth
+                const filter = document.createElementNS('http://www.w3.org/2000/svg', 'filter');
+                filter.setAttribute('id', 'innerShadow');
+                filter.setAttribute('x', '-50%');
+                filter.setAttribute('y', '-50%');
+                filter.setAttribute('width', '200%');
+                filter.setAttribute('height', '200%');
+
+                const feGaussianBlur = document.createElementNS('http://www.w3.org/2000/svg', 'feGaussianBlur');
+                feGaussianBlur.setAttribute('in', 'SourceAlpha');
+                feGaussianBlur.setAttribute('stdDeviation', '3');
+                feGaussianBlur.setAttribute('result', 'blur');
+
+                const feOffset = document.createElementNS('http://www.w3.org/2000/svg', 'feOffset');
+                feOffset.setAttribute('in', 'blur');
+                feOffset.setAttribute('dx', '0');
+                feOffset.setAttribute('dy', '0');
+                feOffset.setAttribute('result', 'offsetBlur');
+
+                const feFlood = document.createElementNS('http://www.w3.org/2000/svg', 'feFlood');
+                feFlood.setAttribute('flood-color', '#000000');
+                feFlood.setAttribute('flood-opacity', '0.3');
+                feFlood.setAttribute('result', 'offsetColor');
+
+                const feComposite1 = document.createElementNS('http://www.w3.org/2000/svg', 'feComposite');
+                feComposite1.setAttribute('in', 'offsetColor');
+                feComposite1.setAttribute('in2', 'offsetBlur');
+                feComposite1.setAttribute('operator', 'in');
+                feComposite1.setAttribute('result', 'offsetBlur');
+
+                const feComposite2 = document.createElementNS('http://www.w3.org/2000/svg', 'feComposite');
+                feComposite2.setAttribute('in', 'SourceGraphic');
+                feComposite2.setAttribute('in2', 'offsetBlur');
+                feComposite2.setAttribute('operator', 'over');
+
+                filter.appendChild(feGaussianBlur);
+                filter.appendChild(feOffset);
+                filter.appendChild(feFlood);
+                filter.appendChild(feComposite1);
+                filter.appendChild(feComposite2);
+                defs.appendChild(filter);
+                svg.appendChild(defs);
+
+                // Find all state paths and color them
+                // Handle both direct path elements and group elements containing paths
+                const paths = svgDoc.querySelectorAll('path[id]');
+                paths.forEach(path => {
+                    const stateId = path.getAttribute('id');
+                    if (stateApprovals[stateId]) {
+                        const baseColor = getColor(stateApprovals[stateId]);
+
+                        // Create gradient for each state
+                        const gradientId = `gradient-${stateId}`;
+                        const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                        gradient.setAttribute('id', gradientId);
+                        gradient.setAttribute('x1', '0%');
+                        gradient.setAttribute('y1', '0%');
+                        gradient.setAttribute('x2', '0%');
+                        gradient.setAttribute('y2', '100%');
+
+                        const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                        stop1.setAttribute('offset', '0%');
+                        stop1.setAttribute('style', `stop-color:${baseColor};stop-opacity:1.2`);
+
+                        const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                        stop2.setAttribute('offset', '100%');
+                        stop2.setAttribute('style', `stop-color:${baseColor};stop-opacity:0.7`);
+
+                        gradient.appendChild(stop1);
+                        gradient.appendChild(stop2);
+                        defs.appendChild(gradient);
+
+                        const newPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        newPath.setAttribute('d', path.getAttribute('d'));
+                        newPath.setAttribute('fill', `url(#${gradientId})`);
+                        newPath.setAttribute('stroke', 'white');
+                        newPath.setAttribute('stroke-width', '1.5');
+                        newPath.setAttribute('filter', 'url(#innerShadow)');
+                        newPath.setAttribute('id', stateId);
+                        svg.appendChild(newPath);
+                    }
+                });
+
+                // Handle group elements (like Michigan)
+                const groups = svgDoc.querySelectorAll('g[id]');
+                groups.forEach(group => {
+                    const stateId = group.getAttribute('id');
+                    if (stateApprovals[stateId]) {
+                        const pathElement = group.querySelector('path');
+                        if (pathElement) {
+                            const baseColor = getColor(stateApprovals[stateId]);
+
+                            // Create gradient for each state
+                            const gradientId = `gradient-${stateId}`;
+                            const gradient = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+                            gradient.setAttribute('id', gradientId);
+                            gradient.setAttribute('x1', '0%');
+                            gradient.setAttribute('y1', '0%');
+                            gradient.setAttribute('x2', '0%');
+                            gradient.setAttribute('y2', '100%');
+
+                            const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                            stop1.setAttribute('offset', '0%');
+                            stop1.setAttribute('style', `stop-color:${baseColor};stop-opacity:1.2`);
+
+                            const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+                            stop2.setAttribute('offset', '100%');
+                            stop2.setAttribute('style', `stop-color:${baseColor};stop-opacity:0.7`);
+
+                            gradient.appendChild(stop1);
+                            gradient.appendChild(stop2);
+                            defs.appendChild(gradient);
+
+                            const newPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                            newPath.setAttribute('d', pathElement.getAttribute('d'));
+                            newPath.setAttribute('fill', `url(#${gradientId})`);
+                            newPath.setAttribute('stroke', 'white');
+                            newPath.setAttribute('stroke-width', '1.5');
+                            newPath.setAttribute('filter', 'url(#innerShadow)');
+                            newPath.setAttribute('id', stateId);
+                            svg.appendChild(newPath);
+                        }
+                    }
+                });
+
+            } catch (error) {
+                console.error('Error loading US map:', error);
+            }
+        }
+
+        // Initialize US map when page loads
+        window.addEventListener('load', () => {
+            try {
+                drawUSMap();
+            } catch (error) {
+                console.error('Error creating US map:', error);
+            }
+        });
+    </script>
+
+</body>
+</html>

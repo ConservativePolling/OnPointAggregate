@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In — OnPointAggregate</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .font-heading {
+            font-family: 'Space Grotesk', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .form-container {
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .input-field {
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.03),
+                0 2px 4px rgba(0, 0, 0, 0.03),
+                0 4px 8px rgba(0, 0, 0, 0.03),
+                0 8px 16px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.7);
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.04),
+                0 2px 4px rgba(0, 0, 0, 0.04),
+                0 4px 8px rgba(0, 0, 0, 0.04),
+                0 8px 16px rgba(0, 0, 0, 0.04),
+                0 16px 32px rgba(0, 0, 0, 0.04);
+            outline: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
+            border: none;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15)) drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0.9));
+            transform: translateY(-1px);
+            filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.18)) drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+        }
+
+        .btn-primary:focus {
+            outline: none;
+        }
+
+        .btn-oauth {
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            background: rgba(255, 255, 255, 0.5);
+            border: none;
+            box-shadow:
+                0 1px 2px rgba(0, 0, 0, 0.04),
+                0 2px 4px rgba(0, 0, 0, 0.04),
+                0 4px 8px rgba(0, 0, 0, 0.04),
+                0 8px 16px rgba(0, 0, 0, 0.03);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            outline: none;
+        }
+
+        .btn-oauth:hover {
+            background: rgba(255, 255, 255, 0.7);
+            transform: translateY(-1px);
+            box-shadow:
+                0 2px 4px rgba(0, 0, 0, 0.05),
+                0 4px 8px rgba(0, 0, 0, 0.05),
+                0 8px 16px rgba(0, 0, 0, 0.04),
+                0 16px 32px rgba(0, 0, 0, 0.03);
+        }
+
+        .btn-oauth:focus {
+            outline: none;
+        }
+
+        .glass-card {
+            backdrop-filter: blur(32px) saturate(180%);
+            -webkit-backdrop-filter: blur(32px) saturate(180%);
+            background: linear-gradient(135deg,
+                rgba(255, 255, 255, 0.5) 0%,
+                rgba(255, 255, 255, 0.4) 100%);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow:
+                0 4px 8px rgba(0, 0, 0, 0.04),
+                0 8px 16px rgba(0, 0, 0, 0.04),
+                0 16px 32px rgba(0, 0, 0, 0.04),
+                0 32px 64px rgba(0, 0, 0, 0.03);
+        }
+
+        .toggle-btn {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toggle-btn.active {
+            color: #000;
+        }
+
+        .toggle-btn::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #000;
+            transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toggle-btn.active::after {
+            width: 100%;
+        }
+
+        /* Smooth Form Morphing Animations */
+        .form-wrapper {
+            position: relative;
+            transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        .glass-card {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card.morphing {
+            transform: scale(0.99);
+        }
+
+        /* Field animations */
+        form {
+            position: relative;
+        }
+
+        form > div,
+        form > button {
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Hidden forms should have invisible fields */
+        form.hidden > div,
+        form.hidden > button {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        /* Fade out animation */
+        form.fade-out > div {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        form.fade-out > div:nth-child(1) { transition-delay: 0ms; }
+        form.fade-out > div:nth-child(2) { transition-delay: 40ms; }
+        form.fade-out > div:nth-child(3) { transition-delay: 80ms; }
+        form.fade-out > div:nth-child(4) { transition-delay: 120ms; }
+
+        form.fade-out > button {
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1) 160ms;
+        }
+
+        /* Fade in animation - start invisible and animate in */
+        form.fade-in > div,
+        form.fade-in > button {
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        form.fade-in > div {
+            animation: fieldFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        form.fade-in > div:nth-child(1) { animation-delay: 100ms; }
+        form.fade-in > div:nth-child(2) { animation-delay: 150ms; }
+        form.fade-in > div:nth-child(3) { animation-delay: 200ms; }
+        form.fade-in > div:nth-child(4) { animation-delay: 250ms; }
+
+        form.fade-in > button {
+            animation: fieldFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) 300ms forwards;
+        }
+
+        @keyframes fieldFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Visible forms (not hidden, not animating) show normally */
+        form:not(.hidden):not(.fade-out):not(.fade-in) > div,
+        form:not(.hidden):not(.fade-out):not(.fade-in) > button {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md form-container">
+            <!-- Logo/Brand -->
+            <div class="text-center mb-8">
+                <a href="verbal-landing.html" class="inline-block">
+                    <h1 class="font-heading text-3xl font-bold tracking-tight text-gray-900 hover:opacity-80 transition-opacity">
+                        OnPoint<span class="text-black">A</span>ggregate
+                    </h1>
+                </a>
+                <p class="text-sm text-gray-600 mt-2 font-medium">Real-time polling and analysis</p>
+            </div>
+
+            <!-- Glass Card -->
+            <div id="glassCard" class="glass-card rounded-3xl p-8">
+                <!-- Toggle Between Sign In / Sign Up -->
+                <div class="flex items-center justify-center space-x-8 mb-8">
+                    <button onclick="switchMode('signin')" id="signinToggle" class="toggle-btn active text-lg font-semibold text-gray-500">
+                        Sign In
+                    </button>
+                    <button onclick="switchMode('signup')" id="signupToggle" class="toggle-btn text-lg font-semibold text-gray-500">
+                        Create Account
+                    </button>
+                </div>
+
+                <!-- Form Wrapper for Smooth Height Transition -->
+                <div id="formWrapper" class="form-wrapper">
+                    <!-- Sign In Form -->
+                    <form id="signinForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Email</label>
+                        <input
+                            type="email"
+                            placeholder="you@example.com"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Password</label>
+                        <input
+                            type="password"
+                            placeholder="Enter your password"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                        >
+                    </div>
+
+                    <div class="flex items-center justify-between text-sm">
+                        <label class="flex items-center space-x-2 cursor-pointer">
+                            <input type="checkbox" class="w-4 h-4 rounded border-gray-300">
+                            <span class="text-gray-700 font-medium">Remember me</span>
+                        </label>
+                        <a href="#" class="text-gray-700 hover:text-gray-900 font-medium transition-colors">
+                            Forgot password?
+                        </a>
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
+                        Sign In
+                    </button>
+                </form>
+
+                <!-- Sign Up Form (Hidden by default) -->
+                <form id="signupForm" class="space-y-4 hidden">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Full Name</label>
+                        <input
+                            type="text"
+                            placeholder="John Doe"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Email</label>
+                        <input
+                            type="email"
+                            placeholder="you@example.com"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Password</label>
+                        <input
+                            type="password"
+                            placeholder="Create a password"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Confirm Password</label>
+                        <input
+                            type="password"
+                            placeholder="Confirm your password"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
+                        Create Account
+                    </button>
+                </form>
+                </div>
+                <!-- End Form Wrapper -->
+
+                <!-- Divider -->
+                <div class="relative my-6">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300/50"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-4 bg-white/60 text-gray-600 font-medium rounded-full">or continue with</span>
+                    </div>
+                </div>
+
+                <!-- OAuth Buttons -->
+                <div class="space-y-3">
+                    <button class="btn-oauth w-full px-6 py-3 rounded-2xl flex items-center justify-center space-x-3 text-gray-900 font-semibold text-sm">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </button>
+
+                    <button class="btn-oauth w-full px-6 py-3 rounded-2xl flex items-center justify-center space-x-3 text-gray-900 font-semibold text-sm">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+                        </svg>
+                        <span>Continue with GitHub</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Link -->
+            <div class="text-center mt-6">
+                <a href="verbal-landing.html" class="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">
+                    ← Back to home
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isAnimating = false;
+
+        function switchMode(mode) {
+            // Prevent multiple clicks during animation
+            if (isAnimating) return;
+            isAnimating = true;
+
+            const signinForm = document.getElementById('signinForm');
+            const signupForm = document.getElementById('signupForm');
+            const signinToggle = document.getElementById('signinToggle');
+            const signupToggle = document.getElementById('signupToggle');
+            const formWrapper = document.getElementById('formWrapper');
+            const glassCard = document.getElementById('glassCard');
+
+            // Get current and target forms
+            const currentForm = mode === 'signin' ? signupForm : signinForm;
+            const targetForm = mode === 'signin' ? signinForm : signupForm;
+
+            // Don't animate if already showing the target form
+            if (!currentForm.classList.contains('hidden')) {
+                // Add micro-scale effect to glass card
+                glassCard.classList.add('morphing');
+
+                // Set wrapper height to current form height
+                formWrapper.style.height = currentForm.offsetHeight + 'px';
+
+                // Fade out current form
+                currentForm.classList.add('fade-out');
+
+                // After fade out completes, switch forms
+                setTimeout(() => {
+                    // Hide current form
+                    currentForm.classList.add('hidden');
+                    currentForm.classList.remove('fade-out');
+
+                    // Show target form and immediately add fade-in class (before removing hidden)
+                    // This prevents any flash of visible content
+                    targetForm.classList.add('fade-in');
+                    targetForm.classList.remove('hidden');
+
+                    // Measure target form height
+                    const targetHeight = targetForm.offsetHeight;
+
+                    // Animate height change
+                    formWrapper.style.height = targetHeight + 'px';
+
+                    // Remove fade-in class after animation completes
+                    setTimeout(() => {
+                        targetForm.classList.remove('fade-in');
+                        formWrapper.style.height = 'auto';
+                        glassCard.classList.remove('morphing');
+                        isAnimating = false;
+                    }, 650);
+                }, 200);
+
+                // Update toggle states
+                if (mode === 'signin') {
+                    signinToggle.classList.add('active');
+                    signupToggle.classList.remove('active');
+                } else {
+                    signinToggle.classList.remove('active');
+                    signupToggle.classList.add('active');
+                }
+            } else {
+                isAnimating = false;
+            }
+        }
+
+        // Set initial wrapper height
+        window.addEventListener('DOMContentLoaded', () => {
+            const signinForm = document.getElementById('signinForm');
+            const formWrapper = document.getElementById('formWrapper');
+            formWrapper.style.height = signinForm.offsetHeight + 'px';
+
+            // Set to auto after initial render
+            setTimeout(() => {
+                formWrapper.style.height = 'auto';
+            }, 100);
+        });
+
+        // Handle Sign In
+        document.getElementById('signinForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+
+            netlifyIdentity.open('login');
+        });
+
+        // Handle Sign Up
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = e.target.querySelector('input[type="text"]').value;
+            const email = e.target.querySelectorAll('input[type="email"]')[0].value;
+            const password = e.target.querySelectorAll('input[type="password"]')[0].value;
+            const confirmPassword = e.target.querySelectorAll('input[type="password"]')[1].value;
+
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+
+            // Open Netlify Identity signup modal
+            // New users will automatically be set to waitlist status via Netlify Identity hooks
+            netlifyIdentity.open('signup');
+        });
+
+        // Handle OAuth buttons
+        document.querySelectorAll('.btn-oauth').forEach(btn => {
+            btn.addEventListener('click', () => {
+                netlifyIdentity.open();
+            });
+        });
+
+        // Initialize Netlify Identity and handle login/signup
+        netlifyIdentity.on('init', user => {
+            if (user) {
+                // User is already logged in, redirect to dashboard
+                window.location.href = '/dashboard.html';
+            }
+        });
+
+        netlifyIdentity.on('login', user => {
+            // User just logged in, redirect to dashboard
+            window.location.href = '/dashboard.html';
+        });
+
+        netlifyIdentity.on('signup', user => {
+            // New user signed up - they'll be on waitlist by default
+            // Netlify Identity will handle setting metadata via Identity hooks
+            window.location.href = '/dashboard.html';
+        });
+
+        netlifyIdentity.on('error', err => {
+            console.error('Identity error:', err);
+        });
+    </script>
+</body>
+</html>
