@@ -8,7 +8,14 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="https://unpkg.com/gotrue-js@0.9.29"></script>
+    <script>
+        // Initialize GoTrue
+        const auth = new GoTrue({
+            APIUrl: window.location.origin + '/.netlify/identity',
+            setCookie: true
+        });
+    </script>
     <style>
         * {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -138,8 +145,8 @@
                 return;
             }
 
-            // Production - use Netlify Identity
-            const user = netlifyIdentity.currentUser();
+            // Production - use GoTrue
+            const user = auth.currentUser();
 
             if (!user) {
                 window.location.href = '/login.html';
@@ -171,31 +178,23 @@
         }
 
         function signOut() {
-            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            auth.currentUser().logout().then(() => {
+                window.location.href = '/login.html';
+            }).catch(err => {
+                console.error('Logout error:', err);
+                window.location.href = '/login.html';
+            });
+        }
+
+        // Initialize - check auth immediately
+        (function() {
+            const user = auth.currentUser();
+            if (!user) {
                 window.location.href = '/login.html';
             } else {
-                netlifyIdentity.logout();
+                checkAccess();
             }
-        }
-
-        // Initialize
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            // Local testing
-            checkAccess();
-        } else {
-            // Production
-            netlifyIdentity.on('init', user => {
-                if (!user) {
-                    window.location.href = '/login.html';
-                } else {
-                    checkAccess();
-                }
-            });
-
-            netlifyIdentity.on('logout', () => {
-                window.location.href = '/login.html';
-            });
-        }
+        })();
     </script>
 </body>
 </html>

@@ -7,11 +7,7 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+# Removed catch-all redirect to allow proper file serving and authentication routing
 
 [dev]
   functions = "netlify/functions"

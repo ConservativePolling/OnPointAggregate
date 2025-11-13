@@ -5,7 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign In — OnPointAggregate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <script src="https://unpkg.com/gotrue-js@0.9.29"></script>
+    <script>
+        // Initialize GoTrue for authentication
+        const auth = new GoTrue({
+            APIUrl: window.location.origin + '/.netlify/identity',
+            setCookie: true
+        });
+
+        // Check if user is already logged in
+        (function() {
+            const user = auth.currentUser();
+            if (user) {
+                window.location.href = '/dashboard.html';
+            }
+        })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -471,63 +486,100 @@
             setTimeout(() => {
                 formWrapper.style.height = 'auto';
             }, 100);
+
+            // Check if we're coming back from an OAuth callback
+            handleOAuthCallback();
         });
 
-        // Handle Sign In
-        document.getElementById('signinForm').addEventListener('submit', (e) => {
+        // Handle OAuth callback
+        async function handleOAuthCallback() {
+            const hash = window.location.hash;
+            if (hash && hash.includes('access_token')) {
+                try {
+                    // GoTrue will automatically parse the hash and store the user
+                    const user = await auth.createUser(hash, true);
+                    if (user) {
+                        window.location.href = '/dashboard.html';
+                    }
+                } catch (error) {
+                    console.error('OAuth callback error:', error);
+                    alert('Authentication failed. Please try again.');
+                    window.location.href = '/login.html';
+                }
+            }
+        }
+
+        // Handle email/password Sign In
+        document.getElementById('signinForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = e.target.querySelector('input[type="email"]').value;
             const password = e.target.querySelector('input[type="password"]').value;
+            const button = e.target.querySelector('button[type="submit"]');
 
-            netlifyIdentity.open('login');
+            try {
+                button.disabled = true;
+                button.textContent = 'Signing in...';
+
+                const user = await auth.login(email, password, true);
+                if (user) {
+                    window.location.href = '/dashboard.html';
+                }
+            } catch (error) {
+                console.error('Sign in error:', error);
+                alert(error.message || 'Failed to sign in. Please check your credentials.');
+                button.disabled = false;
+                button.textContent = 'Sign In';
+            }
         });
 
-        // Handle Sign Up
+        // Handle email/password Sign Up
         document.getElementById('signupForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = e.target.querySelector('input[type="text"]').value;
             const email = e.target.querySelectorAll('input[type="email"]')[0].value;
             const password = e.target.querySelectorAll('input[type="password"]')[0].value;
             const confirmPassword = e.target.querySelectorAll('input[type="password"]')[1].value;
+            const button = e.target.querySelector('button[type="submit"]');
 
             if (password !== confirmPassword) {
                 alert('Passwords do not match!');
                 return;
             }
 
-            // Open Netlify Identity signup modal
-            // New users will automatically be set to waitlist status via Netlify Identity hooks
-            netlifyIdentity.open('signup');
-        });
+            try {
+                button.disabled = true;
+                button.textContent = 'Creating account...';
 
-        // Handle OAuth buttons
-        document.querySelectorAll('.btn-oauth').forEach(btn => {
-            btn.addEventListener('click', () => {
-                netlifyIdentity.open();
-            });
-        });
-
-        // Initialize Netlify Identity and handle login/signup
-        netlifyIdentity.on('init', user => {
-            if (user) {
-                // User is already logged in, redirect to dashboard
-                window.location.href = '/dashboard.html';
+                const user = await auth.signup(email, password, { full_name: name });
+                if (user) {
+                    alert('Account created! Please check your email to confirm your account.');
+                    switchMode('signin');
+                }
+            } catch (error) {
+                console.error('Sign up error:', error);
+                alert(error.message || 'Failed to create account. Please try again.');
+            } finally {
+                button.disabled = false;
+                button.textContent = 'Create Account';
             }
         });
 
-        netlifyIdentity.on('login', user => {
-            // User just logged in, redirect to dashboard
-            window.location.href = '/dashboard.html';
-        });
+        // Handle OAuth buttons - Direct Google/GitHub login
+        document.querySelectorAll('.btn-oauth').forEach((btn, index) => {
+            btn.addEventListener('click', async () => {
+                try {
+                    const provider = index === 0 ? 'google' : 'github';
 
-        netlifyIdentity.on('signup', user => {
-            // New user signed up - they'll be on waitlist by default
-            // Netlify Identity will handle setting metadata via Identity hooks
-            window.location.href = '/dashboard.html';
-        });
+                    // Get the OAuth URL directly
+                    const url = auth.loginExternalUrl(provider);
 
-        netlifyIdentity.on('error', err => {
-            console.error('Identity error:', err);
+                    // Redirect to Google/GitHub OAuth screen (not Netlify modal!)
+                    window.location.href = url;
+                } catch (error) {
+                    console.error('OAuth error:', error);
+                    alert('Failed to initiate OAuth login. Please try again.');
+                }
+            });
         });
     </script>
 </body>
