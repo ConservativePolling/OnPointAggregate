@@ -7,13 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Load GoTrue from CDN -->
     <script src="https://cdn.jsdelivr.net/npm/gotrue-js@0.9.29/dist/gotrue.min.js"></script>
-    <script>
-        // Verify GoTrue loaded
-        if (typeof GoTrue === 'undefined') {
-            console.error('GoTrue failed to load from CDN');
-            alert('Authentication library failed to load. Please check your internet connection and refresh.');
-        }
-    </script>
     <style>
         /* COMPLETELY HIDE AND DISABLE NETLIFY IDENTITY WIDGET */
         #netlify-identity-widget,
