@@ -11,3 +11,11 @@
 
 [dev]
   functions = "netlify/functions"
+
+# Netlify Identity Configuration
+[identity]
+  [identity.settings]
+    # Custom password recovery page
+    recovery_url = "/reset-password.html"
+    # Custom confirmation page (optional - for email confirmations)
+    confirmation_url = "/dashboard.html"
