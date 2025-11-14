@@ -814,7 +814,7 @@
                 button.textContent = 'Sending...';
 
                 // Use Netlify Identity's GoTrue API to request password recovery
-                await netlifyIdentity.gotrue.requestPasswordRecover(email);
+                await netlifyIdentity.gotrue.requestPasswordRecovery(email);
 
                 console.log('Password recovery email sent to:', email);
 
