@@ -535,10 +535,10 @@
             </button>
 
             <h2 class="font-heading text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
-            <p class="text-sm text-gray-600 mb-6">Enter your email address and we'll send you a link to reset your password.</p>
+            <p class="text-sm text-gray-600 mb-6">Enter your email address and we'll send you a 6-digit code to reset your password.</p>
 
             <div id="forgotPasswordSuccess" class="success-message">
-                ✓ Password reset email sent! Check your inbox.
+                ✓ Code sent! Check your email.
             </div>
 
             <form id="forgotPasswordForm" class="space-y-4">
@@ -554,7 +554,7 @@
                 </div>
 
                 <button type="submit" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
-                    Send Reset Link
+                    Send Code
                 </button>
 
                 <button type="button" onclick="closeForgotPasswordModal()" class="btn-oauth w-full px-8 py-3 rounded-2xl text-gray-900 font-semibold text-sm">
@@ -822,7 +822,7 @@
             }
         });
 
-        // Handle Forgot Password Form Submission
+        // Handle Forgot Password Form Submission - NEW CODE-BASED SYSTEM
         document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -846,40 +846,51 @@
 
             try {
                 button.disabled = true;
-                button.textContent = 'Sending...';
-                console.log('Requesting password recovery for:', email);
+                button.textContent = 'Sending code...';
+                console.log('Requesting password reset code for:', email);
 
-                // Use Netlify Identity's GoTrue API to request password recovery
-                await netlifyIdentity.gotrue.requestPasswordRecovery(email);
+                // NEW: Use our code-based system
+                const response = await fetch('/.netlify/functions/request-reset-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
 
-                console.log('✓ Password recovery email sent successfully to:', email);
+                const data = await response.json();
 
-                // Show success message
+                if (!response.ok) {
+                    throw new Error(data.error || 'Failed to send code');
+                }
+
+                console.log('✓ Password reset code sent successfully to:', email);
+
+                // Update success message for code-based flow
+                successMessage.innerHTML = '✓ Code sent! Redirecting...';
                 successMessage.classList.add('active');
 
                 // Reset button
                 button.disabled = false;
-                button.textContent = 'Send Reset Link';
+                button.textContent = 'Send Code';
 
                 // Clear form
                 e.target.reset();
 
-                // Auto-close modal after 3 seconds
+                // Redirect to code verification page after brief delay
                 setTimeout(() => {
-                    closeForgotPasswordModal();
-                }, 3000);
+                    window.location.href = `/verify-code.html?email=${encodeURIComponent(email)}`;
+                }, 1500);
 
             } catch (error) {
-                console.error('✗ Password recovery error:', error);
+                console.error('✗ Password reset code error:', error);
 
                 // User-friendly error messages
-                let errorMessage = 'Failed to send password reset email.';
+                let errorMessage = 'Failed to send password reset code.';
 
                 if (error.message) {
-                    if (error.message.includes('not found') || error.message.includes('User not found')) {
+                    if (error.message.includes('not found') || error.message.includes('User not found') || error.message.includes('not exist')) {
                         errorMessage = 'No account found with this email address.\n\nPlease check the email or create a new account.';
-                    } else if (error.message.includes('rate limit') || error.message.includes('too many')) {
-                        errorMessage = 'Too many password reset attempts.\n\nPlease wait a few minutes and try again.';
+                    } else if (error.message.includes('rate limit') || error.message.includes('too many') || error.message.includes('Too many')) {
+                        errorMessage = 'Too many password reset attempts.\n\nPlease wait an hour and try again.';
                     } else if (error.message.includes('network') || error.message.includes('fetch')) {
                         errorMessage = 'Network error. Please check your internet connection and try again.';
                     } else if (error.message.includes('Identity')) {
@@ -891,7 +902,7 @@
 
                 alert(errorMessage);
                 button.disabled = false;
-                button.textContent = 'Send Reset Link';
+                button.textContent = 'Send Code';
             }
         });
     </script>
