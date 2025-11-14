@@ -1,8 +1,10 @@
 # Netlify Identity Password Reset Setup Guide
 
-## Critical Setup Steps
+## ⚠️ CRITICAL: Dashboard Configuration Required
 
-Your password reset system is fully coded and ready, but **Netlify Identity must be configured in the Netlify dashboard** for emails to work.
+Your password reset system is fully coded and ready, but **Netlify Identity MUST be configured in the Netlify dashboard** for emails to work.
+
+**Important:** Netlify Identity settings **CANNOT** be configured in `netlify.toml`. All configuration must be done through the Netlify dashboard UI.
 
 ---
 
@@ -25,23 +27,34 @@ Your password reset system is fully coded and ready, but **Netlify Identity must
 
 ## Step 3: Configure Password Recovery Email Template
 
-### Option A: Use Custom Template (Recommended)
+### Option A: Use Custom Template (Recommended - Better Branding)
 
 1. In Netlify dashboard, go to **Site configuration** → **Identity** → **Emails**
-2. Find **"Recovery email"** section
-3. Click **"Edit settings"**
+2. Find **"Recovery email"** or **"Password Recovery"** section
+3. Click **"Edit settings"** or **"Use custom template"**
 4. Set template path to: `/email-templates/recovery.html`
 5. Click **Save**
 
-> **Important**: The custom template is in your repository at `email-templates/recovery.html`
+> **Important**: The custom template is already in your repository at `email-templates/recovery.html`. It has OnPointAggregate branding and will direct users to your custom reset page.
 
-### Option B: Use Default Template with Custom URL
+### Option B: Use Default Template (Quick Setup)
 
-If you don't want a custom template:
+If you want to start quickly without custom branding:
 
-1. Go to **Site configuration** → **Identity** → **Settings**
-2. Scroll to **"Email templates"**
-3. The default template will automatically use your reset-password.html page if configured in netlify.toml
+1. Go to **Site configuration** → **Identity** → **Emails**
+2. Leave the recovery email template on **"Default"**
+3. The default Netlify email will still work, but won't have your branding
+
+> **Note**: The default template will link to `yoursite.com/?#recovery_token=XXX`, NOT to your custom reset-password.html page. For best UX, use Option A with the custom template.
+
+### **Custom Template URL Structure**
+
+Your custom email template uses this URL format:
+```
+{{ .SiteURL }}/reset-password.html#recovery_token={{ .Token }}
+```
+
+This ensures users land on your beautiful custom reset page instead of the default Netlify widget.
 
 ---
 
@@ -110,14 +123,23 @@ Make sure users can register:
    - Should point to `/email-templates/recovery.html`
    - Or leave blank to use default template
 
-6. **Browser Console Errors**
+6. **Check Browser Console for Errors**
    - Open browser DevTools (F12)
    - Go to Console tab
    - Try forgot password flow
-   - Look for errors like:
-     - "Identity is not enabled"
-     - "User not found"
-     - "Invalid email"
+   - Look for these helpful log messages:
+
+   **Success indicators:**
+   - `✓ Netlify Identity is enabled and ready`
+   - `✓ Password recovery email sent successfully to: email@example.com`
+
+   **Error indicators:**
+   - `✗ Netlify Identity is not enabled` → Enable Identity in dashboard
+   - `✗ Identity not ready yet` → Wait for page to fully load
+   - `✗ No recovery token in URL` → Email link is malformed
+   - `✗ Password recovery error: User not found` → User doesn't exist, register first
+
+   All critical steps now log to console with ✓ or ✗ symbols for easy debugging!
 
 ### Invalid/Expired Token Error
 

@@ -4,6 +4,8 @@
 
 **The code is 100% complete. Emails won't send until you configure Netlify Identity in the dashboard.**
 
+⚠️ **IMPORTANT**: Netlify Identity **CANNOT** be configured in `netlify.toml`. You MUST use the Netlify dashboard UI.
+
 ---
 
 ## Fix in 3 Steps:
@@ -32,22 +34,44 @@ Click Save
 
 ## Still Not Working?
 
-### Check Browser Console (F12)
+### Check Browser Console (F12) - NEW DEBUGGING FEATURES!
 
-Look for these errors:
+The system now logs every step with ✓ or ✗ symbols. Open DevTools Console and look for:
 
-**"Identity is not enabled"**
-→ Go enable it in Netlify dashboard
+**✓ Success Indicators:**
+```
+✓ Netlify Identity is enabled and ready
+Requesting password recovery for: user@example.com
+✓ Password recovery email sent successfully to: user@example.com
+```
+→ If you see these, the email WAS sent! Check spam folder.
 
-**"User not found"**
-→ Register an account first at /login.html
+**✗ Error Indicators:**
 
-**"Network error"**
-→ Are you on localhost? Won't work - use deployed URL
+```
+✗ Netlify Identity is not enabled
+```
+→ Go to Netlify dashboard and enable Identity
+
+```
+✗ Identity not ready yet
+```
+→ Wait a few seconds for page to fully load, then try again
+
+```
+✗ Password recovery error: User not found
+```
+→ Register an account first at /login.html before trying to reset password
+
+```
+✗ No recovery token in URL
+```
+→ Email link is malformed or you're testing without clicking the email link
 
 **No errors but no email?**
-→ Check spam folder
+→ Check spam folder (Netlify emails often go there)
 → Verify Site URL in Netlify dashboard matches your domain
+→ Wait 1-2 minutes (emails can be delayed)
 
 ---
 
