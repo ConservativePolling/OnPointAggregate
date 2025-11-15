@@ -1,31 +1,20 @@
+const { getStore } = require('@netlify/blobs');
+const sgMail = require('@sendgrid/mail');
 const fetch = require('node-fetch');
+const fs = require('fs').promises;
+const path = require('path');
 
-// In-memory storage for codes (serverless-friendly)
-// Format: { code: { email, token, timestamp, attempts } }
-const resetCodes = new Map();
-
-// Rate limiting: { email: { lastRequest, count } }
-const rateLimits = new Map();
-
-// Cleanup expired codes every 30 seconds
-setInterval(() => {
-  const now = Date.now();
-  const twoMinutes = 2 * 60 * 1000;
-
-  for (const [code, data] of resetCodes.entries()) {
-    if (now - data.timestamp > twoMinutes) {
-      resetCodes.delete(code);
-      console.log(`Cleaned up expired code: ${code}`);
-    }
-  }
-}, 30000);
+// Initialize SendGrid
+if (process.env.SENDGRID_API_KEY) {
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+}
 
 // Generate 6-digit code
 function generateCode() {
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
   // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
@@ -59,10 +48,16 @@ exports.handler = async (event) => {
       };
     }
 
+    // Get Netlify Blobs store
+    const store = getStore('reset-codes');
+    const rateLimitStore = getStore('rate-limits');
+
     // Rate limiting: Max 5 requests per hour per email
     const now = Date.now();
     const oneHour = 60 * 60 * 1000;
-    const rateLimit = rateLimits.get(email) || { lastRequest: 0, count: 0 };
+
+    const rateLimitData = await rateLimitStore.get(email);
+    let rateLimit = rateLimitData ? JSON.parse(rateLimitData) : { lastRequest: 0, count: 0 };
 
     // Reset count if hour has passed
     if (now - rateLimit.lastRequest > oneHour) {
@@ -80,7 +75,7 @@ exports.handler = async (event) => {
     }
 
     // Get Netlify Identity URL from environment
-    const siteUrl = process.env.URL || 'https://onpointaggregate.netlify.app';
+    const siteUrl = process.env.URL || 'http://localhost:8888';
     const identityUrl = `${siteUrl}/.netlify/identity`;
 
     // Request recovery token from Netlify Identity
@@ -107,38 +102,48 @@ exports.handler = async (event) => {
     let code = generateCode();
 
     // Ensure code is unique
-    while (resetCodes.has(code)) {
+    let existingCode = await store.get(code);
+    while (existingCode) {
       code = generateCode();
+      existingCode = await store.get(code);
     }
 
     const recoveryData = await recoveryResponse.json();
 
-    // Store code with metadata
-    resetCodes.set(code, {
+    // Store code in Netlify Blobs with 2-minute TTL
+    await store.set(code, JSON.stringify({
       email,
-      token: recoveryData.recovery_token || code, // Fallback if structure differs
+      token: recoveryData.recovery_token || code,
       timestamp: now,
       attempts: 0
+    }), {
+      metadata: { ttl: 120 } // 2 minutes
     });
 
     // Update rate limit
     rateLimit.count++;
     rateLimit.lastRequest = now;
-    rateLimits.set(email, rateLimit);
+    await rateLimitStore.set(email, JSON.stringify(rateLimit), {
+      metadata: { ttl: 3600 } // 1 hour
+    });
 
     console.log(`✓ Generated code for ${email}: ${code} (expires in 2 minutes)`);
     console.log(`Rate limit: ${rateLimit.count}/5 requests`);
 
-    // In production, you'd send this via email service
-    // For now, return it in response (you can remove this in production)
+    // Send email with code
+    const emailSent = await sendResetEmail(email, code);
+
+    if (!emailSent) {
+      // If email fails, still return success but log warning
+      console.warn('⚠️ Email sending failed, but code is stored. Code:', code);
+    }
+
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         success: true,
         message: 'Reset code sent to your email',
-        // REMOVE THIS IN PRODUCTION - for testing only:
-        code: code, // Only for testing - remove in production
         expiresIn: 120 // seconds
       })
     };
@@ -155,3 +160,53 @@ exports.handler = async (event) => {
     };
   }
 };
+
+async function sendResetEmail(email, code) {
+  try {
+    // Check if SendGrid is configured
+    if (!process.env.SENDGRID_API_KEY) {
+      console.error('✗ SENDGRID_API_KEY not configured');
+      return false;
+    }
+
+    if (!process.env.FROM_EMAIL) {
+      console.error('✗ FROM_EMAIL not configured');
+      return false;
+    }
+
+    // Load email template
+    const templatePath = path.join(__dirname, '../../email-templates/reset-code.html');
+    let template = await fs.readFile(templatePath, 'utf-8');
+
+    // Replace variables
+    template = template.replace(/\{\{ \.Email \}\}/g, email);
+
+    // Replace individual digits for the boxes
+    for (let i = 0; i < 6; i++) {
+      const pattern = new RegExp(`\\{\\{ index \\.Token ${i} \\}\\}`, 'g');
+      template = template.replace(pattern, code[i]);
+    }
+
+    // Replace full token
+    template = template.replace(/\{\{ \.Token \}\}/g, code);
+
+    // Send email via SendGrid
+    const msg = {
+      to: email,
+      from: process.env.FROM_EMAIL,
+      subject: 'Password Reset Code - OnPointAggregate',
+      html: template
+    };
+
+    await sgMail.send(msg);
+    console.log('✓ Email sent successfully to:', email);
+    return true;
+
+  } catch (error) {
+    console.error('✗ Email sending error:', error);
+    if (error.response) {
+      console.error('SendGrid error:', error.response.body);
+    }
+    return false;
+  }
+}

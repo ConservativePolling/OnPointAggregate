@@ -224,7 +224,11 @@ Template path: /email-templates/reset-code.html
 
 Before deploying:
 
-- [ ] Remove debug `code` from response in request-reset-code.js (line 130)
+- [ ] **Complete SendGrid setup** (see SENDGRID_SETUP.md)
+- [ ] Add SENDGRID_API_KEY to Netlify environment variables
+- [ ] Add FROM_EMAIL to Netlify environment variables
+- [ ] Verify sender email in SendGrid
+- [ ] Install dependencies: `npm install`
 - [ ] Test rate limiting works
 - [ ] Test code expiration works
 - [ ] Verify email template renders correctly
@@ -232,6 +236,8 @@ Before deploying:
 - [ ] Verify animations are smooth
 - [ ] Test paste functionality
 - [ ] Check accessibility (screen readers)
+
+**CRITICAL:** Without SendGrid setup, emails won't send! See SENDGRID_SETUP.md for step-by-step instructions.
 
 ---
 

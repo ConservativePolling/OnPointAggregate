@@ -1,11 +1,4 @@
-// Import the same resetCodes Map from request-reset-code
-// Note: In serverless, each function instance has its own memory
-// For production, use a database or Redis
-// This works for demo/testing with warm instances
-
-// Shared storage reference (works when functions are warm)
-const resetCodes = global.resetCodes || new Map();
-global.resetCodes = resetCodes;
+const { getStore } = require('@netlify/blobs');
 
 exports.handler = async (event) => {
   // CORS headers
@@ -50,10 +43,13 @@ exports.handler = async (event) => {
       };
     }
 
-    // Check if code exists
-    const codeData = resetCodes.get(code);
+    // Get Netlify Blobs store
+    const store = getStore('reset-codes');
 
-    if (!codeData) {
+    // Check if code exists
+    const codeDataString = await store.get(code);
+
+    if (!codeDataString) {
       console.log(`✗ Code not found: ${code}`);
       return {
         statusCode: 404,
@@ -64,6 +60,8 @@ exports.handler = async (event) => {
         })
       };
     }
+
+    const codeData = JSON.parse(codeDataString);
 
     // Verify email matches
     if (codeData.email !== email) {
@@ -85,7 +83,7 @@ exports.handler = async (event) => {
 
     if (age > twoMinutes) {
       console.log(`✗ Code expired: ${code} (${Math.floor(age / 1000)}s old)`);
-      resetCodes.delete(code);
+      await store.delete(code);
       return {
         statusCode: 410,
         headers,
@@ -101,7 +99,7 @@ exports.handler = async (event) => {
 
     if (codeData.attempts > 5) {
       console.log(`✗ Too many attempts for code: ${code}`);
-      resetCodes.delete(code);
+      await store.delete(code);
       return {
         statusCode: 429,
         headers,
@@ -115,9 +113,11 @@ exports.handler = async (event) => {
     // Success! Return the recovery token
     console.log(`✓ Code verified: ${code} for ${email}`);
 
-    // Delete code (one-time use)
+    // Get token before deleting
     const token = codeData.token;
-    resetCodes.delete(code);
+
+    // Delete code (one-time use)
+    await store.delete(code);
 
     return {
       statusCode: 200,
@@ -142,12 +142,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
-// Share the resetCodes Map with request-reset-code
-// This allows both functions to access the same data when warm
-if (require.main === module) {
-  const requestResetCode = require('./request-reset-code');
-  if (requestResetCode.resetCodes) {
-    global.resetCodes = requestResetCode.resetCodes;
-  }
-}
