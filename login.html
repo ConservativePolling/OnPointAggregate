@@ -967,12 +967,33 @@
         function openForgotPasswordModal(event) {
             event.preventDefault();
             const modal = document.getElementById('forgotPasswordModal');
-            const successMessage = document.getElementById('forgotPasswordSuccess');
             const form = document.getElementById('forgotPasswordForm');
 
-            // Reset form and hide success message
+            // Reset to first step
+            document.getElementById('emailStep').style.display = 'block';
+            document.getElementById('emailStep').style.opacity = '1';
+            document.getElementById('emailStep').style.transform = 'translateY(0)';
+            document.getElementById('codeStep').style.display = 'none';
+            document.getElementById('passwordStep').style.display = 'none';
+
+            // Reset form and clear errors
             form.reset();
-            successMessage.classList.remove('active');
+            document.getElementById('emailError').classList.remove('active');
+            document.getElementById('codeError').classList.remove('active');
+            document.getElementById('codeSuccess').classList.remove('active');
+            document.getElementById('passwordError').classList.remove('active');
+
+            // Reset state
+            resetEmail = '';
+            recoveryToken = null;
+            clearInterval(timerInterval);
+
+            // Clear code boxes
+            document.querySelectorAll('.code-box').forEach(box => {
+                box.value = '';
+                box.classList.remove('filled', 'error', 'success');
+                box.disabled = false;
+            });
 
             // Open modal
             modal.classList.add('active');
@@ -983,6 +1004,7 @@
             const modal = document.getElementById('forgotPasswordModal');
             modal.classList.remove('active');
             document.body.style.overflow = '';
+            clearInterval(timerInterval);
         }
 
         // Close modal on overlay click
