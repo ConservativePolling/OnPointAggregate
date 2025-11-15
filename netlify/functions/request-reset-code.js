@@ -1,6 +1,8 @@
 const { getStore } = require('@netlify/blobs');
 const sgMail = require('@sendgrid/mail');
-const fetch = require('node-fetch');
+
+// Polyfill fetch for Node < 18 (Netlify Functions use Node 18+ but just in case)
+const fetch = globalThis.fetch || require('node-fetch');
 
 // Initialize SendGrid
 if (process.env.SENDGRID_API_KEY) {
@@ -46,94 +48,109 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Get Netlify Blobs store
-    const store = getStore('reset-codes');
-    const rateLimitStore = getStore('rate-limits');
+    console.log('🔐 Password reset requested for:', email);
 
-    // Rate limiting: Max 5 requests per hour per email
-    const now = Date.now();
-    const oneHour = 60 * 60 * 1000;
-
-    const rateLimitData = await rateLimitStore.get(email);
-    let rateLimit = rateLimitData ? JSON.parse(rateLimitData) : { lastRequest: 0, count: 0 };
-
-    // Reset count if hour has passed
-    if (now - rateLimit.lastRequest > oneHour) {
-      rateLimit.count = 0;
-    }
-
-    if (rateLimit.count >= 5) {
+    // Check SendGrid configuration first
+    if (!process.env.SENDGRID_API_KEY) {
+      console.error('✗ SENDGRID_API_KEY not configured');
       return {
-        statusCode: 429,
+        statusCode: 500,
         headers,
-        body: JSON.stringify({
-          error: 'Too many requests. Please wait an hour before requesting another code.'
-        })
+        body: JSON.stringify({ error: 'Email service not configured' })
       };
     }
 
-    // Get Netlify Identity URL from environment
-    const siteUrl = process.env.URL || 'http://localhost:8888';
-    const identityUrl = `${siteUrl}/.netlify/identity`;
-
-    // Request recovery token from Netlify Identity
-    console.log('Requesting recovery token for:', email);
-    const recoveryResponse = await fetch(`${identityUrl}/recover`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email })
-    });
-
-    if (!recoveryResponse.ok) {
-      const error = await recoveryResponse.text();
-      console.error('Recovery request failed:', error);
+    if (!process.env.FROM_EMAIL) {
+      console.error('✗ FROM_EMAIL not configured');
       return {
-        statusCode: recoveryResponse.status,
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Email service not configured' })
+      };
+    }
+
+    // Generate recovery token from Netlify Identity first
+    let recoveryToken;
+    try {
+      const siteUrl = process.env.URL || context.clientContext?.custom?.netlify?.site_url || 'https://onpointaggregate.com';
+      const apiUrl = `${siteUrl}/.netlify/identity`;
+
+      console.log(`Calling Netlify Identity at: ${apiUrl}/recover`);
+
+      const identityResponse = await fetch(`${apiUrl}/recover`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      if (!identityResponse.ok) {
+        const errorText = await identityResponse.text();
+        console.error('✗ Identity recovery failed:', errorText);
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ error: 'User not found or email service unavailable' })
+        };
+      }
+
+      const identityData = await identityResponse.json();
+      recoveryToken = identityData.recovery_token;
+      console.log('✓ Recovery token generated');
+    } catch (identityError) {
+      console.error('✗ Identity API error:', identityError);
+      return {
+        statusCode: 500,
         headers,
         body: JSON.stringify({
-          error: 'Failed to generate reset code. User may not exist.'
+          error: 'Identity service error',
+          details: identityError.message
         })
       };
     }
 
     // Generate 6-digit code
-    let code = generateCode();
+    const code = generateCode();
+    const now = Date.now();
 
-    // Ensure code is unique
-    let existingCode = await store.get(code);
-    while (existingCode) {
-      code = generateCode();
-      existingCode = await store.get(code);
+    console.log(`✓ Generated code: ${code}`);
+
+    // Try to store code in Netlify Blobs
+    try {
+      const store = getStore('reset-codes');
+
+      await store.set(code, JSON.stringify({
+        email,
+        token: recoveryToken,
+        timestamp: now,
+        attempts: 0
+      }), {
+        metadata: { ttl: 120 } // 2 minutes
+      });
+
+      console.log('✓ Code stored successfully');
+    } catch (blobError) {
+      console.error('✗ Blobs storage error:', blobError);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({
+          error: 'Storage service error',
+          details: blobError.message
+        })
+      };
     }
-
-    const recoveryData = await recoveryResponse.json();
-
-    // Store code in Netlify Blobs with 2-minute TTL
-    await store.set(code, JSON.stringify({
-      email,
-      token: recoveryData.recovery_token || code,
-      timestamp: now,
-      attempts: 0
-    }), {
-      metadata: { ttl: 120 } // 2 minutes
-    });
-
-    // Update rate limit
-    rateLimit.count++;
-    rateLimit.lastRequest = now;
-    await rateLimitStore.set(email, JSON.stringify(rateLimit), {
-      metadata: { ttl: 3600 } // 1 hour
-    });
-
-    console.log(`✓ Generated code for ${email}: ${code} (expires in 2 minutes)`);
-    console.log(`Rate limit: ${rateLimit.count}/5 requests`);
 
     // Send email with code
     const emailSent = await sendResetEmail(email, code);
 
     if (!emailSent) {
-      // If email fails, still return success but log warning
-      console.warn('⚠️ Email sending failed, but code is stored. Code:', code);
+      return {
+        statusCode: 500,
+        headers,
+        body: JSON.stringify({ error: 'Failed to send email. Please try again.' })
+      };
     }
 
     return {
@@ -147,7 +164,7 @@ exports.handler = async (event, context) => {
     };
 
   } catch (error) {
-    console.error('Error generating reset code:', error);
+    console.error('✗ Error generating reset code:', error);
     return {
       statusCode: 500,
       headers,
@@ -161,17 +178,6 @@ exports.handler = async (event, context) => {
 
 async function sendResetEmail(email, code) {
   try {
-    // Check if SendGrid is configured
-    if (!process.env.SENDGRID_API_KEY) {
-      console.error('✗ SENDGRID_API_KEY not configured');
-      return false;
-    }
-
-    if (!process.env.FROM_EMAIL) {
-      console.error('✗ FROM_EMAIL not configured');
-      return false;
-    }
-
     // Email template (inlined for Netlify Functions compatibility)
     let template = `
 <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 40px 20px;">
@@ -190,7 +196,7 @@ async function sendResetEmail(email, code) {
 
       <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; text-align: center;">
         We received a request to reset your password for<br>
-        <strong>{{ .Email }}</strong>
+        <strong>${email}</strong>
       </p>
 
       <p style="color: #4b5563; font-size: 16px; line-height: 1.6; margin: 0 0 24px 0; text-align: center;">
@@ -204,32 +210,32 @@ async function sendResetEmail(email, code) {
             <tr>
               <td style="padding: 0 6px;">
                 <div style="width: 44px; height: 52px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">{{ index .Token 0 }}</span>
+                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">${code[0]}</span>
                 </div>
               </td>
               <td style="padding: 0 6px;">
                 <div style="width: 44px; height: 52px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">{{ index .Token 1 }}</span>
+                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">${code[1]}</span>
                 </div>
               </td>
               <td style="padding: 0 6px;">
                 <div style="width: 44px; height: 52px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">{{ index .Token 2 }}</span>
+                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">${code[2]}</span>
                 </div>
               </td>
               <td style="padding: 0 6px;">
                 <div style="width: 44px; height: 52px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">{{ index .Token 3 }}</span>
+                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">${code[3]}</span>
                 </div>
               </td>
               <td style="padding: 0 6px;">
                 <div style="width: 44px; height: 52px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">{{ index .Token 4 }}</span>
+                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">${code[4]}</span>
                 </div>
               </td>
               <td style="padding: 0 6px;">
                 <div style="width: 44px; height: 52px; background: white; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
-                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">{{ index .Token 5 }}</span>
+                  <span style="font-family: 'Courier New', monospace; font-size: 32px; font-weight: 700; color: #000;">${code[5]}</span>
                 </div>
               </td>
             </tr>
@@ -239,7 +245,7 @@ async function sendResetEmail(email, code) {
 
       <!-- Simplified Text Version for Email Clients -->
       <p style="text-align: center; font-family: 'Courier New', monospace; font-size: 28px; font-weight: 700; color: #000; letter-spacing: 8px; background: #f3f4f6; padding: 16px; border-radius: 8px; margin: 24px 0;">
-        {{ .Token }}
+        ${code}
       </p>
     </div>
 
@@ -275,18 +281,6 @@ async function sendResetEmail(email, code) {
 </div>
 `;
 
-    // Replace variables
-    template = template.replace(/\{\{ \.Email \}\}/g, email);
-
-    // Replace individual digits for the boxes
-    for (let i = 0; i < 6; i++) {
-      const pattern = new RegExp(`\\{\\{ index \\.Token ${i} \\}\\}`, 'g');
-      template = template.replace(pattern, code[i]);
-    }
-
-    // Replace full token
-    template = template.replace(/\{\{ \.Token \}\}/g, code);
-
     // Send email via SendGrid
     const msg = {
       to: email,
@@ -302,7 +296,7 @@ async function sendResetEmail(email, code) {
   } catch (error) {
     console.error('✗ Email sending error:', error);
     if (error.response) {
-      console.error('SendGrid error:', error.response.body);
+      console.error('SendGrid error details:', error.response.body);
     }
     return false;
   }
