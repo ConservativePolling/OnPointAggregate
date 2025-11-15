@@ -63,11 +63,11 @@ exports.handler = async (event, context) => {
       };
     }
 
-    console.log('🔐 Password reset requested for:', email);
+    console.log('[Reset] Password reset requested for:', email);
 
     // Check SendGrid configuration
     if (!process.env.SENDGRID_API_KEY) {
-      console.error('✗ SENDGRID_API_KEY not configured');
+      console.error('[Reset] SENDGRID_API_KEY not configured');
       return {
         statusCode: 500,
         headers,
@@ -76,7 +76,7 @@ exports.handler = async (event, context) => {
     }
 
     if (!process.env.FROM_EMAIL) {
-      console.error('✗ FROM_EMAIL not configured');
+      console.error('[Reset] FROM_EMAIL not configured');
       return {
         statusCode: 500,
         headers,
@@ -90,7 +90,7 @@ exports.handler = async (event, context) => {
       const siteUrl = process.env.URL || 'https://onpointaggregate.com';
       const apiUrl = `${siteUrl}/.netlify/identity`;
 
-      console.log(`📞 Calling Netlify Identity at: ${apiUrl}/recover`);
+      console.log('[Reset] Calling Netlify Identity at:', apiUrl + '/recover');
 
       const identityResponse = await fetch(`${apiUrl}/recover`, {
         method: 'POST',
@@ -102,7 +102,7 @@ exports.handler = async (event, context) => {
 
       if (!identityResponse.ok) {
         const errorText = await identityResponse.text();
-        console.error('✗ Identity recovery failed:', identityResponse.status, errorText);
+        console.error('[Reset] Identity recovery failed:', identityResponse.status, errorText);
         return {
           statusCode: 404,
           headers,
@@ -112,9 +112,9 @@ exports.handler = async (event, context) => {
 
       const identityData = await identityResponse.json();
       recoveryToken = identityData.recovery_token;
-      console.log('✅ Recovery token generated');
+      console.log('[Reset] Recovery token generated successfully');
     } catch (identityError) {
-      console.error('✗ Identity API error:', identityError.message);
+      console.error('[Reset] Identity API error:', identityError.message);
       return {
         statusCode: 500,
         headers,
@@ -143,8 +143,8 @@ exports.handler = async (event, context) => {
       attempts: 0
     });
 
-    console.log(`✅ Generated and stored code: ${code}`);
-    console.log(`📦 Storage size: ${codeStorage.size} codes in memory`);
+    console.log('[Reset] Generated and stored code:', code);
+    console.log('[Reset] Storage size:', codeStorage.size, 'codes');
 
     // Send email with code
     const emailSent = await sendResetEmail(email, code);
@@ -259,13 +259,13 @@ async function sendResetEmail(email, code) {
     };
 
     await sgMail.send(msg);
-    console.log('✅ Email sent successfully to:', email);
+    console.log('[Reset] Email sent successfully to:', email);
     return true;
 
   } catch (error) {
-    console.error('✗ Email sending error:', error.message);
+    console.error('[Reset] Email sending error:', error.message);
     if (error.response) {
-      console.error('SendGrid error details:', error.response.body);
+      console.error('[Reset] SendGrid error details:', error.response.body);
     }
     return false;
   }

@@ -27,7 +27,7 @@ exports.handler = async (event) => {
   try {
     const { code, email } = JSON.parse(event.body);
 
-    console.log(`🔍 Verifying code for: ${email}`);
+    console.log('[Verify] Verifying code for:', email);
 
     // Validate input
     if (!code || !/^\d{6}$/.test(code)) {
@@ -50,8 +50,8 @@ exports.handler = async (event) => {
     const codeData = codeStorage.get(code);
 
     if (!codeData) {
-      console.log(`✗ Code not found: ${code}`);
-      console.log(`📦 Current storage has ${codeStorage.size} codes`);
+      console.log('[Verify] Code not found:', code);
+      console.log('[Verify] Current storage has', codeStorage.size, 'codes');
       return {
         statusCode: 404,
         headers,
@@ -64,7 +64,7 @@ exports.handler = async (event) => {
 
     // Verify email matches
     if (codeData.email !== email) {
-      console.log(`✗ Email mismatch for code ${code}: ${email} !== ${codeData.email}`);
+      console.log('[Verify] Email mismatch for code', code);
       return {
         statusCode: 403,
         headers,
@@ -81,7 +81,7 @@ exports.handler = async (event) => {
     const age = now - codeData.timestamp;
 
     if (age > twoMinutes) {
-      console.log(`✗ Code expired: ${code} (${Math.floor(age / 1000)}s old)`);
+      console.log('[Verify] Code expired:', code, '(' + Math.floor(age / 1000) + 's old)');
       codeStorage.delete(code);
       return {
         statusCode: 410,
@@ -97,7 +97,7 @@ exports.handler = async (event) => {
     codeData.attempts++;
 
     if (codeData.attempts > 5) {
-      console.log(`✗ Too many attempts for code: ${code}`);
+      console.log('[Verify] Too many attempts for code:', code);
       codeStorage.delete(code);
       return {
         statusCode: 429,
@@ -110,14 +110,14 @@ exports.handler = async (event) => {
     }
 
     // Success! Return the recovery token
-    console.log(`✅ Code verified: ${code} for ${email}`);
+    console.log('[Verify] Code verified successfully:', code, 'for', email);
 
     // Get token before deleting
     const token = codeData.token;
 
     // Delete code (one-time use)
     codeStorage.delete(code);
-    console.log(`🗑️ Code deleted. Storage now has ${codeStorage.size} codes`);
+    console.log('[Verify] Code deleted. Storage now has', codeStorage.size, 'codes');
 
     return {
       statusCode: 200,

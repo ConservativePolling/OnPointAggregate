@@ -538,7 +538,7 @@
             <p class="text-sm text-gray-600 mb-6">Enter your email address and we'll send you a 6-digit code to reset your password.</p>
 
             <div id="forgotPasswordSuccess" class="success-message">
-                ✓ Code sent! Check your email.
+                Code sent! Check your email.
             </div>
 
             <form id="forgotPasswordForm" class="space-y-4">
@@ -578,12 +578,12 @@
             try {
                 if (netlifyIdentity.gotrue) {
                     identityEnabled = true;
-                    console.log('✓ Netlify Identity is enabled and ready');
+                    console.log('Netlify Identity is enabled and ready');
                 } else {
-                    console.error('✗ Netlify Identity GoTrue not available');
+                    console.error('Netlify Identity GoTrue not available');
                 }
             } catch (error) {
-                console.error('✗ Error checking Identity status:', error);
+                console.error('Error checking Identity status:', error);
             }
 
             // If user is already logged in, redirect to dashboard
@@ -833,14 +833,14 @@
             // Validate Identity is ready
             if (!identityReady) {
                 alert('Authentication system is still loading. Please wait a moment and try again.');
-                console.error('✗ Identity not ready yet');
+                console.error('Identity not ready yet');
                 return;
             }
 
             // Validate Identity is enabled
             if (!identityEnabled || !netlifyIdentity.gotrue) {
                 alert('Netlify Identity is not enabled on this site.\n\nPlease contact the site administrator to enable Identity in the Netlify dashboard:\nSite configuration → Identity → Enable Identity');
-                console.error('✗ Netlify Identity is not enabled');
+                console.error('Netlify Identity is not enabled');
                 return;
             }
 
@@ -862,26 +862,13 @@
                     throw new Error(data.error || 'Failed to send code');
                 }
 
-                console.log('✓ Password reset code sent successfully to:', email);
+                console.log('Password reset code sent successfully to:', email);
 
-                // Update success message for code-based flow
-                successMessage.innerHTML = '✓ Code sent! Redirecting...';
-                successMessage.classList.add('active');
-
-                // Reset button
-                button.disabled = false;
-                button.textContent = 'Send Code';
-
-                // Clear form
-                e.target.reset();
-
-                // Redirect to code verification page after brief delay
-                setTimeout(() => {
-                    window.location.href = `/verify-code.html?email=${encodeURIComponent(email)}`;
-                }, 1500);
+                // Redirect immediately with smooth transition
+                window.location.href = `/verify-code.html?email=${encodeURIComponent(email)}`;
 
             } catch (error) {
-                console.error('✗ Password reset code error:', error);
+                console.error('Password reset code error:', error);
 
                 // User-friendly error messages
                 let errorMessage = 'Failed to send password reset code.';

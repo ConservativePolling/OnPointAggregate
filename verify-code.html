@@ -4,459 +4,390 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Code — OnPointAggregate</title>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
-        .font-heading {
-            font-family: 'Space Grotesk', sans-serif;
-            letter-spacing: -0.02em;
-        }
-
         body {
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%);
+            background: #fafafa;
             min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
         }
 
-        /* Glass Card */
-        .glass-card {
-            backdrop-filter: blur(32px) saturate(180%);
-            -webkit-backdrop-filter: blur(32px) saturate(180%);
-            background: linear-gradient(135deg,
-                rgba(255, 255, 255, 0.5) 0%,
-                rgba(255, 255, 255, 0.4) 100%);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-            box-shadow:
-                0 4px 8px rgba(0, 0, 0, 0.04),
-                0 8px 16px rgba(0, 0, 0, 0.04),
-                0 16px 32px rgba(0, 0, 0, 0.04),
-                0 32px 64px rgba(0, 0, 0, 0.03);
-            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        .container {
+            width: 100%;
+            max-width: 440px;
         }
 
-        /* Code Input Boxes */
-        .code-box {
-            width: 56px;
-            height: 64px;
-            font-size: 32px;
+        .card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 48px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
             font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #000;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #000;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .email-display {
+            font-weight: 500;
+            color: #000;
+        }
+
+        /* Code Input */
+        .code-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .code-box {
+            width: 48px;
+            height: 56px;
+            font-size: 24px;
+            font-weight: 600;
             font-family: 'Space Grotesk', sans-serif;
             text-align: center;
-            border-radius: 12px;
-            background: rgba(255, 255, 255, 0.6);
-            border: 2px solid rgba(0, 0, 0, 0.08);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 6px;
+            background: #fff;
+            border: 1px solid #eaeaea;
+            transition: all 0.2s ease;
             caret-color: transparent;
         }
 
         .code-box:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid #000;
-            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
-            transform: translateY(-2px);
-            animation: pulse 1.5s infinite;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
         }
 
         .code-box.filled {
-            background: rgba(255, 255, 255, 0.85);
-            border: 2px solid rgba(0, 0, 0, 0.15);
+            border-color: #d1d1d1;
         }
 
         .code-box.error {
-            background: rgba(239, 68, 68, 0.1);
-            border: 2px solid #ef4444;
-            animation: shake 0.5s;
+            border-color: #ef4444;
+            animation: shake 0.3s ease;
         }
 
         .code-box.success {
-            background: rgba(34, 197, 94, 0.1);
-            border: 2px solid #22c55e;
-            animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
-
-        /* Animations */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            border-color: #22c55e;
         }
 
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-            20%, 40%, 60%, 80% { transform: translateX(8px); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
         }
 
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05); }
-            50% { box-shadow: 0 0 0 6px rgba(0, 0, 0, 0.08); }
+        /* Timer */
+        .timer {
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 24px;
         }
 
-        @keyframes successPop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+        .timer.warning {
+            color: #f59e0b;
         }
 
-        @keyframes checkmark {
-            0% {
-                opacity: 0;
-                transform: scale(0) rotate(0deg);
-            }
-            50% {
-                transform: scale(1.2) rotate(10deg);
-            }
-            100% {
-                opacity: 1;
-                transform: scale(1) rotate(0deg);
-            }
+        .timer.danger {
+            color: #ef4444;
         }
 
-        @keyframes morph {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -200% center; }
-            100% { background-position: 200% center; }
-        }
-
-        @keyframes countdown-warning {
-            0%, 100% { color: #f59e0b; }
-            50% { color: #d97706; }
-        }
-
-        @keyframes countdown-danger {
-            0%, 100% {
-                color: #ef4444;
-                transform: scale(1);
-            }
-            50% {
-                color: #dc2626;
-                transform: scale(1.05);
-            }
-        }
-
-        /* Code Container Stagger Animation */
-        .code-container {
-            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .code-box:nth-child(1) { animation-delay: 0.05s; }
-        .code-box:nth-child(2) { animation-delay: 0.1s; }
-        .code-box:nth-child(3) { animation-delay: 0.15s; }
-        .code-box:nth-child(4) { animation-delay: 0.2s; }
-        .code-box:nth-child(5) { animation-delay: 0.25s; }
-        .code-box:nth-child(6) { animation-delay: 0.3s; }
-
-        .box-enter {
-            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) backwards;
-        }
-
-        /* Timer States */
-        .timer-normal { color: #6b7280; }
-        .timer-warning { animation: countdown-warning 1s infinite; }
-        .timer-danger { animation: countdown-danger 0.5s infinite; }
-
-        /* Success Checkmark */
-        .checkmark {
+        /* Password Section */
+        .password-section {
             display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 28px;
-            color: #22c55e;
-            animation: checkmark 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        .code-box.success .checkmark {
+        .password-section.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        .code-box.success input {
-            opacity: 0;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        /* Loading Shimmer */
-        .shimmer {
-            background: linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 255, 255, 0.5) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
+        .form-group {
+            margin-bottom: 16px;
         }
 
-        /* Morphing States */
-        .morphing {
-            transition: height 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 6px;
         }
 
-        .fade-out {
-            animation: fadeOut 0.4s forwards;
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid #eaeaea;
+            border-radius: 6px;
+            transition: all 0.2s ease;
         }
 
-        .fade-in {
-            animation: morph 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes fadeOut {
-            to {
-                opacity: 0;
-                transform: translateY(-10px);
-            }
-        }
-
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .code-box {
-                width: 48px;
-                height: 56px;
-                font-size: 28px;
-            }
-        }
-
-        /* Input Field Styles (for password form) */
-        .input-field {
-            background: rgba(255, 255, 255, 0.5);
-            border: none;
-            box-shadow:
-                0 1px 2px rgba(0, 0, 0, 0.03),
-                0 2px 4px rgba(0, 0, 0, 0.03),
-                0 4px 8px rgba(0, 0, 0, 0.03);
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        .input-field:focus {
-            background: rgba(255, 255, 255, 0.7);
-            box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.05);
+        input[type="password"]:focus {
             outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(0, 0, 0, 0.9));
-            border: none;
-            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
-            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            background: #000;
+            color: #fff;
         }
 
         .btn-primary:hover:not(:disabled) {
-            transform: translateY(-1px);
-            filter: drop-shadow(0 8px 20px rgba(0, 0, 0, 0.18));
+            background: #333;
         }
 
         .btn-primary:disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #666;
+            border: 1px solid #eaeaea;
+            margin-top: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: #fafafa;
+            border-color: #d1d1d1;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #000;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 32px 24px;
+            }
+
+            .code-box {
+                width: 42px;
+                height: 50px;
+                font-size: 20px;
+            }
         }
     </style>
 </head>
-<body class="antialiased">
-    <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="w-full max-w-md">
-            <!-- Logo/Brand -->
-            <div class="text-center mb-8">
-                <h1 class="font-heading text-3xl font-bold tracking-tight text-gray-900">
-                    OnPoint<span class="text-black">A</span>ggregate
-                </h1>
-                <p class="text-sm text-gray-600 mt-2 font-medium">Real-time polling and analysis</p>
-            </div>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">OnPointAggregate</div>
 
-            <!-- Glass Card -->
-            <div id="mainCard" class="glass-card rounded-3xl p-8 morphing">
-                <!-- Code Entry Section -->
-                <div id="codeSection">
-                    <div class="text-center mb-6">
-                        <div class="text-4xl mb-3">✉️</div>
-                        <h2 class="font-heading text-2xl font-bold text-gray-900 mb-2">Check your email</h2>
-                        <p class="text-sm text-gray-600">
-                            We sent a 6-digit code to<br>
-                            <strong id="userEmail" class="text-gray-900"></strong>
-                        </p>
-                    </div>
+            <!-- Code Verification Section -->
+            <div id="codeSection" class="code-section">
+                <h1>Enter verification code</h1>
+                <p class="subtitle">
+                    We sent a code to <span class="email-display" id="emailDisplay"></span>
+                </p>
 
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-800 mb-3 text-center">Enter your code:</label>
-                        <div class="flex justify-center gap-2 code-container">
-                            <div class="code-box-wrapper relative box-enter">
-                                <input type="text" maxlength="1" class="code-box" data-index="0" inputmode="numeric" pattern="\d*">
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="code-box-wrapper relative box-enter">
-                                <input type="text" maxlength="1" class="code-box" data-index="1" inputmode="numeric" pattern="\d*">
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="code-box-wrapper relative box-enter">
-                                <input type="text" maxlength="1" class="code-box" data-index="2" inputmode="numeric" pattern="\d*">
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="code-box-wrapper relative box-enter">
-                                <input type="text" maxlength="1" class="code-box" data-index="3" inputmode="numeric" pattern="\d*">
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="code-box-wrapper relative box-enter">
-                                <input type="text" maxlength="1" class="code-box" data-index="4" inputmode="numeric" pattern="\d*">
-                                <span class="checkmark">✓</span>
-                            </div>
-                            <div class="code-box-wrapper relative box-enter">
-                                <input type="text" maxlength="1" class="code-box" data-index="5" inputmode="numeric" pattern="\d*">
-                                <span class="checkmark">✓</span>
-                            </div>
-                        </div>
-                    </div>
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
 
-                    <!-- Timer -->
-                    <div class="text-center mb-4">
-                        <p class="text-sm font-medium">
-                            <span class="timer-normal">⏱️ <span id="timer">2:00</span> remaining</span>
-                        </p>
-                    </div>
-
-                    <!-- Error Message -->
-                    <div id="errorMessage" class="hidden text-center text-sm text-red-600 font-medium mb-4"></div>
-
-                    <!-- Resend Link -->
-                    <div class="text-center">
-                        <button id="resendBtn" class="text-sm text-gray-600 hover:text-gray-900 font-medium transition-colors">
-                            Didn't receive code? <span class="underline">Resend</span>
-                        </button>
-                    </div>
+                <div class="code-container" id="codeContainer">
+                    <input type="text" maxlength="1" class="code-box" data-index="0" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="2" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="3" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="4" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="5" inputmode="numeric" pattern="[0-9]">
                 </div>
 
-                <!-- Password Reset Section (Hidden Initially) -->
-                <div id="passwordSection" class="hidden">
-                    <div class="text-center mb-6 fade-in">
-                        <div class="text-4xl mb-3">🔒</div>
-                        <h2 class="font-heading text-2xl font-bold text-gray-900 mb-2">Create New Password</h2>
-                        <p class="text-sm text-gray-600">Enter your new password below</p>
+                <div class="timer" id="timer">Code expires in 2:00</div>
+
+                <button type="button" class="btn-secondary" id="resendBtn">Resend code</button>
+            </div>
+
+            <!-- Password Reset Section (hidden initially) -->
+            <div id="passwordSection" class="password-section">
+                <h1>Set new password</h1>
+                <p class="subtitle">Choose a strong password for your account</p>
+
+                <form id="resetPasswordForm">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" required minlength="8">
                     </div>
 
-                    <form id="resetPasswordForm" class="space-y-4 fade-in">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-800 mb-2">New Password</label>
-                            <input
-                                type="password"
-                                id="newPassword"
-                                placeholder="Enter new password"
-                                class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 text-sm font-medium"
-                                required
-                            >
-                        </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required minlength="8">
+                    </div>
 
-                        <div>
-                            <label class="block text-sm font-medium text-gray-800 mb-2">Confirm Password</label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                placeholder="Confirm new password"
-                                class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 text-sm font-medium"
-                                required
-                            >
-                        </div>
-
-                        <button type="submit" id="submitBtn" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
-                            Reset Password
-                        </button>
-                    </form>
-                </div>
+                    <button type="submit" class="btn-primary" id="submitBtn">Reset password</button>
+                </form>
             </div>
+
+            <a href="/login.html" class="back-link">Back to login</a>
         </div>
     </div>
 
     <script>
-        // Get email from URL params
         const urlParams = new URLSearchParams(window.location.search);
         const email = urlParams.get('email');
-        document.getElementById('userEmail').textContent = email || 'your email';
-
-        // Code boxes
         const codeBoxes = document.querySelectorAll('.code-box');
+        const codeSection = document.getElementById('codeSection');
+        const passwordSection = document.getElementById('passwordSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
         let recoveryToken = null;
-
-        // Timer
         let timeRemaining = 120; // 2 minutes
-        const timerElement = document.getElementById('timer');
-        const timerWrapper = timerElement.parentElement;
 
-        const countdown = setInterval(() => {
+        // Display email
+        if (email) {
+            document.getElementById('emailDisplay').textContent = email;
+        } else {
+            window.location.href = '/login.html';
+        }
+
+        // Timer countdown
+        const timerElement = document.getElementById('timer');
+        const timerInterval = setInterval(() => {
             timeRemaining--;
 
             const minutes = Math.floor(timeRemaining / 60);
             const seconds = timeRemaining % 60;
-            timerElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            timerElement.textContent = `Code expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
 
-            // Color transitions
-            timerWrapper.className = '';
-            if (timeRemaining < 30) {
-                timerWrapper.className = 'text-sm font-medium timer-danger';
-            } else if (timeRemaining < 60) {
-                timerWrapper.className = 'text-sm font-medium timer-warning';
-            } else {
-                timerWrapper.className = 'text-sm font-medium timer-normal';
+            if (timeRemaining <= 30) {
+                timerElement.classList.add('danger');
+            } else if (timeRemaining <= 60) {
+                timerElement.classList.add('warning');
             }
 
             if (timeRemaining <= 0) {
-                clearInterval(countdown);
-                showError('Code expired. Please request a new one.');
+                clearInterval(timerInterval);
+                timerElement.textContent = 'Code expired';
                 codeBoxes.forEach(box => box.disabled = true);
+                showError('Code expired. Please request a new one.');
             }
         }, 1000);
 
-        // Auto-focus first box
-        codeBoxes[0].focus();
-
-        // Handle input
+        // Code input handling
         codeBoxes.forEach((box, index) => {
             box.addEventListener('input', (e) => {
                 const value = e.target.value;
 
-                // Only allow digits
                 if (!/^\d$/.test(value)) {
                     e.target.value = '';
                     return;
                 }
 
-                // Mark as filled
                 box.classList.add('filled');
 
-                // Auto-advance to next box
+                // Auto-advance
                 if (value && index < codeBoxes.length - 1) {
-                    setTimeout(() => {
-                        codeBoxes[index + 1].focus();
-                    }, 50);
+                    codeBoxes[index + 1].focus();
                 }
 
-                // Auto-validate when all boxes filled
+                // Auto-validate when complete
                 if (index === codeBoxes.length - 1 && value) {
                     setTimeout(validateCode, 200);
                 }
             });
 
-            // Handle backspace
             box.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !box.value && index > 0) {
                     codeBoxes[index - 1].focus();
@@ -468,22 +399,24 @@
             // Handle paste
             box.addEventListener('paste', (e) => {
                 e.preventDefault();
-                const pasteData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+                const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
 
-                pasteData.split('').forEach((digit, i) => {
+                pastedData.split('').forEach((char, i) => {
                     if (codeBoxes[i]) {
-                        codeBoxes[i].value = digit;
+                        codeBoxes[i].value = char;
                         codeBoxes[i].classList.add('filled');
                     }
                 });
 
-                if (pasteData.length === 6) {
+                if (pastedData.length === 6) {
                     setTimeout(validateCode, 200);
                 }
             });
         });
 
-        // Validate code
+        // Focus first box
+        codeBoxes[0].focus();
+
         async function validateCode() {
             const code = Array.from(codeBoxes).map(box => box.value).join('');
 
@@ -492,9 +425,6 @@
             }
 
             console.log('Validating code:', code);
-
-            // Add shimmer effect
-            codeBoxes.forEach(box => box.classList.add('shimmer'));
 
             try {
                 const response = await fetch('/.netlify/functions/verify-reset-code', {
@@ -505,88 +435,46 @@
 
                 const data = await response.json();
 
-                // Remove shimmer
-                codeBoxes.forEach(box => box.classList.remove('shimmer'));
-
-                if (response.ok && data.success) {
-                    // Success!
-                    console.log('✓ Code verified!');
-                    recoveryToken = data.token;
-
-                    // Show success animation
-                    codeBoxes.forEach((box, i) => {
-                        setTimeout(() => {
-                            box.classList.add('success');
-                        }, i * 80);
-                    });
-
-                    // Morph to password form after animation
-                    setTimeout(() => {
-                        morphToPasswordForm();
-                    }, 1000);
-
-                } else {
-                    // Error
-                    console.error('✗ Invalid code:', data.error);
-                    showError(data.error || 'Invalid code. Please try again.');
-                    shakeBoxes();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Invalid code');
                 }
 
+                console.log('Code verified successfully');
+
+                // Mark boxes as success
+                codeBoxes.forEach(box => {
+                    box.classList.remove('error');
+                    box.classList.add('success');
+                    box.disabled = true;
+                });
+
+                recoveryToken = data.token;
+
+                // Show password section
+                setTimeout(() => {
+                    codeSection.style.display = 'none';
+                    passwordSection.classList.add('active');
+                }, 600);
+
             } catch (error) {
-                console.error('✗ Verification error:', error);
-                codeBoxes.forEach(box => box.classList.remove('shimmer'));
-                showError('Network error. Please try again.');
-                shakeBoxes();
+                console.error('Code validation error:', error);
+                showError(error.message);
+
+                // Mark boxes as error
+                codeBoxes.forEach(box => {
+                    box.classList.add('error');
+                    setTimeout(() => {
+                        box.classList.remove('error');
+                        box.value = '';
+                        box.classList.remove('filled');
+                    }, 500);
+                });
+
+                codeBoxes[0].focus();
             }
         }
 
-        // Show error
-        function showError(message) {
-            const errorEl = document.getElementById('errorMessage');
-            errorEl.textContent = message;
-            errorEl.classList.remove('hidden');
-
-            setTimeout(() => {
-                errorEl.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Shake animation on error
-        function shakeBoxes() {
-            codeBoxes.forEach(box => {
-                box.classList.add('error');
-                box.value = '';
-                box.classList.remove('filled');
-            });
-
-            setTimeout(() => {
-                codeBoxes.forEach(box => box.classList.remove('error'));
-                codeBoxes[0].focus();
-            }, 500);
-        }
-
-        // Morph to password form
-        function morphToPasswordForm() {
-            const card = document.getElementById('mainCard');
-            const codeSection = document.getElementById('codeSection');
-            const passwordSection = document.getElementById('passwordSection');
-
-            // Fade out code section
-            codeSection.classList.add('fade-out');
-
-            setTimeout(() => {
-                codeSection.classList.add('hidden');
-                passwordSection.classList.remove('hidden');
-
-                // Auto-focus new password field
-                document.getElementById('newPassword').focus();
-            }, 400);
-
-            // Clear timer
-            clearInterval(countdown);
-        }
-
-        // Handle password reset
+        // Password reset
         document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
@@ -595,12 +483,12 @@
             const submitBtn = document.getElementById('submitBtn');
 
             if (newPassword !== confirmPassword) {
-                alert('Passwords do not match');
+                showError('Passwords do not match');
                 return;
             }
 
             if (newPassword.length < 8) {
-                alert('Password must be at least 8 characters');
+                showError('Password must be at least 8 characters');
                 return;
             }
 
@@ -608,27 +496,28 @@
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Resetting...';
 
-                // Use recovery token to reset password
                 const user = await netlifyIdentity.gotrue.recover(recoveryToken, true);
                 await user.update({ password: newPassword });
 
-                console.log('✓ Password reset successful!');
+                console.log('Password reset successful');
 
-                // Redirect to login
-                alert('Password reset successful! Redirecting to login...');
-                window.location.href = '/login.html';
+                showSuccess('Password reset successful! Redirecting...');
+
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
 
             } catch (error) {
-                console.error('✗ Password reset error:', error);
-                alert('Error resetting password: ' + error.message);
+                console.error('Password reset error:', error);
+                showError('Error resetting password. Please try again.');
                 submitBtn.disabled = false;
-                submitBtn.textContent = 'Reset Password';
+                submitBtn.textContent = 'Reset password';
             }
         });
 
         // Resend code
         document.getElementById('resendBtn').addEventListener('click', async () => {
-            console.log('Requesting new code...');
+            console.log('Requesting new code');
             try {
                 const response = await fetch('/.netlify/functions/request-reset-code', {
                     method: 'POST',
@@ -637,24 +526,39 @@
                 });
 
                 if (response.ok) {
-                    alert('New code sent! Check your email.');
-                    // Reset timer
+                    showSuccess('New code sent! Check your email.');
                     timeRemaining = 120;
-                    // Clear boxes
+                    timerElement.classList.remove('warning', 'danger');
                     codeBoxes.forEach(box => {
                         box.value = '';
-                        box.classList.remove('filled', 'success', 'error');
                         box.disabled = false;
+                        box.classList.remove('filled', 'error', 'success');
                     });
                     codeBoxes[0].focus();
                 } else {
-                    alert('Failed to send code. Please try again later.');
+                    throw new Error('Failed to resend code');
                 }
             } catch (error) {
                 console.error('Resend error:', error);
-                alert('Network error. Please try again.');
+                showError('Failed to resend code. Please try again.');
             }
         });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            successMessage.classList.remove('active');
+
+            setTimeout(() => {
+                errorMessage.classList.remove('active');
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('active');
+            errorMessage.classList.remove('active');
+        }
     </script>
 </body>
 </html>
