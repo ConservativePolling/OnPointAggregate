@@ -145,35 +145,308 @@
             padding: 3.5rem 2rem;
         }
 
-        .search-bar {
-            background: #ffffff;
-            border: 1.5px solid #d5dceb;
-            border-radius: 12px;
-            padding: 1.125rem 1.5rem;
-            margin-bottom: 2.5rem;
+        .preview-hero {
+            position: relative;
+            background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), rgba(37, 99, 235, 0))
+                        , linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 251, 255, 0.88) 100%);
+            border: 1.5px solid rgba(213, 220, 235, 0.8);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            border-radius: 20px;
+            padding: 2.75rem;
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+            overflow: hidden;
+            isolation: isolate;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+        }
+
+        .preview-hero::before {
+            content: '';
+            position: absolute;
+            inset: -40% -30% auto auto;
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.14), transparent 65%);
+            filter: blur(0px);
+            z-index: -1;
+        }
+
+        .preview-hero::after {
+            content: '';
+            position: absolute;
+            right: -120px;
+            top: 40%;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.28), transparent 70%);
+            transform: translateY(-50%) rotate(-6deg);
+            z-index: -1;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .hero-tag {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero-tag svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .hero-title {
+            font-size: 2.75rem;
+            line-height: 1.1;
+            font-weight: 700;
+            color: #0b0b0f;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-description {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #4b5563;
+            max-width: 480px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+        }
+
+        .hero-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.85rem 1.45rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .hero-button svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .hero-button-primary {
+            background: linear-gradient(135deg, #2563eb, #1e3a8a);
+            color: white;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+        }
+
+        .hero-button-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 32px rgba(37, 99, 235, 0.28);
+        }
+
+        .hero-button-ghost {
+            background: rgba(255, 255, 255, 0.65);
+            border-color: rgba(37, 99, 235, 0.16);
+            color: #1f2937;
+        }
+
+        .hero-button-ghost:hover {
+            border-color: rgba(37, 99, 235, 0.35);
+            color: #111827;
+            transform: translateY(-1px);
+        }
+
+        .hero-meta {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.25rem;
+        }
+
+        .hero-meta-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(213, 220, 235, 0.6);
+            border-radius: 14px;
+            padding: 0.9rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .hero-meta-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .hero-meta-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .hero-panel {
+            position: relative;
+            background: rgba(255, 255, 255, 0.82);
+            border-radius: 16px;
+            border: 1.5px solid rgba(213, 220, 235, 0.7);
+            padding: 1.75rem;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .hero-panel::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.28), transparent 70%);
+        }
+
+        .hero-panel-header {
             display: flex;
             align-items: center;
-            gap: 0.875rem;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.05);
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
+            justify-content: space-between;
         }
 
-        .search-bar svg {
-            width: 17px;
-            height: 17px;
-            opacity: 0.35;
-            flex-shrink: 0;
+        .hero-panel-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #6b7280;
+            font-weight: 600;
         }
 
-        .search-bar input {
-            border: none;
-            outline: none;
-            font-size: 0.9375rem;
-            flex: 1;
-            color: #a3a3a3;
-            background: transparent;
+        .hero-panel-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #047857;
+            font-weight: 600;
+        }
+
+        .hero-panel svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .hero-panel-metric {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .hero-panel-metric strong {
+            font-size: 2.5rem;
+            color: #0b0f19;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-panel-metric span {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .hero-trend-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .hero-trend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hero-trend-info {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .hero-trend-change {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .hero-trend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .trend-positive {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .trend-negative {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+        }
+
+        .hero-sparkline {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 48px;
+        }
+
+        .hero-sparkline span {
+            display: block;
+            width: 6px;
+            border-radius: 999px 999px 0 0;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.45), rgba(37, 99, 235, 0.1));
+        }
+
+        .hero-sparkline span:nth-child(odd) {
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.55), rgba(16, 185, 129, 0.15));
+        }
+
+        .hero-panel-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8125rem;
+            color: #6b7280;
+        }
+
+        .hero-panel-footer a {
+            color: #1d4ed8;
+            text-decoration: none;
+            font-weight: 600;
         }
 
         .chart-container {
@@ -608,19 +881,32 @@
                 height: 17px;
             }
 
-            .search-bar {
-                padding: 0.875rem 1rem;
-                margin-bottom: 1.5rem;
-                border-radius: 10px;
+            .preview-hero {
+                grid-template-columns: 1fr;
+                padding: 2rem 1.5rem;
+                gap: 2rem;
             }
 
-            .search-bar input {
-                font-size: 0.875rem;
+            .hero-title {
+                font-size: 2.1rem;
             }
 
-            .search-bar svg {
-                width: 15px;
-                height: 15px;
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hero-meta {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hero-panel {
+                padding: 1.5rem;
             }
 
             .chart-container {
@@ -732,19 +1018,29 @@
                 height: 16px;
             }
 
-            .search-bar {
-                padding: 0.75rem 0.875rem;
-                margin-bottom: 1.25rem;
-                border-radius: 9px;
+            .preview-hero {
+                padding: 1.75rem 1.25rem;
+                margin-bottom: 2rem;
             }
 
-            .search-bar input {
-                font-size: 0.8125rem;
+            .hero-title {
+                font-size: 1.85rem;
             }
 
-            .search-bar svg {
-                width: 14px;
-                height: 14px;
+            .hero-actions {
+                gap: 0.75rem;
+            }
+
+            .hero-button {
+                justify-content: space-between;
+            }
+
+            .hero-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-panel {
+                padding: 1.25rem;
             }
 
             .chart-container {
@@ -844,16 +1140,105 @@
     </nav>
 
     <div class="container">
-        <div class="search-bar">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <circle cx="11" cy="11" r="8"></circle>
-                <path d="m21 21-4.35-4.35"></path>
-            </svg>
-            <input type="text" value="Do Americans approve of Donald Trump?" readonly>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="opacity: 0.3;">
-                <polyline points="6 9 12 15 18 9"></polyline>
-            </svg>
-        </div>
+        <section class="preview-hero">
+            <div class="hero-content">
+                <span class="hero-tag">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m5 13 4 4L19 7"></path>
+                    </svg>
+                    OnPointAggregate 3.0 Preview
+                </span>
+                <h1 class="hero-title">Participate in the OnPointAggregate preview experience.</h1>
+                <p class="hero-description">
+                    Help us refine our next-generation political intelligence dashboard with your early feedback.
+                    Enjoy refreshed visuals, richer crosstabs, and faster live updates tailored for newsrooms.
+                </p>
+                <div class="hero-actions">
+                    <a href="#" class="hero-button hero-button-primary">
+                        Request early access
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    <a href="#" class="hero-button hero-button-ghost">
+                        View roadmap
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14"></path>
+                            <path d="m19 12-7 7-7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <div class="hero-meta">
+                    <div class="hero-meta-item">
+                        <span class="hero-meta-label">Refresh cadence</span>
+                        <span class="hero-meta-value">Every 15 minutes</span>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span class="hero-meta-label">Preview testers</span>
+                        <span class="hero-meta-value">312 newsrooms</span>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span class="hero-meta-label">Feedback velocity</span>
+                        <span class="hero-meta-value">&uarr; 42% this week</span>
+                    </div>
+                </div>
+            </div>
+            <aside class="hero-panel">
+                <div class="hero-panel-header">
+                    <span class="hero-panel-label">Today&apos;s signal</span>
+                    <span class="hero-panel-pill">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                        Stable trend
+                    </span>
+                </div>
+                <div class="hero-panel-metric">
+                    <strong>44.8%</strong>
+                    <span>approval average · 7d</span>
+                </div>
+                <div class="hero-trend-list">
+                    <div class="hero-trend-item">
+                        <div class="hero-trend-info">
+                            <span class="hero-trend-dot trend-positive"></span>
+                            Independents
+                        </div>
+                        <span class="hero-trend-change">+1.3%</span>
+                    </div>
+                    <div class="hero-trend-item">
+                        <div class="hero-trend-info">
+                            <span class="hero-trend-dot trend-negative"></span>
+                            Suburban women
+                        </div>
+                        <span class="hero-trend-change">-0.6%</span>
+                    </div>
+                    <div class="hero-trend-item">
+                        <div class="hero-trend-info">
+                            <span class="hero-trend-dot trend-positive"></span>
+                            Young voters
+                        </div>
+                        <span class="hero-trend-change">+0.9%</span>
+                    </div>
+                </div>
+                <div class="hero-sparkline" aria-hidden="true">
+                    <span style="height: 18px;"></span>
+                    <span style="height: 32px;"></span>
+                    <span style="height: 26px;"></span>
+                    <span style="height: 40px;"></span>
+                    <span style="height: 35px;"></span>
+                    <span style="height: 44px;"></span>
+                    <span style="height: 28px;"></span>
+                    <span style="height: 38px;"></span>
+                </div>
+                <div class="hero-panel-footer">
+                    <span>Aggregated from 58 live trackers</span>
+                    <a href="#">See methodology</a>
+                </div>
+            </aside>
+        </section>
 
         <div class="chart-container">
             <div class="chart-header">
