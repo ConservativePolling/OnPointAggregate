@@ -1,4 +1,5 @@
-const { getStore } = require('@netlify/blobs');
+// Import shared storage from request function
+const { codeStorage } = require('./request-reset-code');
 
 exports.handler = async (event) => {
   // CORS headers
@@ -26,6 +27,8 @@ exports.handler = async (event) => {
   try {
     const { code, email } = JSON.parse(event.body);
 
+    console.log(`🔍 Verifying code for: ${email}`);
+
     // Validate input
     if (!code || !/^\d{6}$/.test(code)) {
       return {
@@ -43,14 +46,12 @@ exports.handler = async (event) => {
       };
     }
 
-    // Get Netlify Blobs store
-    const store = getStore('reset-codes');
+    // Check if code exists in storage
+    const codeData = codeStorage.get(code);
 
-    // Check if code exists
-    const codeDataString = await store.get(code);
-
-    if (!codeDataString) {
+    if (!codeData) {
       console.log(`✗ Code not found: ${code}`);
+      console.log(`📦 Current storage has ${codeStorage.size} codes`);
       return {
         statusCode: 404,
         headers,
@@ -60,8 +61,6 @@ exports.handler = async (event) => {
         })
       };
     }
-
-    const codeData = JSON.parse(codeDataString);
 
     // Verify email matches
     if (codeData.email !== email) {
@@ -83,7 +82,7 @@ exports.handler = async (event) => {
 
     if (age > twoMinutes) {
       console.log(`✗ Code expired: ${code} (${Math.floor(age / 1000)}s old)`);
-      await store.delete(code);
+      codeStorage.delete(code);
       return {
         statusCode: 410,
         headers,
@@ -99,7 +98,7 @@ exports.handler = async (event) => {
 
     if (codeData.attempts > 5) {
       console.log(`✗ Too many attempts for code: ${code}`);
-      await store.delete(code);
+      codeStorage.delete(code);
       return {
         statusCode: 429,
         headers,
@@ -111,13 +110,14 @@ exports.handler = async (event) => {
     }
 
     // Success! Return the recovery token
-    console.log(`✓ Code verified: ${code} for ${email}`);
+    console.log(`✅ Code verified: ${code} for ${email}`);
 
     // Get token before deleting
     const token = codeData.token;
 
     // Delete code (one-time use)
-    await store.delete(code);
+    codeStorage.delete(code);
+    console.log(`🗑️ Code deleted. Storage now has ${codeStorage.size} codes`);
 
     return {
       statusCode: 200,
@@ -131,7 +131,7 @@ exports.handler = async (event) => {
     };
 
   } catch (error) {
-    console.error('Error verifying code:', error);
+    console.error('✗ Error verifying code:', error);
     return {
       statusCode: 500,
       headers,
