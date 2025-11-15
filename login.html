@@ -160,12 +160,140 @@
             border-radius: 12px;
             font-size: 14px;
             font-weight: 500;
-            margin-bottom: 16px;
             display: none;
         }
 
         .success-message.active {
             display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Code Input Boxes */
+        .code-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .code-box {
+            width: 48px;
+            height: 56px;
+            font-size: 24px;
+            font-weight: 700;
+            font-family: 'Space Grotesk', sans-serif;
+            text-align: center;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border: 2px solid rgba(0, 0, 0, 0.08);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            caret-color: transparent;
+            box-shadow:
+                0 2px 4px rgba(0, 0, 0, 0.03),
+                0 4px 8px rgba(0, 0, 0, 0.03);
+        }
+
+        .code-box:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(0, 0, 0, 0.3);
+            box-shadow:
+                0 0 0 4px rgba(0, 0, 0, 0.05),
+                0 4px 12px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px) scale(1.05);
+        }
+
+        .code-box.filled {
+            background: rgba(255, 255, 255, 0.85);
+            border: 2px solid rgba(0, 0, 0, 0.15);
+        }
+
+        .code-box.error {
+            background: rgba(239, 68, 68, 0.15);
+            border: 2px solid #ef4444;
+            animation: shake 0.4s ease;
+        }
+
+        .code-box.success {
+            background: rgba(34, 197, 94, 0.15);
+            border: 2px solid #22c55e;
+            animation: successPop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-6px); }
+            40%, 80% { transform: translateX(6px); }
+        }
+
+        @keyframes successPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .timer {
+            font-size: 13px;
+            font-weight: 500;
+            color: #6b7280;
+            transition: color 0.3s ease;
+        }
+
+        .timer.warning {
+            color: #f59e0b;
+        }
+
+        .timer.danger {
+            color: #ef4444;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .reset-step {
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .form-container {
@@ -534,33 +662,102 @@
                 </svg>
             </button>
 
-            <h2 class="font-heading text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
-            <p class="text-sm text-gray-600 mb-6">Enter your email address and we'll send you a 6-digit code to reset your password.</p>
+            <!-- Step 1: Email Input -->
+            <div id="emailStep" class="reset-step">
+                <h2 class="font-heading text-2xl font-bold text-gray-900 mb-2">Reset Password</h2>
+                <p class="text-sm text-gray-600 mb-6">Enter your email address and we'll send you a 6-digit code.</p>
 
-            <div id="forgotPasswordSuccess" class="success-message">
-                Code sent! Check your email.
+                <div id="emailError" class="error-message mb-4"></div>
+
+                <form id="forgotPasswordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Email</label>
+                        <input
+                            type="email"
+                            id="forgotPasswordEmail"
+                            placeholder="you@example.com"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                        >
+                    </div>
+
+                    <button type="submit" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
+                        Send Code
+                    </button>
+
+                    <button type="button" onclick="closeForgotPasswordModal()" class="btn-oauth w-full px-8 py-3 rounded-2xl text-gray-900 font-semibold text-sm">
+                        Cancel
+                    </button>
+                </form>
             </div>
 
-            <form id="forgotPasswordForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-800 mb-2">Email</label>
-                    <input
-                        type="email"
-                        id="forgotPasswordEmail"
-                        placeholder="you@example.com"
-                        class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
-                        required
-                    >
+            <!-- Step 2: Code Verification -->
+            <div id="codeStep" class="reset-step" style="display: none;">
+                <h2 class="font-heading text-2xl font-bold text-gray-900 mb-2">Enter Code</h2>
+                <p class="text-sm text-gray-600 mb-6">
+                    We sent a code to <span id="emailDisplay" class="font-semibold text-gray-900"></span>
+                </p>
+
+                <div id="codeError" class="error-message mb-4"></div>
+                <div id="codeSuccess" class="success-message mb-4"></div>
+
+                <div class="code-container mb-4">
+                    <input type="text" maxlength="1" class="code-box" data-index="0" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="2" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="3" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="4" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="5" inputmode="numeric" pattern="[0-9]">
                 </div>
 
-                <button type="submit" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
-                    Send Code
+                <div class="timer mb-6 text-center" id="timer">Expires in 2:00</div>
+
+                <button type="button" id="resendBtn" class="btn-oauth w-full px-8 py-3 rounded-2xl text-gray-900 font-semibold text-sm mb-3">
+                    Resend Code
                 </button>
 
-                <button type="button" onclick="closeForgotPasswordModal()" class="btn-oauth w-full px-8 py-3 rounded-2xl text-gray-900 font-semibold text-sm">
-                    Cancel
+                <button type="button" onclick="backToEmail()" class="w-full px-8 py-3 text-gray-600 font-medium text-sm hover:text-gray-900 transition">
+                    ← Back
                 </button>
-            </form>
+            </div>
+
+            <!-- Step 3: New Password -->
+            <div id="passwordStep" class="reset-step" style="display: none;">
+                <h2 class="font-heading text-2xl font-bold text-gray-900 mb-2">Set New Password</h2>
+                <p class="text-sm text-gray-600 mb-6">Choose a strong password for your account</p>
+
+                <div id="passwordError" class="error-message mb-4"></div>
+
+                <form id="resetPasswordForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">New Password</label>
+                        <input
+                            type="password"
+                            id="newPassword"
+                            placeholder="Enter new password"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                            minlength="8"
+                        >
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium text-gray-800 mb-2">Confirm Password</label>
+                        <input
+                            type="password"
+                            id="confirmPassword"
+                            placeholder="Confirm new password"
+                            class="input-field w-full px-4 py-3 rounded-2xl text-gray-900 placeholder-gray-500 text-sm font-medium"
+                            required
+                            minlength="8"
+                        >
+                    </div>
+
+                    <button type="submit" id="resetSubmitBtn" class="btn-primary w-full px-8 py-3 rounded-2xl text-white font-semibold text-sm">
+                        Reset Password
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -822,34 +1019,68 @@
             }
         });
 
-        // Handle Forgot Password Form Submission - NEW CODE-BASED SYSTEM
+        // State for password reset flow
+        let resetEmail = '';
+        let recoveryToken = null;
+        let timeRemaining = 120;
+        let timerInterval = null;
+
+        // Show/hide reset steps
+        function showStep(stepName) {
+            document.getElementById('emailStep').style.display = 'none';
+            document.getElementById('codeStep').style.display = 'none';
+            document.getElementById('passwordStep').style.display = 'none';
+            document.getElementById(stepName + 'Step').style.display = 'block';
+        }
+
+        function backToEmail() {
+            showStep('email');
+            clearInterval(timerInterval);
+            resetEmail = '';
+            document.getElementById('forgotPasswordEmail').value = '';
+            document.querySelectorAll('.code-box').forEach(box => {
+                box.value = '';
+                box.classList.remove('filled', 'error', 'success');
+                box.disabled = false;
+            });
+        }
+
+        function showError(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.classList.add('active');
+            setTimeout(() => el.classList.remove('active'), 5000);
+        }
+
+        function showSuccess(elementId, message) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.classList.add('active');
+        }
+
+        // Handle Forgot Password Form Submission
         document.getElementById('forgotPasswordForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
             const email = document.getElementById('forgotPasswordEmail').value;
             const button = e.target.querySelector('button[type="submit"]');
-            const successMessage = document.getElementById('forgotPasswordSuccess');
+            resetEmail = email;
 
             // Validate Identity is ready
             if (!identityReady) {
-                alert('Authentication system is still loading. Please wait a moment and try again.');
-                console.error('Identity not ready yet');
+                showError('emailError', 'Authentication system is still loading. Please wait.');
                 return;
             }
 
-            // Validate Identity is enabled
             if (!identityEnabled || !netlifyIdentity.gotrue) {
-                alert('Netlify Identity is not enabled on this site.\n\nPlease contact the site administrator to enable Identity in the Netlify dashboard:\nSite configuration → Identity → Enable Identity');
-                console.error('Netlify Identity is not enabled');
+                showError('emailError', 'Identity service is not enabled.');
                 return;
             }
 
             try {
                 button.disabled = true;
-                button.textContent = 'Sending code...';
-                console.log('Requesting password reset code for:', email);
+                button.textContent = 'Sending...';
 
-                // NEW: Use our code-based system
                 const response = await fetch('/.netlify/functions/request-reset-code', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -862,34 +1093,225 @@
                     throw new Error(data.error || 'Failed to send code');
                 }
 
-                console.log('Password reset code sent successfully to:', email);
+                console.log('[Reset] Code sent to:', email);
 
-                // Redirect immediately with smooth transition
-                window.location.href = `/verify-code.html?email=${encodeURIComponent(email)}`;
+                // Switch to code entry step
+                document.getElementById('emailDisplay').textContent = email;
+                showStep('code');
+                startTimer();
+                document.querySelector('.code-box').focus();
 
-            } catch (error) {
-                console.error('Password reset code error:', error);
-
-                // User-friendly error messages
-                let errorMessage = 'Failed to send password reset code.';
-
-                if (error.message) {
-                    if (error.message.includes('not found') || error.message.includes('User not found') || error.message.includes('not exist')) {
-                        errorMessage = 'No account found with this email address.\n\nPlease check the email or create a new account.';
-                    } else if (error.message.includes('rate limit') || error.message.includes('too many') || error.message.includes('Too many')) {
-                        errorMessage = 'Too many password reset attempts.\n\nPlease wait an hour and try again.';
-                    } else if (error.message.includes('network') || error.message.includes('fetch')) {
-                        errorMessage = 'Network error. Please check your internet connection and try again.';
-                    } else if (error.message.includes('Identity')) {
-                        errorMessage = 'Netlify Identity is not properly configured.\n\nPlease contact the site administrator.';
-                    } else {
-                        errorMessage = `Error: ${error.message}`;
-                    }
-                }
-
-                alert(errorMessage);
                 button.disabled = false;
                 button.textContent = 'Send Code';
+
+            } catch (error) {
+                console.error('[Reset] Error:', error);
+                showError('emailError', error.message || 'Failed to send code. Please try again.');
+                button.disabled = false;
+                button.textContent = 'Send Code';
+            }
+        });
+
+        // Timer countdown
+        function startTimer() {
+            timeRemaining = 120;
+            const timerEl = document.getElementById('timer');
+            const codeBoxes = document.querySelectorAll('.code-box');
+
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                timerEl.textContent = `Expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+                timerEl.classList.remove('warning', 'danger');
+                if (timeRemaining <= 30) {
+                    timerEl.classList.add('danger');
+                } else if (timeRemaining <= 60) {
+                    timerEl.classList.add('warning');
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    timerEl.textContent = 'Code expired';
+                    codeBoxes.forEach(box => box.disabled = true);
+                    showError('codeError', 'Code expired. Please request a new one.');
+                }
+            }, 1000);
+        }
+
+        // Code box handling
+        const codeBoxes = document.querySelectorAll('.code-box');
+        codeBoxes.forEach((box, index) => {
+            box.addEventListener('input', (e) => {
+                const value = e.target.value;
+
+                if (!/^\d$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                box.classList.add('filled');
+
+                // Auto-advance
+                if (value && index < codeBoxes.length - 1) {
+                    codeBoxes[index + 1].focus();
+                }
+
+                // Auto-validate when complete
+                if (index === codeBoxes.length - 1 && value) {
+                    setTimeout(validateCode, 200);
+                }
+            });
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && index > 0) {
+                    codeBoxes[index - 1].focus();
+                    codeBoxes[index - 1].value = '';
+                    codeBoxes[index - 1].classList.remove('filled');
+                }
+            });
+
+            // Handle paste
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+
+                pastedData.split('').forEach((char, i) => {
+                    if (codeBoxes[i]) {
+                        codeBoxes[i].value = char;
+                        codeBoxes[i].classList.add('filled');
+                    }
+                });
+
+                if (pastedData.length === 6) {
+                    setTimeout(validateCode, 200);
+                }
+            });
+        });
+
+        async function validateCode() {
+            const code = Array.from(codeBoxes).map(box => box.value).join('');
+
+            if (code.length !== 6) return;
+
+            console.log('[Reset] Validating code');
+
+            try {
+                const response = await fetch('/.netlify/functions/verify-reset-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, email: resetEmail })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Invalid code');
+                }
+
+                console.log('[Reset] Code verified');
+
+                // Mark boxes as success
+                codeBoxes.forEach(box => {
+                    box.classList.remove('error');
+                    box.classList.add('success');
+                    box.disabled = true;
+                });
+
+                recoveryToken = data.token;
+
+                // Show password step
+                setTimeout(() => {
+                    clearInterval(timerInterval);
+                    showStep('password');
+                    document.getElementById('newPassword').focus();
+                }, 600);
+
+            } catch (error) {
+                console.error('[Reset] Code validation error:', error);
+                showError('codeError', error.message || 'Invalid code');
+
+                // Mark boxes as error
+                codeBoxes.forEach(box => {
+                    box.classList.add('error');
+                    setTimeout(() => {
+                        box.classList.remove('error');
+                        box.value = '';
+                        box.classList.remove('filled');
+                    }, 500);
+                });
+
+                codeBoxes[0].focus();
+            }
+        }
+
+        // Resend code
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            console.log('[Reset] Resending code');
+            try {
+                const response = await fetch('/.netlify/functions/request-reset-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: resetEmail })
+                });
+
+                if (response.ok) {
+                    showSuccess('codeSuccess', 'New code sent! Check your email.');
+                    startTimer();
+                    codeBoxes.forEach(box => {
+                        box.value = '';
+                        box.disabled = false;
+                        box.classList.remove('filled', 'error', 'success');
+                    });
+                    codeBoxes[0].focus();
+                } else {
+                    throw new Error('Failed to resend code');
+                }
+            } catch (error) {
+                console.error('[Reset] Resend error:', error);
+                showError('codeError', 'Failed to resend code. Please try again.');
+            }
+        });
+
+        // Password reset
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = document.getElementById('resetSubmitBtn');
+
+            if (newPassword !== confirmPassword) {
+                showError('passwordError', 'Passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showError('passwordError', 'Password must be at least 8 characters');
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Resetting...';
+
+                const user = await netlifyIdentity.gotrue.recover(recoveryToken, true);
+                await user.update({ password: newPassword });
+
+                console.log('[Reset] Password reset successful');
+
+                // Close modal and show success
+                closeForgotPasswordModal();
+                alert('Password reset successful! You can now sign in with your new password.');
+
+            } catch (error) {
+                console.error('[Reset] Password reset error:', error);
+                showError('passwordError', 'Error resetting password. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Reset Password';
             }
         });
     </script>
