@@ -3,266 +3,1534 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnPointAggregate — Early Access</title>
+    <title>Senator Davis | Defending North Carolina</title>
+
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Montserrat:wght@400;700;900&family=Courier+Prime:wght@400;700&family=Permanent+Marker&family=Gloria+Hallelujah&display=swap" rel="stylesheet">
+
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+        :root {
+            /* BRAND PALETTE */
+            --gop-red: #c8102e;
+            --deep-navy: #002040;
+            --paper-cream: #FDF0D5;
+            --off-white: #f4f1ea;
+            --gold: #F2A900;
+            --ink-black: #1a1a1a;
+            --terminal-green: #0f0;
+
+            /* WAR ROOM PALETTE */
+            --wood-dark: #3e2723;
+            --wood-light: #5d4037;
+            --folder-yellow: #e3c08d;
+
+            /* UI TOKENS */
+            --border-thick: 4px solid var(--ink-black);
+            --shadow-hard: 8px 8px 0px var(--ink-black);
+            --shadow-hover: 4px 4px 0px var(--ink-black);
+            --shadow-floating: 0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body {
+            overflow-x: hidden; /* Prevents horizontal scroll from rotated elements */
         }
 
         body {
-            background: #fafafa;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--paper-cream);
+            color: var(--ink-black);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
         }
 
-        .container {
-            max-width: 1200px;
+        /* --- TYPOGRAPHY --- */
+        h1, h2, h3 { font-family: 'Alfa Slab One', serif; text-transform: uppercase; line-height: 1.1; }
+        .handwritten { font-family: 'Gloria Hallelujah', cursive; color: var(--deep-navy); transform: rotate(-2deg); }
+        .marker-text { font-family: 'Permanent Marker', cursive; color: var(--gop-red); }
+        .typewriter { font-family: 'Courier Prime', monospace; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* --- BUTTONS --- */
+        .btn {
+            display: inline-block;
+            padding: 15px 35px;
+            font-family: 'Alfa Slab One';
+            text-decoration: none;
+            border: var(--border-thick);
+            box-shadow: var(--shadow-hard);
+            transition: var(--transition);
+            cursor: pointer;
+            text-transform: uppercase;
+            font-size: 1.1rem;
+        }
+        .btn:active { transform: translate(4px, 4px); box-shadow: none; }
+        .btn-red { background: var(--gop-red); color: white; border-color: var(--ink-black); }
+        .btn-navy { background: var(--deep-navy); color: white; border-color: white; }
+        .btn-gold { background: var(--gold); color: var(--deep-navy); }
+
+        /* --- HEADER BRANDING --- */
+        header.brand-header {
+            background: var(--deep-navy);
+            padding: 20px 0;
+            border-bottom: 5px solid var(--gop-red);
+            text-align: center;
+        }
+
+        .brand-lockup {
+            display: inline-block;
+            border: 3px solid white;
+            padding: 10px 25px;
+            color: white;
+        }
+
+        .brand-lockup h1 { font-size: 2.5rem; line-height: 1; letter-spacing: 2px; margin: 0; }
+        .brand-lockup span { font-family: 'Courier Prime'; font-weight: 700; letter-spacing: 4px; font-size: 0.9rem; display: block; margin-top: 5px; }
+
+        /* --- NAVIGATION --- */
+        nav {
+            position: sticky; top: 0; z-index: 1000;
+            background: white; border-bottom: var(--border-thick); padding: 15px 0;
+        }
+        .nav-flex { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; color: var(--deep-navy); transform: rotate(-2deg); }
+        .logo span { color: var(--gop-red); }
+
+        /* --- HERO SECTION --- */
+        .hero {
+            padding: 80px 0;
+            position: relative;
+            background: linear-gradient(135deg, var(--paper-cream) 60%, #e6ddd0 60%);
+        }
+
+        .hero-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            align-items: center;
+            gap: 50px;
+        }
+
+        .hero-content h1 {
+            font-size: 4.5rem;
+            color: var(--deep-navy);
+            text-shadow: 4px 4px 0px white, 6px 6px 0px var(--gop-red);
+            margin-bottom: 20px;
+        }
+
+        .hero-content p {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        /* Stylized Portrait Frame */
+        .portrait-wrapper {
+            position: relative;
+            padding: 10px;
+            background: white;
+            border: var(--border-thick);
+            box-shadow: 15px 15px 0px var(--deep-navy);
+            transform: rotate(3deg);
+        }
+
+        .jefferson-img {
+            width: 100%;
+            display: block;
+            filter: sepia(0.8) contrast(1.2);
+            border-bottom: 4px solid var(--gop-red);
+        }
+
+        .badge-overlay {
+            position: absolute;
+            top: -20px; right: -20px;
+            background: var(--gold);
+            border: var(--border-thick);
+            padding: 15px;
+            border-radius: 50%;
+            width: 120px; height: 120px;
+            display: flex; align-items: center; justify-content: center;
+            text-align: center;
+            font-family: 'Alfa Slab One';
+            font-size: 0.9rem;
+            transform: rotate(15deg);
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        /* --- WAR ROOM SECTION --- */
+        .war-room {
+            background-color: var(--wood-dark);
+            background-image: linear-gradient(90deg, rgba(255,255,255,.07) 50%, transparent 50%),
+            linear-gradient(90deg, rgba(255,255,255,.13) 50%, transparent 50%),
+            linear-gradient(90deg, transparent 50%, rgba(255,255,255,.17) 50%),
+            linear-gradient(90deg, transparent 50%, rgba(255,255,255,.19) 50%);
+            background-size: 13px, 29px, 37px, 53px;
+            padding: 100px 20px;
+            min-height: 100vh;
+            overflow: hidden;
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
+            border-top: var(--border-thick);
+            border-bottom: var(--border-thick);
+        }
+
+        .war-room-title {
+            text-align: center;
+            color: #dacab0;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .war-room-subtitle {
+            text-align: center;
+            color: rgba(255,255,255,0.6);
+            font-family: 'Courier Prime';
+            margin-bottom: 50px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .desk-container {
+            max-width: 1300px;
             margin: 0 auto;
-            padding: 0 24px;
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 40px;
+            align-items: start;
+        }
+
+        /* --- LEFT SIDE: CASE FILES --- */
+        .case-files {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .file-folder {
+            background: var(--folder-yellow);
+            padding: 15px 20px;
+            border-radius: 4px 10px 10px 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 5px 5px 10px rgba(0,0,0,0.3);
+            border-left: 10px solid rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        /* Folder Tab Effect */
+        .file-folder::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 0;
+            width: 40%;
+            height: 10px;
+            background: var(--folder-yellow);
+            border-radius: 4px 4px 0 0;
+            filter: brightness(0.9);
+        }
+
+        .file-folder:hover {
+            transform: translateX(10px);
+            background: #ebd0a6;
+        }
+
+        .file-folder.active {
+            transform: translateX(20px) scale(1.05);
+            background: #ffdfba;
+            box-shadow: 10px 10px 20px rgba(0,0,0,0.4);
+            z-index: 10;
+            border-left: 10px solid var(--gop-red);
+        }
+
+        .folder-label {
+            font-family: 'Courier Prime';
+            font-weight: 700;
+            font-size: 1.1rem;
+            text-transform: uppercase;
+            color: #4e342e;
+        }
+
+        .status-stamp {
+            font-size: 0.7rem;
+            font-weight: bold;
+            border: 2px solid rgba(0,0,0,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+            transform: rotate(-5deg);
+            opacity: 0.6;
+        }
+
+        /* --- RIGHT SIDE: THE DOSSIER --- */
+        .dossier-wrapper {
+            position: relative;
+            perspective: 1000px;
+            min-height: 700px;
+        }
+
+        .paper-stack {
+            background: #fcfcfc;
+            width: 100%;
+            min-height: 650px;
+            padding: 60px;
+            position: relative;
+            box-shadow: var(--shadow-floating);
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%239C92AC' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            transform-origin: top center;
+            animation: slideIn 0.5s ease-out forwards;
+            display: none;
+        }
+
+        .paper-stack.active { display: block; }
+
+        @keyframes slideIn {
+            0% { transform: translateY(50px) rotate(2deg); opacity: 0; }
+            100% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        }
+
+        /* --- DOSSIER DETAILS --- */
+        .paper-clip {
+            position: absolute;
+            top: -15px;
+            left: 40px;
+            width: 40px;
+            height: 80px;
+            border: 5px solid #555;
+            border-radius: 20px;
+            border-bottom: none;
+            z-index: 5;
+        }
+        .paper-clip::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 8px;
+            width: 14px;
+            height: 50px;
+            border: 5px solid #555;
+            border-top: none;
+            border-radius: 0 0 10px 10px;
+        }
+
+        .stamp-box {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            border: 4px double var(--gop-red);
+            color: var(--gop-red);
+            padding: 5px 15px;
+            font-family: 'Alfa Slab One';
+            font-size: 1.2rem;
+            transform: rotate(-15deg);
+            opacity: 0.7;
+            mix-blend-mode: multiply;
+        }
+
+        .bill-header {
+            border-bottom: 2px solid black;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+        }
+
+        .congress-meta {
+            font-family: 'Courier Prime';
+            font-size: 0.8rem;
+            color: #666;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bill-title {
+            font-size: 2.5rem;
+            margin: 20px 0;
+            line-height: 1;
+            color: black;
+        }
+
+        .bill-content {
+            font-family: 'Times New Roman', serif;
+            font-size: 1.1rem;
+            line-height: 1.6;
+            columns: 2;
+            column-gap: 40px;
+            text-align: justify;
+        }
+
+        .bill-content p { margin-bottom: 15px; }
+
+        .marginal-note {
+            position: absolute;
+            width: 200px;
+            font-family: 'Gloria Hallelujah';
+            color: darkblue;
+            font-size: 0.9rem;
+            line-height: 1.2;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, rgba(255,255,0,0.4) 0%, rgba(255,255,0,0.2) 100%);
+        }
+
+        .signature-area {
+            margin-top: 40px;
+            border-top: 2px dashed #ccc;
+            padding-top: 20px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+        }
+        .sig-label { font-family: 'Courier Prime'; font-size: 0.8rem; }
+        .davis-sig {
+            font-family: 'Permanent Marker';
+            font-size: 2rem;
+            color: var(--deep-navy);
+            transform: rotate(-5deg);
+        }
+
+        /* --- BOARD OF TRUTH (REASONS TO VOTE SECTION) --- */
+        .cork-section {
+            background-color: #6d4c41;
+            /* Corkboard pattern via radial gradient simulation */
+            background-image: radial-gradient(#5d4037 10%, transparent 10%),
+                              radial-gradient(#5d4037 10%, transparent 10%);
+            background-size: 10px 10px;
+            background-position: 0 0, 5px 5px;
+            padding: 80px 0;
+            border-top: var(--border-thick);
+            border-bottom: var(--border-thick);
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.7);
+        }
+
+        .cork-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 40px;
+        }
+
+        .pin-card {
+            background: white;
+            width: 280px;
+            padding: 25px;
+            position: relative;
+            box-shadow: 5px 10px 20px rgba(0,0,0,0.5);
+            font-family: 'Courier Prime';
+            transition: transform 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .pin-card:hover { transform: scale(1.05) rotate(0deg) !important; z-index: 10; }
+
+        .pin-head {
+            width: 20px; height: 20px;
+            background: radial-gradient(circle at 30% 30%, #ff5252, #b71c1c);
+            border-radius: 50%;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
+            z-index: 5;
+        }
+
+        .pin-head.blue { background: radial-gradient(circle at 30% 30%, #448aff, #1565c0); }
+        .pin-head.gold { background: radial-gradient(circle at 30% 30%, #ffd740, #ff6f00); }
+
+        .card-title {
+            font-family: 'Alfa Slab One';
+            font-size: 1.4rem;
+            color: var(--deep-navy);
+            margin-bottom: 15px;
+            border-bottom: 3px solid var(--gop-red);
+            padding-bottom: 5px;
             width: 100%;
         }
 
-        /* Header */
-        header {
-            padding: 24px 0;
-            border-bottom: 1px solid #eaeaea;
+        .card-body { font-size: 0.95rem; line-height: 1.4; color: #333; }
+
+        .card-stamp {
+            margin-top: 15px;
+            border: 3px solid var(--gop-red);
+            color: var(--gop-red);
+            font-family: 'Permanent Marker';
+            font-size: 1.2rem;
+            padding: 5px 10px;
+            transform: rotate(-8deg);
+            opacity: 0.8;
         }
 
-        .logo {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 20px;
-            font-weight: 700;
-            letter-spacing: -0.02em;
-            color: #000;
+        /* Specific Rotations for randomness */
+        .pin-card:nth-child(1) { transform: rotate(-3deg); }
+        .pin-card:nth-child(2) { transform: rotate(4deg); top: 20px; }
+        .pin-card:nth-child(3) { transform: rotate(-2deg); }
+        .pin-card:nth-child(4) { transform: rotate(3deg); top: 15px; }
+
+
+        /* --- RALLIES SECTION --- */
+        .rallies { padding: 100px 0; background: white; }
+        .section-head { text-align: center; margin-bottom: 60px; }
+        .section-head h2 { font-size: 3rem; color: var(--deep-navy); }
+
+        .ticket-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+
+        .ticket {
+            background: var(--paper-cream);
+            border: var(--border-thick);
+            display: flex;
+            position: relative;
+            box-shadow: var(--shadow-hard);
+            transition: var(--transition);
+            -webkit-mask-image: radial-gradient(circle at 0 50%, transparent 15px, black 16px), radial-gradient(circle at 100% 50%, transparent 15px, black 16px);
+            mask-image: radial-gradient(circle at 0 50%, transparent 15px, black 16px), radial-gradient(circle at 100% 50%, transparent 15px, black 16px);
         }
 
-        /* Hero Section */
-        .hero {
-            flex: 1;
+        .ticket:hover { transform: translateY(-10px); box-shadow: 12px 12px 0px var(--gop-red); }
+
+        .ticket-date {
+            background: var(--deep-navy);
+            color: white;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-right: 3px dashed white;
+            width: 100px;
+        }
+        .t-month { font-weight: 900; font-size: 1rem; }
+        .t-day { font-family: 'Alfa Slab One'; font-size: 2.5rem; }
+
+        .ticket-info { padding: 25px; flex-grow: 1; }
+        .ticket-info h3 { font-size: 1.5rem; margin-bottom: 5px; }
+        .ticket-loc { font-family: 'Courier Prime'; font-weight: 700; color: #666; display: flex; align-items: center; gap: 5px; }
+
+        .icon-pin { width: 16px; height: 16px; fill: var(--gop-red); }
+
+        /* --- PATRIOT TRANSMISSION (DONATION TICKER) --- */
+        .live-feed-section {
+            background: #0a0a0a;
+            border-top: var(--border-thick);
+            border-bottom: var(--border-thick);
+            padding: 50px 0;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .feed-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #001529;
+            border: 4px solid #333;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            height: 400px;
+            gap: 20px;
+        }
+
+        .feed-header {
+            border-right: 2px dashed #444;
+            padding-right: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            text-align: right;
+        }
+
+        .feed-title {
+            color: var(--gop-red);
+            font-family: 'Alfa Slab One';
+            font-size: 2rem;
+            line-height: 1;
+            margin-bottom: 10px;
+        }
+
+        .feed-subtitle {
+            color: #888;
+            font-family: 'Courier Prime';
+            font-size: 0.8rem;
+            text-transform: uppercase;
+        }
+
+        .blink-dot {
+            display: inline-block;
+            width: 12px; height: 12px;
+            background: red;
+            border-radius: 50%;
+            margin-right: 5px;
+            animation: blink 1s infinite;
+        }
+
+        @keyframes blink { 50% { opacity: 0; } }
+
+        .ticker-window {
+            overflow: hidden;
+            position: relative;
+            mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
+        }
+
+        .ticker-content {
+            animation: scrollUp 45s linear infinite;
+        }
+
+        .ticker-window:hover .ticker-content {
+            animation-play-state: paused;
+        }
+
+        @keyframes scrollUp {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-50%); }
+        }
+
+        .donation-item {
+            font-family: 'Courier Prime';
+            color: #0f0;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0, 255, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            font-size: 1rem;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .d-name { font-weight: bold; }
+        .d-loc { color: #888; font-size: 0.8rem; }
+        .d-amount { color: var(--gold); font-weight: bold; }
+
+        /* --- DONATE SECTION --- */
+        .donate-section {
+            background: var(--gop-red);
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            border-top: var(--border-thick);
+        }
+
+        .donate-box {
+            background: var(--deep-navy);
+            border: 6px solid white;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 50px;
+            box-shadow: 15px 15px 0px rgba(0,0,0,0.3);
+            transform: rotate(-1deg);
+        }
+
+        .donate-grid {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .amount-btn {
+            background: transparent;
+            border: 2px solid white;
+            color: white;
+            padding: 15px 25px;
+            font-family: 'Alfa Slab One';
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .amount-btn:hover, .amount-btn.selected { background: var(--gold); color: var(--deep-navy); transform: scale(1.1); border-color: var(--gold); }
+
+        /* --- FOOTER --- */
+        footer {
+            background: var(--ink-black);
+            color: #888;
+            padding: 60px 0;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        .disclaimer { border: 1px solid #555; display: inline-block; padding: 10px 20px; margin-top: 20px; text-transform: uppercase; }
+
+        /* --- SCROLL ANIMATION UTILITY --- */
+        .reveal { opacity: 0; transform: translateY(30px); transition: all 0.8s ease-out; }
+        .reveal.active { opacity: 1; transform: translateY(0); }
+
+        /* --- MODAL POP UP STYLES --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 32, 64, 0.9);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: var(--off-white);
+            width: 90%;
+            max-width: 900px;
+            border: 8px solid var(--gop-red);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            position: relative;
+            transform: scale(0.7) translateY(100px) rotate(-5deg);
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+            /* Subtle background pattern for modal */
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3z' fill='%239C92AC' fill-opacity='0.08' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        .modal-overlay.show .modal-content {
+            transform: scale(1) translateY(0) rotate(0deg);
+        }
+
+        .modal-image-col {
+            background: var(--deep-navy);
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 60px 0;
         }
 
-        .hero-content {
+        .modal-jefferson {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            /* Filter to make it look old/printed */
+            filter: sepia(0.5) contrast(1.2);
+            opacity: 0.9;
+        }
+
+        .modal-text-col {
+            padding: 40px;
             text-align: center;
-            max-width: 580px;
-            margin: 0 auto;
+            position: relative;
         }
 
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 10px;
-            background: #000;
-            color: #fff;
-            border-radius: 50px;
-            font-size: 12px;
-            font-weight: 500;
-            margin-bottom: 20px;
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        .pulse-dot {
-            width: 5px;
-            height: 5px;
-            background: #0f0;
-            border-radius: 50%;
-            animation: pulse 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        h1 {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 56px;
-            font-weight: 700;
-            letter-spacing: -0.04em;
-            line-height: 1.1;
-            color: #000;
-            margin-bottom: 16px;
-            animation: fadeInUp 0.6s ease-out 0.1s both;
-        }
-
-        .subtitle {
-            font-size: 18px;
-            line-height: 1.5;
-            color: #666;
-            margin-bottom: 32px;
-            animation: fadeInUp 0.6s ease-out 0.2s both;
-            font-weight: 400;
-        }
-
-        .cta-button {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 12px 24px;
-            background: #000;
-            color: #fff;
-            text-decoration: none;
-            border-radius: 7px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            animation: fadeInUp 0.6s ease-out 0.3s both;
-            border: none;
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 2rem;
             cursor: pointer;
+            color: var(--ink-black);
+            font-weight: bold;
+            z-index: 10;
+            line-height: 1;
+            transition: color 0.2s;
+            background: rgba(255, 255, 255, 0.9);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--ink-black);
+        }
+        .close-modal:hover {
+            color: white;
+            background: var(--gop-red);
+            border-color: var(--gop-red);
         }
 
-        .cta-button:hover {
-            background: #111;
-            transform: translateY(-0.5px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        .modal-alert-banner {
+            background: var(--gop-red);
+            color: white;
+            font-family: 'Courier Prime';
+            font-weight: bold;
+            padding: 5px;
+            display: inline-block;
+            margin-bottom: 15px;
+            transform: rotate(-2deg);
+            box-shadow: 3px 3px 0 rgba(0,0,0,0.2);
         }
 
-        .cta-button:active {
-            transform: translateY(0);
+        .modal-headline {
+            font-size: 2.8rem;
+            color: var(--deep-navy);
+            line-height: 0.95;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .modal-body {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            font-weight: 600;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .modal-donations {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-amount {
+            border: 2px solid var(--deep-navy);
+            background: white;
+            color: var(--deep-navy);
+            padding: 15px 0;
+            font-family: 'Alfa Slab One';
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 4px 4px 0 rgba(0,0,0,0.1);
+        }
+
+        .modal-amount:hover, .modal-amount.selected {
+            background: var(--gop-red);
+            color: white;
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0 rgba(0,0,0,0.2);
+        }
+
+        .modal-cta {
+            width: 100%;
+            background: var(--gold);
+            color: var(--deep-navy);
+            font-family: 'Alfa Slab One';
+            font-size: 1.5rem;
+            padding: 15px;
+            border: 3px solid var(--deep-navy);
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 6px 6px 0 var(--deep-navy);
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .modal-cta:active {
+            transform: translate(4px, 4px);
             box-shadow: none;
         }
 
-        .arrow {
-            transition: transform 0.2s ease;
+        /* Shine effect on button */
+        .modal-cta::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
         }
 
-        .cta-button:hover .arrow {
-            transform: translateX(2px);
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            20% { transform: translateX(100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
         }
 
-        /* Footer */
-        footer {
-            padding: 24px 0;
-            border-top: 1px solid #eaeaea;
-            text-align: center;
-            color: #666;
-            font-size: 14px;
-        }
+        /* =========================================
+           MOBILE MEDIA QUERIES - RESPONSIVE LOGIC
+           ========================================= */
+        @media (max-width: 900px) {
+            /* GLOBAL */
+            .container { padding: 0 15px; }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+            /* HERO */
+            .hero-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+                text-align: center;
             }
-            to {
-                opacity: 1;
+            .hero-content h1 {
+                font-size: 2.8rem;
+            }
+            .portrait-wrapper {
+                width: 80%;
+                max-width: 400px;
+                margin: 20px auto 0;
+                transform: rotate(2deg); /* Slight rotation only */
+            }
+            .badge-overlay {
+                right: -10px;
+                width: 100px; height: 100px;
+                font-size: 0.8rem;
+            }
+
+            /* WAR ROOM (AGENDA) */
+            .desk-container {
+                grid-template-columns: 1fr;
+            }
+            .case-files {
+                flex-direction: row;
+                overflow-x: auto;
+                padding-bottom: 15px;
+                margin-bottom: 20px;
+                /* Hide scrollbar but allow scroll */
+                scrollbar-width: none;
+            }
+            .case-files::-webkit-scrollbar { display: none; }
+
+            .file-folder {
+                min-width: 160px;
+                margin-right: 10px;
+                font-size: 0.9rem;
+                flex-shrink: 0;
+            }
+            /* When a folder is active in mobile, move it up slightly */
+            .file-folder.active {
+                transform: translateY(-5px);
+            }
+
+            /* DOSSIER (PAPER) */
+            .dossier-wrapper { min-height: auto; }
+            .paper-stack {
+                padding: 30px 20px;
+                min-height: auto;
+            }
+            .bill-content { columns: 1; text-align: left; }
+            .bill-title { font-size: 2rem; }
+            .stamp-box {
+                position: relative;
+                top: auto; right: auto;
+                display: inline-block;
+                margin-bottom: 10px;
+                transform: rotate(-2deg);
+            }
+            .marginal-note {
+                position: relative;
+                width: 100%;
+                transform: none;
+                margin: 20px 0;
+                color: var(--gop-red);
+                text-align: center;
+            }
+
+            /* CORKBOARD (TRUTH) */
+            .cork-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 30px;
+            }
+            .pin-card {
+                transform: rotate(0deg) !important;
+                top: 0 !important;
+                width: 100%;
+                max-width: 350px;
+            }
+
+            /* TICKER (LIVE FEED) */
+            .feed-container {
+                grid-template-columns: 1fr;
+                height: auto;
+                padding: 15px;
+            }
+            .feed-header {
+                border-right: none;
+                border-bottom: 2px dashed #444;
+                padding-bottom: 15px;
+                margin-bottom: 15px;
+                text-align: center;
+            }
+            .ticker-window { height: 250px; }
+
+            /* DONATE BOX */
+            .donate-box { padding: 30px 20px; transform: rotate(0deg); }
+            .donate-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+            .amount-btn { width: 100%; padding: 15px 10px; }
+
+            /* MODAL */
+            .modal-content {
+                grid-template-columns: 1fr;
+                width: 95%;
+                max-height: 90vh;
+                overflow-y: auto;
                 transform: translateY(0);
             }
-        }
-
-        /* Mobile Optimizations */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 24px;
+            .modal-image-col { height: 180px; }
+            .modal-text-col { padding: 20px; }
+            .modal-headline { font-size: 2rem; }
+            .modal-donations {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
             }
 
-            header {
-                padding: 16px 0;
-            }
-
-            .logo {
-                font-size: 18px;
-            }
-
-            .hero {
-                padding: 48px 0 32px;
-            }
-
-            .badge {
-                font-size: 11px;
-                padding: 3px 8px;
-                margin-bottom: 16px;
-            }
-
-            .pulse-dot {
-                width: 4px;
-                height: 4px;
-            }
-
-            .mobile-break {
-                display: inline;
-            }
-
-            h1 {
-                font-size: 36px;
-                margin-bottom: 12px;
-                line-height: 1.15;
-            }
-
-            .subtitle {
-                font-size: 16px;
-                margin-bottom: 28px;
-                line-height: 1.5;
-            }
-
-            .cta-button {
-                width: 100%;
-                justify-content: center;
-                padding: 14px 24px;
-                font-size: 14px;
-            }
-
-            footer {
-                font-size: 13px;
-                padding: 20px 0;
-            }
-        }
-
-        @media (max-width: 390px) {
-            h1 {
-                font-size: 32px;
-            }
-
-            .subtitle {
-                font-size: 15px;
+            /* MOBILE: Make close button more visible */
+            .close-modal {
+                top: 5px;
+                right: 5px;
+                width: 44px;
+                height: 44px;
+                font-size: 1.5rem;
+                background: rgba(255, 255, 255, 0.95);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
             }
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="container">
-            <div class="logo">OnPoint<span style="opacity: 1;">A</span>ggregate</div>
+
+    <!-- BRAND HEADER -->
+    <header class="brand-header">
+        <div class="brand-lockup">
+            <h1>DAVIS FOR SENATE</h1>
+            <span>CONSERVATIVE. INCUMBENT. PATRIOT.</span>
         </div>
     </header>
 
-    <main class="hero">
-        <div class="hero-content">
-            <div class="badge">
-                <span class="pulse-dot"></span>
-                Sign Up Available
+    <!-- NAV -->
+    <nav>
+        <div class="container nav-flex">
+            <div class="logo">SEN. <span>DAVIS</span></div>
+            <div>
+                <a href="#war-room" class="btn btn-navy" style="padding: 10px 20px; font-size: 0.9rem;">Agenda</a>
+                <a href="#donate" class="btn btn-red" style="margin-left: 10px; padding: 10px 20px; font-size: 0.9rem;">Donate</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="container hero-grid">
+            <div class="hero-content reveal active">
+                <h1>DEFENDING<br>NORTH<br>CAROLINA</h1>
+                <p>Conservative. Incumbent. Patriot.<br>
+                The radical left wants to change our values. Jayden "Buck" Davis says <strong>NO.</strong> We are securing the border, cutting inflation, and protecting our farms.</p>
+                <a href="#donate" class="btn btn-red">Join the Fight</a>
+                <a href="#rallies" class="btn btn-navy" style="margin-left: 10px;">Get Tickets</a>
             </div>
 
-            <h1>Participate in the<br class="mobile-break"> OnPointAggregate 3.0 Preview</h1>
-
-            <p class="subtitle">
-                Sign up to join early access. Free of charge.
-            </p>
-
-            <a href="/login.html" class="cta-button">
-                Get Started
-                <span class="arrow">→</span>
-            </a>
+            <div class="portrait-wrapper reveal active">
+                <div class="badge-overlay">100% NC<br>GROWN</div>
+                <!-- Fixed High-Res Image of Jefferson by Rembrandt Peale -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1e/Thomas_Jefferson_by_Rembrandt_Peale%2C_1800.jpg/800px-Thomas_Jefferson_by_Rembrandt_Peale%2C_1800.jpg" alt="Senator Jayden Davis" class="jefferson-img">
+                <div style="background: var(--deep-navy); color: white; text-align: center; padding: 15px; font-family: 'Alfa Slab One'; font-size: 1.5rem;">SENATOR JAYDEN DAVIS</div>
+            </div>
         </div>
-    </main>
+    </section>
 
+    <!-- WAR ROOM (Legislative Agenda) -->
+    <section id="war-room" class="war-room">
+        <h2 class="war-room-title reveal active">THE WAR ROOM</h2>
+        <p class="war-room-subtitle reveal active">CLASSIFIED LEGISLATIVE AGENDA // EYES ONLY</p>
+
+        <div class="desk-container reveal active">
+
+            <!-- LEFT COLUMN: THE FOLDERS -->
+            <div class="case-files">
+
+                <!-- Folder 1 -->
+                <div class="file-folder active" onclick="openDossier('border')">
+                    <span class="folder-label">Border Security</span>
+                    <span class="status-stamp" style="color: #c8102e; border-color: #c8102e;">URGENT</span>
+                </div>
+
+                <!-- Folder 2 -->
+                <div class="file-folder" onclick="openDossier('energy')">
+                    <span class="folder-label">NC Energy Indep.</span>
+                    <span class="status-stamp" style="color: #002040; border-color: #002040;">PENDING</span>
+                </div>
+
+                <!-- Folder 3 -->
+                <div class="file-folder" onclick="openDossier('ag')">
+                    <span class="folder-label">Farm Bill 2032</span>
+                    <span class="status-stamp" style="color: green; border-color: green;">SIGNED</span>
+                </div>
+            </div>
+
+            <!-- RIGHT COLUMN: THE DOSSIER VIEW -->
+            <div class="dossier-wrapper">
+
+                <!-- DOSSIER 1: BORDER -->
+                <div id="doc-border" class="paper-stack active">
+                    <div class="paper-clip"></div>
+                    <div class="stamp-box">TOP SECRET</div>
+
+                    <div class="marginal-note" style="top: 120px; right: -40px; transform: rotate(5deg);">
+                        We must stop the flow<br>on I-95 immediately! <br> - J.D.
+                    </div>
+
+                    <div class="bill-header">
+                        <div class="congress-meta">
+                            <span>118TH CONGRESS <br> 1st Session</span>
+                            <span>S. 492</span>
+                        </div>
+                        <h2 class="bill-title">THE "SECURE NC" ACT</h2>
+                        <div class="congress-meta">
+                            <span>SPONSOR: SEN. JAYDEN DAVIS (R-NC)</span>
+                        </div>
+                    </div>
+
+                    <div class="bill-content">
+                        <p><strong>§ SECTION 1. SHORT TITLE.</strong> This Act may be cited as the "North Carolina Sovereignty and Border Protection Act."</p>
+
+                        <p><strong>§ SECTION 2. FINDINGS.</strong> The Senate finds that the failure of Federal enforcement has directly impacted North Carolina communities via the I-95 drug corridor.</p>
+
+                        <p><span class="highlight"><strong>§ SECTION 3. APPROPRIATIONS.</strong> There is hereby appropriated $4,000,000,000 for the immediate construction of physical barriers</span> and the deployment of advanced detection technology.</p>
+
+                        <p><strong>§ SECTION 4. ZERO TOLERANCE.</strong> Establishes a mandatory minimum sentence for traffickers of Fentanyl found crossing state lines into North Carolina. We are ending the "Catch and Release" loophole that endangers our suburbs.</p>
+                    </div>
+
+                    <div class="signature-area">
+                        <span class="sig-label">APPROVED BY:</span>
+                        <div class="davis-sig">Jayden Davis</div>
+                    </div>
+                </div>
+
+                <!-- DOSSIER 2: ENERGY -->
+                <div id="doc-energy" class="paper-stack">
+                    <div class="paper-clip"></div>
+                    <div class="stamp-box">ACTION REQ</div>
+
+                    <div class="marginal-note" style="top: 200px; left: -30px; color: var(--gop-red); transform: rotate(-10deg);">
+                        Prices are too high!<br>Drill here, drill now.
+                    </div>
+
+                    <div class="bill-header">
+                        <div class="congress-meta">
+                            <span>118TH CONGRESS <br> 2nd Session</span>
+                            <span>S. 1776</span>
+                        </div>
+                        <h2 class="bill-title">ENERGY FREEDOM ACT</h2>
+                        <div class="congress-meta">
+                            <span>SPONSOR: SEN. JAYDEN DAVIS (R-NC)</span>
+                        </div>
+                    </div>
+
+                    <div class="bill-content">
+                        <p><strong>§ SECTION 1. OFFSHORE LEASING.</strong> Directs the Department of the Interior to immediately resume oil and gas lease sales in the Mid-Atlantic planning area, strictly for the benefit of lowering utility costs for NC residents.</p>
+
+                        <p><strong>§ SECTION 2. GAS TAX HOLIDAY.</strong> <span class="highlight">Immediate suspension of the federal gas tax</span> for 180 days to provide relief to working families in Raleigh, Charlotte, and rural counties.</p>
+
+                        <p><strong>§ SECTION 3. PIPELINE APPROVAL.</strong> Expedites the permitting process for natural gas pipelines to ensure reliable winter heating for the Blue Ridge mountain region, bypassing EPA bureaucratic red tape.</p>
+                    </div>
+
+                    <div class="signature-area">
+                        <span class="sig-label">PROPOSED BY:</span>
+                        <div class="davis-sig">Jayden Davis</div>
+                    </div>
+                </div>
+
+                <!-- DOSSIER 3: AGRICULTURE -->
+                <div id="doc-ag" class="paper-stack">
+                    <div class="paper-clip"></div>
+                    <div class="stamp-box">PRIORITY</div>
+
+                    <div class="marginal-note" style="bottom: 100px; right: 20px; color: green; font-family:'Permanent Marker'; transform: rotate(-2deg);">
+                        Save our Family Farms!
+                    </div>
+
+                    <div class="bill-header">
+                        <div class="congress-meta">
+                            <span>118TH CONGRESS <br> 1st Session</span>
+                            <span>S. 88</span>
+                        </div>
+                        <h2 class="bill-title">NC FARM DEFENSE BILL</h2>
+                        <div class="congress-meta">
+                            <span>SPONSOR: SEN. JAYDEN DAVIS (R-NC)</span>
+                        </div>
+                    </div>
+
+                    <div class="bill-content">
+                        <p><strong>§ SECTION 1. DEATH TAX REPEAL.</strong> Permanently repeals the estate tax for family-owned agricultural operations, ensuring that North Carolina farms stay in the family, not the hands of the IRS.</p>
+
+                        <p><strong>§ SECTION 2. WATER RIGHTS.</strong> <span class="highlight">Blocks the EPA's "Waters of the U.S." rule</span> which attempts to regulate farm ponds and drainage ditches as navigable waterways. This is a direct assault on our sovereignty.</p>
+
+                        <p><strong>§ SECTION 3. HOG FARMER PROTECTION.</strong> Provides legal immunity for compliant hog farmers against frivolous nuisance lawsuits funded by out-of-state activist groups targeting our livestock industry.</p>
+                    </div>
+
+                    <div class="signature-area">
+                        <span class="sig-label">CO-SPONSORED BY:</span>
+                        <div class="davis-sig">Jayden Davis</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW SECTION: THE BOARD OF TRUTH (REASONS TO VOTE) -->
+    <section class="cork-section">
+        <div class="container">
+            <div class="section-head reveal active" style="margin-bottom: 40px;">
+                <h2 style="color: #e3c08d; text-shadow: 2px 2px 4px black;">THE PLATFORM</h2>
+                <p class="typewriter" style="color: white;">CORE PRINCIPLES // NON-NEGOTIABLE</p>
+            </div>
+
+            <div class="cork-container reveal active">
+
+                <!-- Card 1: Conservative -->
+                <div class="pin-card">
+                    <div class="pin-head"></div>
+                    <h3 class="card-title">TRUE CONSERVATIVE</h3>
+                    <div class="card-body">
+                        <p>No flip-flopping. No "RINO" deals. Jayden Davis has a <strong>100% ACU Rating</strong>. He stands on principle, not polls.</p>
+                    </div>
+                    <div class="card-stamp">AMERICA FIRST</div>
+                </div>
+
+                <!-- Card 2: Economics -->
+                <div class="pin-card">
+                    <div class="pin-head blue"></div>
+                    <h3 class="card-title">ECONOMIC FREEDOM</h3>
+                    <div class="card-body">
+                        <p>We support massive <strong>TAX BREAKS</strong> for working families. It's your money, not the government's.</p>
+                    </div>
+                    <div class="card-stamp" style="color: green; border-color: green; transform: rotate(5deg);">CUT TAXES</div>
+                </div>
+
+                <!-- Card 3: Social/Gender -->
+                <div class="pin-card">
+                    <div class="pin-head gold"></div>
+                    <h3 class="card-title">COMMON SENSE</h3>
+                    <div class="card-body">
+                        <p>We believe in Science. We support <strong>2 GENDERS</strong>. We are keeping radical ideology out of North Carolina classrooms.</p>
+                    </div>
+                    <div class="card-stamp" style="color: var(--deep-navy); border-color: var(--deep-navy);">REALITY CHECK</div>
+                </div>
+
+                <!-- Card 4: Romney/Border -->
+                <div class="pin-card">
+                    <div class="pin-head"></div>
+                    <h3 class="card-title">SECURE BORDERS</h3>
+                    <div class="card-body">
+                        <p>Jayden proudly supports <strong>PRESIDENT ROMNEY'S</strong> bold agenda to finish the wall and secure our sovereignty.</p>
+                    </div>
+                    <div class="card-stamp" style="color: #b71c1c; border-color: #b71c1c; transform: rotate(-5deg);">BUILD IT</div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- RALLIES -->
+    <section id="rallies" class="rallies">
+        <div class="container">
+            <div class="section-head reveal">
+                <h2>ON THE TRAIL</h2>
+                <p class="typewriter">COME MEET JAYDEN IN YOUR HOMETOWN</p>
+            </div>
+
+            <div class="ticket-container reveal">
+
+                <!-- Ticket 1 -->
+                <div class="ticket">
+                    <div class="ticket-date">
+                        <span class="t-month">OCT</span>
+                        <span class="t-day">12</span>
+                    </div>
+                    <div class="ticket-info">
+                        <h3>FREEDOM FEST</h3>
+                        <div class="ticket-loc">
+                            <svg class="icon-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+                            Charlotte Fairgrounds
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-navy" style="padding: 8px 20px; font-size: 0.8rem;">RSVP FREE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket 2 -->
+                <div class="ticket">
+                    <div class="ticket-date">
+                        <span class="t-month">OCT</span>
+                        <span class="t-day">18</span>
+                    </div>
+                    <div class="ticket-info">
+                        <h3>RALEIGH RALLY</h3>
+                        <div class="ticket-loc">
+                            <svg class="icon-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+                            Convention Center
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-navy" style="padding: 8px 20px; font-size: 0.8rem;">RSVP FREE</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ticket 3 -->
+                <div class="ticket">
+                    <div class="ticket-date">
+                        <span class="t-month">OCT</span>
+                        <span class="t-day">25</span>
+                    </div>
+                    <div class="ticket-info">
+                        <h3>VICTORY BUS</h3>
+                        <div class="ticket-loc">
+                            <svg class="icon-pin" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"></path></svg>
+                            Asheville Downtown
+                        </div>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-navy" style="padding: 8px 20px; font-size: 0.8rem;">RSVP FREE</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- LIVE FEED DONATION TICKER -->
+    <section class="live-feed-section">
+        <div class="feed-container">
+            <div class="feed-header">
+                <h2 class="feed-title"><span class="blink-dot"></span>LIVE FEED</h2>
+                <p class="feed-subtitle">Secure Transmission</p>
+                <p class="feed-subtitle" style="margin-top:10px; color: white;">JOIN THE MOVEMENT<br>BEFORE IT'S TOO LATE</p>
+            </div>
+
+            <div class="ticker-window">
+                <div class="ticker-content">
+                    <!-- Original List -->
+                    <div class="donation-item"><span class="d-name">Sarah M.</span><span class="d-loc">Raleigh, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">James P.</span><span class="d-loc">Charlotte, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Robert K.</span><span class="d-loc">Wilmington, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Linda B.</span><span class="d-loc">Asheville, NC</span><span class="d-amount">$500.00</span></div>
+                    <div class="donation-item"><span class="d-name">Michael T.</span><span class="d-loc">Greensboro, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Patricia L.</span><span class="d-loc">Durham, NC</span><span class="d-amount">$250.00</span></div>
+                    <div class="donation-item"><span class="d-name">John D.</span><span class="d-loc">Fayetteville, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Mary S.</span><span class="d-loc">Cary, NC</span><span class="d-amount">$75.00</span></div>
+                    <div class="donation-item"><span class="d-name">David W.</span><span class="d-loc">High Point, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Jennifer A.</span><span class="d-loc">Concord, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Charles H.</span><span class="d-loc">Gastonia, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Susan R.</span><span class="d-loc">Jacksonville, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Joseph F.</span><span class="d-loc">Chapel Hill, NC</span><span class="d-amount">$200.00</span></div>
+                    <div class="donation-item"><span class="d-name">Jessica M.</span><span class="d-loc">Huntersville, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Thomas G.</span><span class="d-loc">Apex, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Karen C.</span><span class="d-loc">Burlington, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Christopher V.</span><span class="d-loc">Rocky Mount, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Lisa B.</span><span class="d-loc">Wilson, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Daniel N.</span><span class="d-loc">Wake Forest, NC</span><span class="d-amount">$150.00</span></div>
+                    <div class="donation-item"><span class="d-name">Nancy K.</span><span class="d-loc">Hickory, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Paul E.</span><span class="d-loc">Indian Trail, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Margaret J.</span><span class="d-loc">Mooresville, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Mark O.</span><span class="d-loc">Holly Springs, NC</span><span class="d-amount">$500.00</span></div>
+                    <div class="donation-item"><span class="d-name">Sandra P.</span><span class="d-loc">Goldsboro, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Donald Q.</span><span class="d-loc">Salisbury, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Ashley Z.</span><span class="d-loc">Monroe, NC</span><span class="d-amount">$75.00</span></div>
+                    <div class="donation-item"><span class="d-name">George X.</span><span class="d-loc">New Bern, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Betty Y.</span><span class="d-loc">Sanford, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Kenneth L.</span><span class="d-loc">Garner, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Dorothy W.</span><span class="d-loc">Cornelius, NC</span><span class="d-amount">$50.00</span></div>
+
+                    <!-- Duplicate List for seamless loop -->
+                    <div class="donation-item"><span class="d-name">Sarah M.</span><span class="d-loc">Raleigh, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">James P.</span><span class="d-loc">Charlotte, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Robert K.</span><span class="d-loc">Wilmington, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Linda B.</span><span class="d-loc">Asheville, NC</span><span class="d-amount">$500.00</span></div>
+                    <div class="donation-item"><span class="d-name">Michael T.</span><span class="d-loc">Greensboro, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Patricia L.</span><span class="d-loc">Durham, NC</span><span class="d-amount">$250.00</span></div>
+                    <div class="donation-item"><span class="d-name">John D.</span><span class="d-loc">Fayetteville, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Mary S.</span><span class="d-loc">Cary, NC</span><span class="d-amount">$75.00</span></div>
+                    <div class="donation-item"><span class="d-name">David W.</span><span class="d-loc">High Point, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Jennifer A.</span><span class="d-loc">Concord, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Charles H.</span><span class="d-loc">Gastonia, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Susan R.</span><span class="d-loc">Jacksonville, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Joseph F.</span><span class="d-loc">Chapel Hill, NC</span><span class="d-amount">$200.00</span></div>
+                    <div class="donation-item"><span class="d-name">Jessica M.</span><span class="d-loc">Huntersville, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Thomas G.</span><span class="d-loc">Apex, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Karen C.</span><span class="d-loc">Burlington, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Christopher V.</span><span class="d-loc">Rocky Mount, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Lisa B.</span><span class="d-loc">Wilson, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Daniel N.</span><span class="d-loc">Wake Forest, NC</span><span class="d-amount">$150.00</span></div>
+                    <div class="donation-item"><span class="d-name">Nancy K.</span><span class="d-loc">Hickory, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Paul E.</span><span class="d-loc">Indian Trail, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Margaret J.</span><span class="d-loc">Mooresville, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Mark O.</span><span class="d-loc">Holly Springs, NC</span><span class="d-amount">$500.00</span></div>
+                    <div class="donation-item"><span class="d-name">Sandra P.</span><span class="d-loc">Goldsboro, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Donald Q.</span><span class="d-loc">Salisbury, NC</span><span class="d-amount">$50.00</span></div>
+                    <div class="donation-item"><span class="d-name">Ashley Z.</span><span class="d-loc">Monroe, NC</span><span class="d-amount">$75.00</span></div>
+                    <div class="donation-item"><span class="d-name">George X.</span><span class="d-loc">New Bern, NC</span><span class="d-amount">$100.00</span></div>
+                    <div class="donation-item"><span class="d-name">Betty Y.</span><span class="d-loc">Sanford, NC</span><span class="d-amount">$25.00</span></div>
+                    <div class="donation-item"><span class="d-name">Kenneth L.</span><span class="d-loc">Garner, NC</span><span class="d-amount">$17.76</span></div>
+                    <div class="donation-item"><span class="d-name">Dorothy W.</span><span class="d-loc">Cornelius, NC</span><span class="d-amount">$50.00</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DONATE -->
+    <section id="donate" class="donate-section">
+        <div class="container">
+            <div class="donate-box reveal">
+                <h2>KEEP THE SENATE RED</h2>
+                <p>The liberal mob is pouring millions into North Carolina. We need your help to hold the line.</p>
+
+                <div class="donate-grid">
+                    <button class="amount-btn">$25</button>
+                    <button class="amount-btn selected">$50</button>
+                    <button class="amount-btn">$100</button>
+                    <button class="amount-btn">$500</button>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: bold;">
+                        <input type="checkbox" style="width: 20px; height: 20px; accent-color: var(--gold);">
+                        Make this a monthly recurring donation
+                    </label>
+                </div>
+
+                <button class="btn btn-gold" style="width: 100%;">PROCESS DONATION</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
     <footer>
         <div class="container">
-            <p>&copy; 2025 OnPointAggregate. All rights reserved.</p>
+            <div class="brand-lockup" style="border-color: #555; color: #888; transform: scale(0.7); margin-bottom: 20px;">
+                <h1 style="font-size: 1.8rem;">DAVIS FOR SENATE</h1>
+                <span style="font-size: 0.7rem;">CONSERVATIVE. INCUMBENT. PATRIOT.</span>
+            </div>
+            <p style="margin: 10px 0;">PO Box 1776, Raleigh, NC 27601</p>
+
+            <div class="disclaimer">
+                Paid for by the Committee to Re-Elect Senator Davis. <br>Not authorized by any candidate or candidate's committee.
+            </div>
+            <p style="margin-top: 20px;">© 2032 Davis for Senate.</p>
         </div>
     </footer>
+
+    <!-- POP-UP MODAL -->
+    <div id="campaign-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="close-modal" onclick="closeModal()">X</div>
+
+            <!-- Left Column: Image -->
+            <div class="modal-image-col">
+                <!-- Fixed Image: Declaration of Independence (Trumbull) - Very iconic/stable URL -->
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f9/Declaration_of_Independence_%281819%29%2C_by_John_Trumbull.jpg/800px-Declaration_of_Independence_%281819%29%2C_by_John_Trumbull.jpg" class="modal-jefferson" alt="Signing of Declaration">
+                <div style="position: absolute; bottom: 20px; left: 0; width: 100%; text-align: center; color: var(--gold); font-family: 'Alfa Slab One'; font-size: 3rem; text-shadow: 4px 4px 0 black;">1776</div>
+            </div>
+
+            <!-- Right Column: Pitch -->
+            <div class="modal-text-col">
+                <div class="modal-alert-banner">PATRIOT ALERT: CODE RED</div>
+
+                <h2 class="modal-headline">STOP THE RADICAL LEFT!</h2>
+
+                <div class="modal-body">
+                    <p>The radical left wants to rewrite our history, destroy our borders, and silence our voices.</p>
+                    <p class="marker-text" style="margin-top: 15px; transform: rotate(-1deg);">Don't let them erase Jefferson's legacy! Stand with Jayden Davis.</p>
+                </div>
+
+                <div class="modal-donations">
+                    <div class="modal-amount" onclick="selectModalAmount(this)">$15</div>
+                    <div class="modal-amount selected" onclick="selectModalAmount(this)">$45</div>
+                    <div class="modal-amount" onclick="selectModalAmount(this)">$75</div>
+                    <div class="modal-amount" onclick="selectModalAmount(this)">$100</div>
+                </div>
+
+                <button class="modal-cta" onclick="closeModal()">STAND WITH DAVIS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script>
+        // 1. War Room Logic
+        function openDossier(docId) {
+            // Handle Sidebar Active State
+            const folders = document.querySelectorAll('.file-folder');
+            folders.forEach(f => f.classList.remove('active'));
+
+            // Map IDs to folder indices
+            if(docId === 'border') folders[0].classList.add('active');
+            if(docId === 'energy') folders[1].classList.add('active');
+            if(docId === 'ag') folders[2].classList.add('active');
+
+            // Handle Document Transition
+            const docs = document.querySelectorAll('.paper-stack');
+
+            // Remove active class to hide old docs
+            docs.forEach(d => {
+                d.classList.remove('active');
+                d.style.animation = 'none';
+            });
+
+            // Trigger Reflow/Activation for new doc
+            const target = document.getElementById('doc-' + docId);
+
+            // Small timeout allows CSS to reset before reapplying animation
+            setTimeout(() => {
+                target.style.animation = 'slideIn 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards';
+                target.classList.add('active');
+            }, 10);
+        }
+
+        // 2. Donation Button Logic (Main Page)
+        const donationButtons = document.querySelectorAll('.amount-btn');
+        donationButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                donationButtons.forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+            });
+        });
+
+        // 3. Scroll Reveal Animation
+        const observerOptions = { threshold: 0.1 };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+        // 4. Modal Logic
+        const modal = document.getElementById('campaign-modal');
+
+        // Trigger the pop up after 1.5 seconds
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                modal.classList.add('show');
+            }, 1500);
+        });
+
+        function closeModal() {
+            modal.classList.remove('show');
+        }
+
+        function selectModalAmount(el) {
+            const opts = document.querySelectorAll('.modal-amount');
+            opts.forEach(o => o.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+
+        // Close modal if clicking outside the content box
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    </script>
+
 </body>
 </html>
