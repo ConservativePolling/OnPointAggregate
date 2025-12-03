@@ -3,221 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OnPointAggregate 3.0</title>
+    <title>OnPointAggregate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300&family=Roboto+Condensed:wght@700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary-black: #121212;
-            --border-color: #121212;
-            --accent-orange: #ff5d00;
-            --bg-color: #ffffff;
-            --subtle-gray: #f7f7f7;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
-            font-family: 'Merriweather', serif;
-            background-color: var(--bg-color);
-            color: var(--primary-black);
-            margin: 0;
-            padding: 0;
-            line-height: 1.5;
-            -webkit-font-smoothing: antialiased;
+            background: #fafafa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
-        }
-
-        .divider {
-            border-bottom: 1px solid var(--border-color);
-            margin: 0;
-        }
-
-        .thick-divider {
-            border-bottom: 4px solid var(--border-color);
-            margin: 0;
+            padding: 0 24px;
+            width: 100%;
         }
 
         header {
-            padding: 15px 0;
-        }
-
-        .nav-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-family: 'Roboto', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            padding: 24px 0;
+            border-bottom: 1px solid #eaeaea;
         }
 
         .logo {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.5rem;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
             font-weight: 700;
-            letter-spacing: -0.5px;
-        }
-
-        .status-badge {
-            background: var(--primary-black);
-            color: #fff;
-            padding: 4px 8px;
-            border-radius: 2px;
-            font-size: 0.7rem;
-            letter-spacing: 1px;
+            letter-spacing: -0.02em;
+            color: #000;
         }
 
         .hero {
-            text-align: center;
-            padding: 80px 0 60px;
-            background-color: var(--subtle-gray);
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .hero-label {
-            font-family: 'Roboto', sans-serif;
-            font-weight: 700;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            color: var(--accent-orange);
-            margin-bottom: 15px;
-            display: block;
-        }
-
-        .hero h1 {
-            font-size: 3.5rem;
-            font-weight: 900;
-            margin: 0 0 15px 0;
-            line-height: 1.1;
-            letter-spacing: -1px;
-        }
-
-        .hero p {
-            font-family: 'Merriweather', serif;
-            font-size: 1.3rem;
-            font-style: italic;
-            font-weight: 300;
-            color: #444;
-            margin: 0 auto;
-            max-width: 600px;
-        }
-
-        .research-section {
-            padding: 60px 0;
-        }
-
-        .section-header {
+            flex: 1;
             display: flex;
-            align-items: baseline;
-            border-bottom: 2px solid var(--primary-black);
-            margin-bottom: 30px;
-            padding-bottom: 10px;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 0;
         }
 
-        .section-title {
-            font-family: 'Roboto Condensed', sans-serif;
-            font-size: 1.5rem;
+        .hero-content {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 48px;
             font-weight: 700;
-            text-transform: uppercase;
-            margin-right: 15px;
+            letter-spacing: -0.03em;
+            line-height: 1.1;
+            color: #000;
+            margin-bottom: 20px;
+            animation: fadeInUp 0.6s ease-out;
         }
 
-        .section-meta {
-            font-family: 'Roboto', sans-serif;
-            font-size: 0.85rem;
+        .subtitle {
+            font-size: 18px;
+            line-height: 1.6;
             color: #666;
-            text-transform: uppercase;
+            margin-bottom: 32px;
+            animation: fadeInUp 0.6s ease-out 0.1s both;
+            font-weight: 400;
         }
 
-        .paper-wrapper {
-            background: #fff;
-            border: 1px solid #ddd;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            position: relative;
+        .subtitle a {
+            color: #000;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            transition: opacity 0.2s ease;
         }
 
-        .paper-wrapper::before {
-            content: "";
-            display: block;
-            height: 4px;
-            background: var(--primary-black);
-            width: 100%;
-        }
-
-        iframe {
-            width: 100%;
-            height: 850px;
-            border: none;
-            display: block;
+        .subtitle a:hover {
+            opacity: 0.7;
         }
 
         footer {
-            background: #fff;
-            border-top: 1px solid #e0e0e0;
-            color: #333;
-            padding: 60px 0;
+            padding: 24px 0;
+            border-top: 1px solid #eaeaea;
             text-align: center;
-            font-family: 'Roboto', sans-serif;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 700;
+            color: #999;
+            font-size: 14px;
         }
 
-        footer p {
-            margin: 0;
-            color: #b3b3b3;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 <body>
-
-    <div class="thick-divider"></div>
-
     <header>
         <div class="container">
-            <div class="nav-bar">
-                <div class="logo">OnPointAggregate</div>
-                <div class="status-badge">Under Construction</div>
-            </div>
+            <div class="logo">OnPointAggregate</div>
         </div>
     </header>
 
-    <div class="divider"></div>
-
-    <section class="hero">
-        <div class="container">
-            <span class="hero-label">Project Update</span>
-            <h1>OnPointAggregate 3.0</h1>
-            <p>The next generation of predictive modeling.<br>Arriving 2026.</p>
+    <main class="hero">
+        <div class="hero-content">
+            <h1>OnPointAggregate 3.0 Is Coming In 2026</h1>
+            <p class="subtitle">
+                We have released our latest research on <a href="research_paper.html">demographic vote decomposition</a>.
+            </p>
         </div>
-    </section>
-
-    <section class="research-section">
-        <div class="container">
-            <div class="section-header">
-                <span class="section-title">Featured Research</span>
-                <span class="section-meta">Dec 2025 &nbsp;|&nbsp; Methodology</span>
-            </div>
-
-            <div class="paper-wrapper">
-                <iframe src="research_paper.html" title="Research Paper"></iframe>
-            </div>
-        </div>
-    </section>
+    </main>
 
     <footer>
         <div class="container">
-            <p>&copy; 2025 OnPointAggregate.</p>
+            <p>&copy; 2025 OnPointAggregate</p>
         </div>
     </footer>
-
 </body>
 </html>
