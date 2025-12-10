@@ -127,20 +127,20 @@
         /* LLM cursor - active generation indicator */
         .llm-cursor {
             display: inline-block;
-            width: 11px;
-            height: 11px;
+            width: 13px;
+            height: 13px;
             background: #000;
             border-radius: 50%;
-            margin-left: 8px;
-            vertical-align: middle;
+            margin-left: 4px;
+            vertical-align: baseline;
             position: relative;
-            top: -3px;
+            top: -6px;
             animation: cursorIdle 0.9s ease-in-out infinite;
             transition: transform 0.06s ease-out, opacity 0.06s ease-out;
         }
 
         .llm-cursor.typing {
-            animation: cursorPulse 0.55s ease-in-out infinite;
+            animation: cursorPulse 0.5s ease-in-out infinite;
         }
 
         .llm-cursor.done {
@@ -150,24 +150,24 @@
         /* Idle state - gentle breathing */
         @keyframes cursorIdle {
             0%, 100% {
-                opacity: 0.9;
+                opacity: 1;
                 transform: scale(1);
             }
             50% {
-                opacity: 0.4;
-                transform: scale(0.8);
+                opacity: 0.35;
+                transform: scale(0.85);
             }
         }
 
-        /* Active typing - more pronounced pulse */
+        /* Active typing - steady working pulse */
         @keyframes cursorPulse {
             0%, 100% {
                 opacity: 1;
                 transform: scale(1);
             }
             50% {
-                opacity: 0.3;
-                transform: scale(0.6);
+                opacity: 0.4;
+                transform: scale(0.7);
             }
         }
 
