@@ -127,47 +127,47 @@
         /* LLM cursor - active generation indicator */
         .llm-cursor {
             display: inline-block;
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
             background: #000;
             border-radius: 50%;
-            margin-left: 5px;
+            margin-left: 6px;
             vertical-align: baseline;
             position: relative;
-            top: -9px;
-            animation: cursorIdle 2s ease-in-out infinite;
+            top: -10px;
+            animation: cursorIdle 2.5s ease-in-out infinite;
             transition: transform 0.1s ease-out, opacity 0.1s ease-out;
         }
 
         .llm-cursor.typing {
-            animation: cursorBreathing 1.4s ease-in-out infinite;
+            animation: cursorBreathing 1.6s ease-in-out infinite;
         }
 
         .llm-cursor.done {
             animation: cursorFadeOut 0.6s ease-out forwards;
         }
 
-        /* Idle state - very subtle breathing */
+        /* Idle state - gentle opacity breathing, minimal scale */
         @keyframes cursorIdle {
+            0%, 100% {
+                opacity: 0.8;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(0.98);
+            }
+        }
+
+        /* Active typing - soft pulse, almost no size change */
+        @keyframes cursorBreathing {
             0%, 100% {
                 opacity: 0.85;
                 transform: scale(1);
             }
             50% {
                 opacity: 0.55;
-                transform: scale(0.96);
-            }
-        }
-
-        /* Active typing - barely perceptible pulse */
-        @keyframes cursorBreathing {
-            0%, 100% {
-                opacity: 0.9;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.6;
-                transform: scale(0.94);
+                transform: scale(0.97);
             }
         }
 
@@ -235,10 +235,10 @@
             }
 
             .llm-cursor {
-                width: 14px;
-                height: 14px;
-                margin-left: 4px;
-                top: -6px;
+                width: 17px;
+                height: 17px;
+                margin-left: 5px;
+                top: -7px;
             }
 
             .subtitle {
@@ -256,10 +256,10 @@
             }
 
             .llm-cursor {
-                width: 12px;
-                height: 12px;
-                margin-left: 3px;
-                top: -5px;
+                width: 14px;
+                height: 14px;
+                margin-left: 4px;
+                top: -6px;
             }
 
             .subtitle {
