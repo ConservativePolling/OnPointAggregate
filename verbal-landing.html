@@ -64,6 +64,39 @@
             letter-spacing: -0.02em;
         }
 
+        body {
+            background: #fbfbfe;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .ambient-gradient {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                linear-gradient(90deg,
+                    rgba(255, 120, 165, 0.14) 0%,
+                    rgba(255, 191, 105, 0.16) 16%,
+                    rgba(255, 232, 138, 0.18) 32%,
+                    rgba(170, 246, 187, 0.18) 48%,
+                    rgba(148, 214, 255, 0.18) 64%,
+                    rgba(182, 160, 255, 0.16) 80%,
+                    rgba(240, 172, 255, 0.14) 100%
+                ),
+                radial-gradient(140% 100% at 50% 30%, rgba(255, 255, 255, 0.7), transparent 55%);
+            background-size: 160% 100%, cover;
+            background-position: center;
+            filter: saturate(110%) contrast(101%);
+            opacity: 0.9;
+        }
+
+        .page-surface {
+            position: relative;
+            z-index: 1;
+        }
+
         /* Refined pop-in animations */
         .article-card {
             opacity: 0;
@@ -184,6 +217,8 @@
     </style>
 </head>
 <body class="bg-white text-gray-900 antialiased">
+    <div class="ambient-gradient"></div>
+    <div class="page-surface">
 
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 bg-white/98 backdrop-blur-lg border-b border-gray-100">
@@ -413,6 +448,8 @@
             </div>
         </div>
     </footer>
+
+    </div>
 
     <script>
         // Navigation function
