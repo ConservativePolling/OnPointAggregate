@@ -110,7 +110,47 @@
             line-height: 1.1;
             color: #000;
             margin-bottom: 20px;
-            animation: fadeInUp 0.6s ease-out;
+            display: inline;
+        }
+
+        .hero-content h1 {
+            display: inline;
+        }
+
+        .typing-container {
+            display: block;
+            text-align: center;
+            margin-bottom: 20px;
+            min-height: 106px;
+        }
+
+        /* LLM cursor - ChatGPT style black dot */
+        .llm-cursor {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            background: #000;
+            border-radius: 50%;
+            margin-left: 4px;
+            vertical-align: middle;
+            position: relative;
+            top: -2px;
+            animation: cursorPulse 1s ease-in-out infinite;
+        }
+
+        .llm-cursor.done {
+            display: none;
+        }
+
+        @keyframes cursorPulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(0.85);
+            }
         }
 
         .subtitle {
@@ -305,7 +345,9 @@
 
     <main class="hero">
         <div class="hero-content">
-            <h1>OnPointAggregate 3.0 Is Coming In 2026</h1>
+            <div class="typing-container">
+                <h1 id="typewriter"></h1><span class="llm-cursor" id="cursor"></span>
+            </div>
             <p class="subtitle">
                 We have released our latest research on <a href="research_paper.html">demographic vote decomposition</a>.
             </p>
@@ -329,11 +371,55 @@
     </div>
 
     <script>
+        // LLM-style typewriter effect
+        (function() {
+            const text = 'OnPointAggregate 3.0 Is Coming In 2026';
+            const element = document.getElementById('typewriter');
+            const cursor = document.getElementById('cursor');
+            let index = 0;
+
+            function getTypingDelay() {
+                // Varied speed like LLM generation
+                // Base speed with randomness
+                const base = 45;
+                const variance = Math.random() * 60;
+
+                // Occasionally pause slightly longer (thinking)
+                if (Math.random() < 0.1) {
+                    return base + variance + 80;
+                }
+
+                // Speed burst (multiple tokens at once feel)
+                if (Math.random() < 0.15) {
+                    return base * 0.4;
+                }
+
+                return base + variance;
+            }
+
+            function type() {
+                if (index < text.length) {
+                    element.textContent += text.charAt(index);
+                    index++;
+                    setTimeout(type, getTypingDelay());
+                } else {
+                    // Done typing - hide cursor after brief pause
+                    setTimeout(function() {
+                        cursor.classList.add('done');
+                    }, 600);
+                }
+            }
+
+            // Start typing after small delay
+            setTimeout(type, 300);
+        })();
+
+        // Modal logic
         (function() {
             if (Math.random() < 0.25) {
                 setTimeout(function() {
                     document.getElementById('announcementModal').classList.add('active');
-                }, 500);
+                }, 2800);
             }
         })();
 
