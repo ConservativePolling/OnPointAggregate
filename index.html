@@ -124,32 +124,58 @@
             min-height: 106px;
         }
 
-        /* LLM cursor - ChatGPT style black dot */
+        /* LLM cursor - active generation indicator */
         .llm-cursor {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 7px;
+            height: 7px;
             background: #000;
             border-radius: 50%;
-            margin-left: 4px;
+            margin-left: 6px;
             vertical-align: middle;
             position: relative;
-            top: -2px;
-            animation: cursorPulse 1s ease-in-out infinite;
+            top: -4px;
+            animation: cursorGenerate 0.6s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3);
+            transition: transform 0.05s ease-out, opacity 0.05s ease-out;
+        }
+
+        .llm-cursor.typing {
+            animation: cursorGenerate 0.4s ease-in-out infinite, cursorGlow 0.8s ease-in-out infinite;
         }
 
         .llm-cursor.done {
-            display: none;
+            animation: cursorFadeOut 0.4s ease-out forwards;
         }
 
-        @keyframes cursorPulse {
+        @keyframes cursorGenerate {
             0%, 100% {
                 opacity: 1;
                 transform: scale(1);
             }
             50% {
-                opacity: 0.4;
-                transform: scale(0.85);
+                opacity: 0.5;
+                transform: scale(0.75);
+            }
+        }
+
+        @keyframes cursorGlow {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.15);
+            }
+            50% {
+                box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+            }
+        }
+
+        @keyframes cursorFadeOut {
+            0% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(0.5);
             }
         }
 
@@ -377,41 +403,69 @@
             const element = document.getElementById('typewriter');
             const cursor = document.getElementById('cursor');
             let index = 0;
+            let burstMode = false;
+            let burstCount = 0;
 
             function getTypingDelay() {
-                // Varied speed like LLM generation
-                // Base speed with randomness
-                const base = 45;
-                const variance = Math.random() * 60;
-
-                // Occasionally pause slightly longer (thinking)
-                if (Math.random() < 0.1) {
-                    return base + variance + 80;
+                // Handle burst mode (rapid successive characters)
+                if (burstMode && burstCount > 0) {
+                    burstCount--;
+                    if (burstCount === 0) burstMode = false;
+                    return 25 + Math.random() * 15;
                 }
 
-                // Speed burst (multiple tokens at once feel)
-                if (Math.random() < 0.15) {
-                    return base * 0.4;
+                // Random chance to enter burst mode (2-4 chars fast)
+                if (Math.random() < 0.12) {
+                    burstMode = true;
+                    burstCount = Math.floor(Math.random() * 3) + 2;
+                    return 20;
                 }
 
-                return base + variance;
+                // Micro-pause at spaces (natural word boundary)
+                if (text.charAt(index - 1) === ' ') {
+                    return 80 + Math.random() * 60;
+                }
+
+                // Occasional thinking pause
+                if (Math.random() < 0.08) {
+                    return 140 + Math.random() * 80;
+                }
+
+                // Base rhythm with variance
+                return 50 + Math.random() * 45;
+            }
+
+            function kickCursor() {
+                cursor.style.transform = 'scale(1.3)';
+                cursor.style.opacity = '1';
+                setTimeout(function() {
+                    cursor.style.transform = '';
+                    cursor.style.opacity = '';
+                }, 50);
             }
 
             function type() {
                 if (index < text.length) {
+                    // Add typing class for active state
+                    if (!cursor.classList.contains('typing')) {
+                        cursor.classList.add('typing');
+                    }
+
                     element.textContent += text.charAt(index);
+                    kickCursor();
                     index++;
                     setTimeout(type, getTypingDelay());
                 } else {
-                    // Done typing - hide cursor after brief pause
+                    // Done - transition cursor out
+                    cursor.classList.remove('typing');
                     setTimeout(function() {
                         cursor.classList.add('done');
-                    }, 600);
+                    }, 500);
                 }
             }
 
             // Start typing after small delay
-            setTimeout(type, 300);
+            setTimeout(type, 400);
         })();
 
         // Modal logic
