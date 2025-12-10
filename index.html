@@ -127,47 +127,46 @@
         /* LLM cursor - active generation indicator */
         .llm-cursor {
             display: inline-block;
-            width: 22px;
-            height: 22px;
+            width: 32px;
+            height: 32px;
             background: #000;
             border-radius: 50%;
-            margin-left: 6px;
-            vertical-align: baseline;
+            margin-left: 10px;
+            vertical-align: middle;
             position: relative;
-            top: -10px;
-            animation: cursorIdle 2.5s ease-in-out infinite;
-            transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+            top: 0;
+            animation: cursorIdle 2s ease-in-out infinite;
         }
 
         .llm-cursor.typing {
-            animation: cursorBreathing 1.6s ease-in-out infinite;
+            animation: cursorChurn 1s ease-in-out infinite;
         }
 
         .llm-cursor.done {
-            animation: cursorFadeOut 0.6s ease-out forwards;
+            animation: cursorFadeOut 0.5s ease-out forwards;
         }
 
-        /* Idle state - gentle opacity breathing, minimal scale */
+        /* Idle state - gentle waiting */
         @keyframes cursorIdle {
             0%, 100% {
-                opacity: 0.8;
+                opacity: 0.6;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+        }
+
+        /* Active typing - visible dilate/contract like churning */
+        @keyframes cursorChurn {
+            0%, 100% {
+                opacity: 0.95;
                 transform: scale(1);
             }
             50% {
                 opacity: 0.5;
-                transform: scale(0.98);
-            }
-        }
-
-        /* Active typing - soft pulse, almost no size change */
-        @keyframes cursorBreathing {
-            0%, 100% {
-                opacity: 0.85;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.55;
-                transform: scale(0.97);
+                transform: scale(0.7);
             }
         }
 
@@ -235,10 +234,10 @@
             }
 
             .llm-cursor {
-                width: 17px;
-                height: 17px;
-                margin-left: 5px;
-                top: -7px;
+                width: 22px;
+                height: 22px;
+                margin-left: 7px;
+                top: 0;
             }
 
             .subtitle {
@@ -256,10 +255,10 @@
             }
 
             .llm-cursor {
-                width: 14px;
-                height: 14px;
-                margin-left: 4px;
-                top: -6px;
+                width: 18px;
+                height: 18px;
+                margin-left: 5px;
+                top: 0;
             }
 
             .subtitle {
@@ -470,17 +469,6 @@
                 return 50 + Math.random() * 45;
             }
 
-            function kickCursor() {
-                // Subtle pulse on each character
-                cursor.style.transform = 'scale(1.1)';
-                cursor.style.opacity = '1';
-
-                setTimeout(function() {
-                    cursor.style.transform = '';
-                    cursor.style.opacity = '';
-                }, 100);
-            }
-
             function type() {
                 if (index < text.length) {
                     // Add typing class for active state
@@ -489,7 +477,6 @@
                     }
 
                     element.textContent += text.charAt(index);
-                    kickCursor();
                     index++;
                     setTimeout(type, getTypingDelay());
                 } else {
