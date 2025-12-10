@@ -127,44 +127,47 @@
         /* LLM cursor - active generation indicator */
         .llm-cursor {
             display: inline-block;
-            width: 7px;
-            height: 7px;
+            width: 11px;
+            height: 11px;
             background: #000;
             border-radius: 50%;
-            margin-left: 6px;
+            margin-left: 8px;
             vertical-align: middle;
             position: relative;
-            top: -4px;
-            animation: cursorGenerate 0.6s ease-in-out infinite;
-            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.3);
-            transition: transform 0.05s ease-out, opacity 0.05s ease-out;
+            top: -3px;
+            animation: cursorIdle 0.9s ease-in-out infinite;
+            transition: transform 0.06s ease-out, opacity 0.06s ease-out;
         }
 
         .llm-cursor.typing {
-            animation: cursorGenerate 0.4s ease-in-out infinite, cursorGlow 0.8s ease-in-out infinite;
+            animation: cursorPulse 0.55s ease-in-out infinite;
         }
 
         .llm-cursor.done {
-            animation: cursorFadeOut 0.4s ease-out forwards;
+            animation: cursorFadeOut 0.5s ease-out forwards;
         }
 
-        @keyframes cursorGenerate {
+        /* Idle state - gentle breathing */
+        @keyframes cursorIdle {
+            0%, 100% {
+                opacity: 0.9;
+                transform: scale(1);
+            }
+            50% {
+                opacity: 0.4;
+                transform: scale(0.8);
+            }
+        }
+
+        /* Active typing - more pronounced pulse */
+        @keyframes cursorPulse {
             0%, 100% {
                 opacity: 1;
                 transform: scale(1);
             }
             50% {
-                opacity: 0.5;
-                transform: scale(0.75);
-            }
-        }
-
-        @keyframes cursorGlow {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.15);
-            }
-            50% {
-                box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.08);
+                opacity: 0.3;
+                transform: scale(0.6);
             }
         }
 
@@ -175,7 +178,7 @@
             }
             100% {
                 opacity: 0;
-                transform: scale(0.5);
+                transform: scale(0.3);
             }
         }
 
@@ -436,12 +439,13 @@
             }
 
             function kickCursor() {
-                cursor.style.transform = 'scale(1.3)';
+                // Brief bright pulse on each character
+                cursor.style.transform = 'scale(1.2)';
                 cursor.style.opacity = '1';
                 setTimeout(function() {
                     cursor.style.transform = '';
                     cursor.style.opacity = '';
-                }, 50);
+                }, 60);
             }
 
             function type() {
