@@ -40,20 +40,205 @@
 
         body {
             font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
-            background: #fafafa;
-            background-image:
-                radial-gradient(circle at 1px 1px, rgba(0,0,0,0.03) 1px, transparent 0);
-            background-size: 24px 24px;
+            background: linear-gradient(135deg, #f8f6fc 0%, #faf9fd 25%, #f5f3fa 50%, #faf8fd 75%, #f7f5fb 100%);
             min-height: 100vh;
             color: var(--geist-foreground);
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             letter-spacing: -0.02em;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Panels Background */
+        .floating-panels-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+        }
+
+        .bg-glow-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.4), transparent 70%);
+            top: -150px;
+            left: -100px;
+        }
+
+        .bg-glow-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
+            top: 30%;
+            right: -100px;
+        }
+
+        .bg-glow-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(244, 114, 182, 0.2), transparent 70%);
+            bottom: 10%;
+            left: 20%;
+        }
+
+        .floating-panel {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            animation: floatPanel 12s ease-in-out infinite;
+            opacity: 0.5;
+        }
+
+        .floating-panel-header {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .panel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .panel-dot-red { background: #ff6b6b; }
+        .panel-dot-yellow { background: #ffd93d; }
+        .panel-dot-green { background: #6bcb77; }
+
+        .floating-panel-body {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-gradient {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .panel-gradient::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+        }
+
+        /* Panel 1 - Top left */
+        .fp-1 {
+            width: 280px;
+            height: 200px;
+            top: 8%;
+            left: 3%;
+            animation-delay: 0s;
+        }
+
+        .fp-1 .panel-gradient {
+            height: 166px;
+            background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 40%, #fde68a 80%, #fbbf24 100%);
+        }
+
+        /* Panel 2 - Top right */
+        .fp-2 {
+            width: 200px;
+            height: 150px;
+            top: 5%;
+            right: 5%;
+            animation-delay: -3s;
+        }
+
+        .fp-2 .panel-gradient {
+            height: 116px;
+            background: linear-gradient(160deg, #ddd6fe 0%, #e9d5ff 50%, #fce7f3 100%);
+        }
+
+        /* Panel 3 - Middle right */
+        .fp-3 {
+            width: 180px;
+            height: 220px;
+            top: 35%;
+            right: 2%;
+            animation-delay: -6s;
+        }
+
+        .fp-3 .panel-gradient {
+            height: 186px;
+            background: linear-gradient(180deg, #818cf8 0%, #a5b4fc 50%, #c7d2fe 100%);
+        }
+
+        /* Panel 4 - Bottom left */
+        .fp-4 {
+            width: 240px;
+            height: 160px;
+            bottom: 15%;
+            left: 2%;
+            animation-delay: -2s;
+        }
+
+        .fp-4 .panel-gradient {
+            height: 126px;
+            background: linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 30%, #fbcfe8 70%, #fda4af 100%);
+        }
+
+        /* Panel 5 - Bottom right */
+        .fp-5 {
+            width: 160px;
+            height: 130px;
+            bottom: 25%;
+            right: 8%;
+            animation-delay: -8s;
+        }
+
+        .fp-5 .panel-gradient {
+            height: 96px;
+            background: linear-gradient(145deg, #e9d5ff 0%, #fce7f3 50%, #fef3c7 100%);
+        }
+
+        @keyframes floatPanel {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-6px) rotate(0.3deg); }
+            50% { transform: translateY(-3px) rotate(0deg); }
+            75% { transform: translateY(-9px) rotate(-0.3deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .fp-1 { width: 200px; height: 150px; left: 2%; }
+            .fp-2 { width: 150px; height: 120px; }
+            .fp-3 { width: 140px; height: 180px; }
+            .fp-4 { width: 180px; height: 130px; }
+            .fp-5 { display: none; }
+            .fp-1 .panel-gradient { height: 116px; }
+            .fp-2 .panel-gradient { height: 86px; }
+            .fp-3 .panel-gradient { height: 146px; }
+            .fp-4 .panel-gradient { height: 96px; }
+        }
+
+        @media (max-width: 768px) {
+            .floating-panels-bg { display: none; }
         }
 
         .navbar {
-            background: rgba(255, 255, 255, 0.8);
+            background: rgba(255, 255, 255, 0.85);
             backdrop-filter: saturate(180%) blur(20px);
+            position: relative;
+            z-index: 100;
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-bottom: 1px solid var(--accents-2);
             padding: 0 2.5rem;
@@ -143,6 +328,8 @@
             max-width: 1160px;
             margin: 0 auto;
             padding: 3.5rem 2rem;
+            position: relative;
+            z-index: 10;
         }
 
         .preview-hero {
@@ -588,6 +775,7 @@
             transform: translateY(20px);
             animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
             position: relative;
+            z-index: 10;
             transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -1111,6 +1299,68 @@
     </style>
 </head>
 <body>
+    <!-- Floating Panels Background -->
+    <div class="floating-panels-bg">
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-glow bg-glow-3"></div>
+
+        <div class="floating-panel fp-1">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-2">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-3">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-4">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-5">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar">
         <div class="logo">
             <div class="logo-icon">✓</div>

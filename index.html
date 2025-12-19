@@ -65,7 +65,274 @@
 
         header, main, footer {
             position: relative;
+            z-index: 10;
+        }
+
+        /* Floating Glossy Panels */
+        .floating-panels {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
             z-index: 1;
+            overflow: hidden;
+        }
+
+        .glass-panel {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.08),
+                0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+            overflow: hidden;
+        }
+
+        .panel-titlebar {
+            padding: 11px 14px;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            background: rgba(255, 255, 255, 0.25);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .dot {
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+        }
+
+        .dot-close { background: #ff5f57; }
+        .dot-min { background: #febc2e; }
+        .dot-max { background: #28c840; }
+
+        .panel-body {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-gradient {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Glossy shine overlay */
+        .panel-gradient::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse 120% 80% at 25% 20%, rgba(255, 255, 255, 0.5) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        /* Abstract chart elements */
+        .abstract-bars {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-evenly;
+            padding: 0 16px 12px;
+            opacity: 0.35;
+        }
+
+        .bar {
+            width: 10%;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .abstract-line {
+            position: absolute;
+            inset: 15%;
+            opacity: 0.3;
+        }
+
+        .abstract-line svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .abstract-line path {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.8);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+        }
+
+        /* Panel 1 - Top left, large */
+        .gp-1 {
+            width: 320px;
+            height: 220px;
+            top: 8%;
+            left: 4%;
+            animation: floatA 14s ease-in-out infinite;
+        }
+
+        .gp-1 .panel-gradient {
+            height: 185px;
+            background: linear-gradient(135deg,
+                #8b5cf6 0%,
+                #a78bfa 20%,
+                #c4b5fd 40%,
+                #f97316 65%,
+                #fbbf24 85%,
+                #fde68a 100%);
+        }
+
+        /* Panel 2 - Top right */
+        .gp-2 {
+            width: 200px;
+            height: 160px;
+            top: 6%;
+            right: 8%;
+            animation: floatB 12s ease-in-out infinite;
+            animation-delay: -3s;
+        }
+
+        .gp-2 .panel-gradient {
+            height: 125px;
+            background: linear-gradient(150deg,
+                #ddd6fe 0%,
+                #e9d5ff 35%,
+                #fbcfe8 65%,
+                #fecdd3 100%);
+        }
+
+        /* Panel 3 - Left side, tall */
+        .gp-3 {
+            width: 180px;
+            height: 260px;
+            top: 38%;
+            left: 2%;
+            animation: floatC 16s ease-in-out infinite;
+            animation-delay: -7s;
+        }
+
+        .gp-3 .panel-gradient {
+            height: 225px;
+            background: linear-gradient(180deg,
+                #6366f1 0%,
+                #818cf8 30%,
+                #a5b4fc 60%,
+                #c7d2fe 100%);
+        }
+
+        /* Panel 4 - Bottom center-left */
+        .gp-4 {
+            width: 280px;
+            height: 170px;
+            bottom: 12%;
+            left: 15%;
+            animation: floatA 13s ease-in-out infinite;
+            animation-delay: -4s;
+        }
+
+        .gp-4 .panel-gradient {
+            height: 135px;
+            background: linear-gradient(125deg,
+                #c4b5fd 0%,
+                #ddd6fe 25%,
+                #fae8ff 50%,
+                #fcd34d 80%,
+                #fef08a 100%);
+        }
+
+        /* Panel 5 - Right side */
+        .gp-5 {
+            width: 220px;
+            height: 190px;
+            top: 32%;
+            right: 3%;
+            animation: floatB 15s ease-in-out infinite;
+            animation-delay: -9s;
+        }
+
+        .gp-5 .panel-gradient {
+            height: 155px;
+            background: linear-gradient(140deg,
+                #a78bfa 0%,
+                #c4b5fd 30%,
+                #fde68a 70%,
+                #fb923c 100%);
+        }
+
+        /* Panel 6 - Bottom right, small */
+        .gp-6 {
+            width: 160px;
+            height: 130px;
+            bottom: 18%;
+            right: 10%;
+            animation: floatC 11s ease-in-out infinite;
+            animation-delay: -2s;
+        }
+
+        .gp-6 .panel-gradient {
+            height: 95px;
+            background: linear-gradient(135deg,
+                #e9d5ff 0%,
+                #fce7f3 40%,
+                #fef3c7 80%,
+                #fde68a 100%);
+        }
+
+        @keyframes floatA {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-10px) rotate(0.5deg); }
+            50% { transform: translateY(-5px) rotate(0deg); }
+            75% { transform: translateY(-15px) rotate(-0.5deg); }
+        }
+
+        @keyframes floatB {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            33% { transform: translateY(-12px) rotate(-0.4deg); }
+            66% { transform: translateY(-6px) rotate(0.4deg); }
+        }
+
+        @keyframes floatC {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            20% { transform: translateY(-8px) rotate(0.3deg); }
+            40% { transform: translateY(-14px) rotate(0deg); }
+            60% { transform: translateY(-6px) rotate(-0.3deg); }
+            80% { transform: translateY(-11px) rotate(0.2deg); }
+        }
+
+        @media (max-width: 1200px) {
+            .gp-1 { width: 260px; height: 180px; left: 2%; }
+            .gp-1 .panel-gradient { height: 145px; }
+            .gp-2 { width: 170px; height: 140px; right: 4%; }
+            .gp-2 .panel-gradient { height: 105px; }
+            .gp-3 { width: 150px; height: 220px; }
+            .gp-3 .panel-gradient { height: 185px; }
+            .gp-4 { width: 230px; height: 145px; left: 8%; }
+            .gp-4 .panel-gradient { height: 110px; }
+            .gp-5 { width: 180px; height: 160px; }
+            .gp-5 .panel-gradient { height: 125px; }
+            .gp-6 { width: 140px; height: 115px; }
+            .gp-6 .panel-gradient { height: 80px; }
+        }
+
+        @media (max-width: 900px) {
+            .gp-3, .gp-5 { display: none; }
+            .gp-1 { width: 200px; height: 150px; top: 5%; left: 3%; }
+            .gp-1 .panel-gradient { height: 115px; }
+            .gp-2 { width: 150px; height: 120px; top: 8%; right: 3%; }
+            .gp-2 .panel-gradient { height: 85px; }
+            .gp-4 { width: 180px; height: 125px; bottom: 8%; left: 5%; }
+            .gp-4 .panel-gradient { height: 90px; }
+            .gp-6 { width: 130px; height: 105px; bottom: 12%; right: 5%; }
+            .gp-6 .panel-gradient { height: 70px; }
+        }
+
+        @media (max-width: 600px) {
+            .floating-panels { display: none; }
         }
 
         .container {
@@ -397,6 +664,109 @@
     </style>
 </head>
 <body>
+    <!-- Floating Glossy Panels Background -->
+    <div class="floating-panels">
+        <!-- Panel 1 - Top left with trend lines -->
+        <div class="glass-panel gp-1">
+            <div class="panel-titlebar">
+                <div class="dot dot-close"></div>
+                <div class="dot dot-min"></div>
+                <div class="dot dot-max"></div>
+            </div>
+            <div class="panel-body">
+                <div class="panel-gradient">
+                    <div class="abstract-line">
+                        <svg viewBox="0 0 200 80" preserveAspectRatio="none">
+                            <path d="M0,60 Q40,45 80,50 T160,35 T200,25"/>
+                            <path d="M0,70 Q50,60 100,55 T200,40" style="stroke-width: 1.5; opacity: 0.5;"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 2 - Top right -->
+        <div class="glass-panel gp-2">
+            <div class="panel-titlebar">
+                <div class="dot dot-close"></div>
+                <div class="dot dot-min"></div>
+                <div class="dot dot-max"></div>
+            </div>
+            <div class="panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <!-- Panel 3 - Left tall with bars -->
+        <div class="glass-panel gp-3">
+            <div class="panel-titlebar">
+                <div class="dot dot-close"></div>
+                <div class="dot dot-min"></div>
+                <div class="dot dot-max"></div>
+            </div>
+            <div class="panel-body">
+                <div class="panel-gradient">
+                    <div class="abstract-bars">
+                        <div class="bar" style="height: 40%;"></div>
+                        <div class="bar" style="height: 65%;"></div>
+                        <div class="bar" style="height: 50%;"></div>
+                        <div class="bar" style="height: 80%;"></div>
+                        <div class="bar" style="height: 55%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 4 - Bottom left with trend -->
+        <div class="glass-panel gp-4">
+            <div class="panel-titlebar">
+                <div class="dot dot-close"></div>
+                <div class="dot dot-min"></div>
+                <div class="dot dot-max"></div>
+            </div>
+            <div class="panel-body">
+                <div class="panel-gradient">
+                    <div class="abstract-line">
+                        <svg viewBox="0 0 200 60" preserveAspectRatio="none">
+                            <path d="M0,45 C50,35 80,50 130,25 S180,35 200,20"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 5 - Right side with bars -->
+        <div class="glass-panel gp-5">
+            <div class="panel-titlebar">
+                <div class="dot dot-close"></div>
+                <div class="dot dot-min"></div>
+                <div class="dot dot-max"></div>
+            </div>
+            <div class="panel-body">
+                <div class="panel-gradient">
+                    <div class="abstract-bars">
+                        <div class="bar" style="height: 55%;"></div>
+                        <div class="bar" style="height: 75%;"></div>
+                        <div class="bar" style="height: 45%;"></div>
+                        <div class="bar" style="height: 85%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel 6 - Bottom right small -->
+        <div class="glass-panel gp-6">
+            <div class="panel-titlebar">
+                <div class="dot dot-close"></div>
+                <div class="dot dot-min"></div>
+                <div class="dot dot-max"></div>
+            </div>
+            <div class="panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+    </div>
+
     <header>
         <div class="container">
             <div class="logo">OnPointAggregate</div>
