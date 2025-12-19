@@ -140,17 +140,17 @@
             z-index: 2;
         }
 
-        /* Panel 1 - Top left large */
+        /* Panel 1 - Top left large - closer to center */
         .gp-1 {
-            width: 300px;
-            height: 210px;
-            top: 30px;
-            left: 40px;
+            width: 380px;
+            height: 280px;
+            top: 8%;
+            left: calc(50% - 580px);
             animation: drift1 22s ease-in-out infinite;
         }
 
         .gp-1 .panel-gradient {
-            height: 184px;
+            height: 254px;
             background:
                 radial-gradient(ellipse 50% 50% at 30% 40%, rgba(140, 110, 200, 0.75) 0%, transparent 50%),
                 radial-gradient(ellipse 45% 45% at 70% 60%, rgba(230, 150, 100, 0.65) 0%, transparent 45%),
@@ -158,123 +158,123 @@
                 linear-gradient(135deg, #8870d0 0%, #a890e0 30%, #d0c0f0 50%, #e0b898 75%, #e8c878 100%);
         }
 
-        /* Panel 2 - Top right */
+        /* Panel 2 - Top right - closer to center */
         .gp-2 {
-            width: 250px;
-            height: 175px;
-            top: 45px;
-            right: 50px;
+            width: 340px;
+            height: 240px;
+            top: 5%;
+            right: calc(50% - 560px);
             animation: drift2 20s ease-in-out infinite;
         }
 
         .gp-2 .panel-gradient {
-            height: 149px;
+            height: 214px;
             background:
                 radial-gradient(ellipse 55% 50% at 40% 45%, rgba(160, 140, 210, 0.7) 0%, transparent 50%),
                 radial-gradient(ellipse 40% 40% at 75% 55%, rgba(225, 165, 105, 0.55) 0%, transparent 45%),
                 linear-gradient(140deg, #a898d8 0%, #c8b8e8 40%, #e8d8e0 70%, #edd4b8 100%);
         }
 
-        /* Panel 3 - Left middle */
+        /* Panel 3 - Left middle - closer to center */
         .gp-3 {
-            width: 175px;
-            height: 230px;
-            top: 32%;
-            left: 35px;
+            width: 260px;
+            height: 320px;
+            top: 30%;
+            left: calc(50% - 520px);
             animation: drift3 26s ease-in-out infinite;
         }
 
         .gp-3 .panel-gradient {
-            height: 204px;
+            height: 294px;
             background:
                 radial-gradient(ellipse 55% 40% at 50% 30%, rgba(105, 95, 185, 0.7) 0%, transparent 45%),
                 radial-gradient(ellipse 50% 35% at 50% 70%, rgba(145, 130, 205, 0.6) 0%, transparent 45%),
                 linear-gradient(175deg, #7068c0 0%, #8880d0 35%, #a8a0e0 65%, #c0b8e8 100%);
         }
 
-        /* Panel 4 - Bottom left */
+        /* Panel 4 - Bottom left - closer to center */
         .gp-4 {
-            width: 270px;
-            height: 155px;
-            bottom: 35px;
-            left: 55px;
+            width: 360px;
+            height: 220px;
+            bottom: 8%;
+            left: calc(50% - 560px);
             animation: drift1 24s ease-in-out infinite;
             animation-delay: -6s;
         }
 
         .gp-4 .panel-gradient {
-            height: 129px;
+            height: 194px;
             background:
                 radial-gradient(ellipse 45% 55% at 25% 50%, rgba(155, 135, 205, 0.7) 0%, transparent 45%),
                 radial-gradient(ellipse 40% 50% at 80% 50%, rgba(240, 200, 100, 0.55) 0%, transparent 42%),
                 linear-gradient(130deg, #a090d8 0%, #c0b0e8 35%, #e0d8f0 55%, #f0e0c0 80%, #e8d070 100%);
         }
 
-        /* Panel 5 - Right middle */
+        /* Panel 5 - Right middle - closer to center */
         .gp-5 {
-            width: 190px;
-            height: 250px;
-            top: 28%;
-            right: 40px;
+            width: 280px;
+            height: 340px;
+            top: 25%;
+            right: calc(50% - 540px);
             animation: drift2 28s ease-in-out infinite;
             animation-delay: -10s;
         }
 
         .gp-5 .panel-gradient {
-            height: 224px;
+            height: 314px;
             background:
                 radial-gradient(ellipse 50% 45% at 45% 35%, rgba(125, 105, 195, 0.7) 0%, transparent 48%),
                 radial-gradient(ellipse 45% 40% at 55% 70%, rgba(225, 165, 100, 0.55) 0%, transparent 42%),
                 linear-gradient(160deg, #8070c8 0%, #a090d8 30%, #c0b0e8 55%, #e0c8a8 80%, #d8b068 100%);
         }
 
-        /* Panel 6 - Bottom right */
+        /* Panel 6 - Bottom right - closer to center */
         .gp-6 {
-            width: 235px;
-            height: 145px;
-            bottom: 50px;
-            right: 60px;
+            width: 320px;
+            height: 200px;
+            bottom: 10%;
+            right: calc(50% - 550px);
             animation: drift3 20s ease-in-out infinite;
             animation-delay: -4s;
         }
 
         .gp-6 .panel-gradient {
-            height: 119px;
+            height: 174px;
             background:
                 radial-gradient(ellipse 55% 50% at 50% 45%, rgba(170, 155, 220, 0.65) 0%, transparent 50%),
                 radial-gradient(ellipse 40% 45% at 75% 55%, rgba(235, 190, 108, 0.5) 0%, transparent 45%),
                 linear-gradient(145deg, #b8a8e0 0%, #d0c0f0 45%, #f0e0d0 75%, #e0c888 100%);
         }
 
-        /* Panel 7 - Top center peeking */
+        /* Panel 7 - Top center left */
         .gp-7 {
-            width: 155px;
-            height: 125px;
-            top: 15px;
-            left: calc(50% - 200px);
+            width: 220px;
+            height: 180px;
+            top: 3%;
+            left: calc(50% - 280px);
             animation: drift2 18s ease-in-out infinite;
             animation-delay: -8s;
         }
 
         .gp-7 .panel-gradient {
-            height: 99px;
+            height: 154px;
             background:
                 radial-gradient(ellipse 60% 55% at 50% 50%, rgba(150, 135, 210, 0.65) 0%, transparent 50%),
                 linear-gradient(150deg, #a898d8 0%, #c8b8e8 50%, #e0d4e0 100%);
         }
 
-        /* Panel 8 - Bottom center peeking */
+        /* Panel 8 - Bottom center right */
         .gp-8 {
-            width: 170px;
-            height: 115px;
-            bottom: 20px;
-            left: calc(50% + 80px);
+            width: 240px;
+            height: 170px;
+            bottom: 5%;
+            right: calc(50% - 320px);
             animation: drift1 16s ease-in-out infinite;
             animation-delay: -3s;
         }
 
         .gp-8 .panel-gradient {
-            height: 89px;
+            height: 144px;
             background:
                 radial-gradient(ellipse 55% 50% at 45% 50%, rgba(140, 120, 200, 0.6) 0%, transparent 48%),
                 radial-gradient(ellipse 40% 45% at 70% 50%, rgba(230, 185, 112, 0.45) 0%, transparent 45%),
@@ -302,66 +302,78 @@
             80% { transform: translate(2px, -10px); }
         }
 
+        /* Large desktop - panels visible and framing content */
+        @media (max-width: 1400px) {
+            .gp-1 { width: 320px; height: 240px; left: calc(50% - 480px); }
+            .gp-1 .panel-gradient { height: 214px; }
+            .gp-2 { width: 290px; height: 200px; right: calc(50% - 460px); }
+            .gp-2 .panel-gradient { height: 174px; }
+            .gp-3 { width: 220px; height: 280px; left: calc(50% - 420px); }
+            .gp-3 .panel-gradient { height: 254px; }
+            .gp-4 { width: 300px; height: 185px; left: calc(50% - 460px); }
+            .gp-4 .panel-gradient { height: 159px; }
+            .gp-5 { width: 240px; height: 300px; right: calc(50% - 440px); }
+            .gp-5 .panel-gradient { height: 274px; }
+            .gp-6 { width: 280px; height: 170px; right: calc(50% - 450px); }
+            .gp-6 .panel-gradient { height: 144px; }
+            .gp-7 { width: 190px; height: 155px; left: calc(50% - 240px); }
+            .gp-7 .panel-gradient { height: 129px; }
+            .gp-8 { width: 200px; height: 145px; right: calc(50% - 260px); }
+            .gp-8 .panel-gradient { height: 119px; }
+        }
+
         /* Tablet */
-        @media (max-width: 1200px) {
-            .gp-1 { width: 250px; height: 175px; top: 25px; left: 30px; }
-            .gp-1 .panel-gradient { height: 149px; }
-            .gp-2 { width: 210px; height: 150px; top: 35px; right: 35px; }
-            .gp-2 .panel-gradient { height: 124px; }
-            .gp-3 { width: 150px; height: 195px; left: 25px; }
-            .gp-3 .panel-gradient { height: 169px; }
-            .gp-4 { width: 225px; height: 130px; bottom: 28px; left: 40px; }
-            .gp-4 .panel-gradient { height: 104px; }
-            .gp-5 { width: 160px; height: 210px; right: 30px; }
-            .gp-5 .panel-gradient { height: 184px; }
-            .gp-6 { width: 195px; height: 120px; bottom: 38px; right: 45px; }
-            .gp-6 .panel-gradient { height: 94px; }
-            .gp-7 { width: 130px; height: 105px; left: calc(50% - 160px); }
-            .gp-7 .panel-gradient { height: 79px; }
-            .gp-8 { width: 145px; height: 98px; left: calc(50% + 50px); }
-            .gp-8 .panel-gradient { height: 72px; }
+        @media (max-width: 1100px) {
+            .gp-7, .gp-8 { display: none; }
+            .gp-1 { width: 260px; height: 195px; top: 6%; left: 15px; }
+            .gp-1 .panel-gradient { height: 169px; }
+            .gp-2 { width: 235px; height: 170px; top: 5%; right: 15px; }
+            .gp-2 .panel-gradient { height: 144px; }
+            .gp-3 { width: 180px; height: 230px; top: 28%; left: 12px; }
+            .gp-3 .panel-gradient { height: 204px; }
+            .gp-4 { width: 245px; height: 155px; bottom: 6%; left: 18px; }
+            .gp-4 .panel-gradient { height: 129px; }
+            .gp-5 { width: 195px; height: 250px; top: 26%; right: 12px; }
+            .gp-5 .panel-gradient { height: 224px; }
+            .gp-6 { width: 225px; height: 145px; bottom: 8%; right: 18px; }
+            .gp-6 .panel-gradient { height: 119px; }
         }
 
         /* Small tablet */
-        @media (max-width: 900px) {
-            .gp-7, .gp-8 { display: none; }
-            .gp-1 { width: 195px; height: 140px; top: 20px; left: 20px; }
-            .gp-1 .panel-gradient { height: 114px; }
-            .gp-2 { width: 170px; height: 125px; top: 25px; right: 20px; }
-            .gp-2 .panel-gradient { height: 99px; }
-            .gp-3 { width: 125px; height: 165px; top: 30%; left: 15px; }
-            .gp-3 .panel-gradient { height: 139px; }
-            .gp-4 { width: 180px; height: 110px; bottom: 20px; left: 25px; }
-            .gp-4 .panel-gradient { height: 84px; }
-            .gp-5 { width: 135px; height: 175px; top: 28%; right: 15px; }
-            .gp-5 .panel-gradient { height: 149px; }
-            .gp-6 { width: 160px; height: 100px; bottom: 25px; right: 25px; }
-            .gp-6 .panel-gradient { height: 74px; }
+        @media (max-width: 800px) {
+            .gp-3, .gp-5 { display: none; }
+            .gp-1 { width: 210px; height: 160px; top: 5%; left: 10px; }
+            .gp-1 .panel-gradient { height: 134px; }
+            .gp-2 { width: 190px; height: 145px; top: 4%; right: 10px; }
+            .gp-2 .panel-gradient { height: 119px; }
+            .gp-4 { width: 200px; height: 130px; bottom: 5%; left: 12px; }
+            .gp-4 .panel-gradient { height: 104px; }
+            .gp-6 { width: 185px; height: 120px; bottom: 6%; right: 12px; }
+            .gp-6 .panel-gradient { height: 94px; }
         }
 
         /* Large phone */
-        @media (max-width: 680px) {
-            .gp-3, .gp-5 { display: none; }
-            .gp-1 { width: 155px; height: 115px; top: 15px; left: 12px; }
-            .gp-1 .panel-gradient { height: 89px; }
-            .gp-2 { width: 135px; height: 100px; top: 18px; right: 12px; }
-            .gp-2 .panel-gradient { height: 74px; }
-            .gp-4 { width: 145px; height: 92px; bottom: 15px; left: 15px; }
-            .gp-4 .panel-gradient { height: 66px; }
-            .gp-6 { width: 130px; height: 85px; bottom: 18px; right: 15px; }
-            .gp-6 .panel-gradient { height: 59px; }
+        @media (max-width: 600px) {
+            .gp-1 { width: 165px; height: 130px; top: 4%; left: 8px; }
+            .gp-1 .panel-gradient { height: 104px; }
+            .gp-2 { width: 150px; height: 118px; top: 3%; right: 8px; }
+            .gp-2 .panel-gradient { height: 92px; }
+            .gp-4 { width: 160px; height: 108px; bottom: 4%; left: 10px; }
+            .gp-4 .panel-gradient { height: 82px; }
+            .gp-6 { width: 145px; height: 100px; bottom: 5%; right: 10px; }
+            .gp-6 .panel-gradient { height: 74px; }
         }
 
         /* Phone */
         @media (max-width: 480px) {
-            .gp-1 { width: 125px; height: 95px; top: 10px; left: 8px; }
-            .gp-1 .panel-gradient { height: 69px; }
-            .gp-2 { width: 110px; height: 85px; top: 12px; right: 8px; }
-            .gp-2 .panel-gradient { height: 59px; }
-            .gp-4 { width: 120px; height: 80px; bottom: 10px; left: 10px; }
-            .gp-4 .panel-gradient { height: 54px; }
-            .gp-6 { width: 105px; height: 75px; bottom: 12px; right: 10px; }
-            .gp-6 .panel-gradient { height: 49px; }
+            .gp-1 { width: 135px; height: 108px; top: 3%; left: 5px; }
+            .gp-1 .panel-gradient { height: 82px; }
+            .gp-2 { width: 120px; height: 98px; top: 2%; right: 5px; }
+            .gp-2 .panel-gradient { height: 72px; }
+            .gp-4 { width: 130px; height: 92px; bottom: 3%; left: 6px; }
+            .gp-4 .panel-gradient { height: 66px; }
+            .gp-6 { width: 115px; height: 85px; bottom: 4%; right: 6px; }
+            .gp-6 .panel-gradient { height: 59px; }
         }
 
         .container {
