@@ -26,53 +26,47 @@
             overflow-x: hidden;
         }
 
-        /* Scattered light gradient - bright top, darker bottom */
+        /* Refined ambient lighting - subtle and natural */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background:
-                /* Main light source from top */
-                radial-gradient(ellipse 140% 60% at 50% -10%, rgba(180, 215, 245, 0.95) 0%, transparent 50%),
-                /* Secondary light scatter */
-                radial-gradient(ellipse 100% 50% at 30% 10%, rgba(160, 200, 235, 0.6) 0%, transparent 40%),
-                radial-gradient(ellipse 90% 45% at 70% 15%, rgba(170, 210, 240, 0.5) 0%, transparent 38%),
-                /* Ambient light in middle */
-                radial-gradient(ellipse 120% 60% at 50% 40%, rgba(120, 170, 210, 0.4) 0%, transparent 50%),
-                /* Base gradient - light to dark */
+                /* Soft overhead light bloom */
+                radial-gradient(ellipse 120% 50% at 50% -5%, rgba(200, 225, 250, 0.9) 0%, transparent 45%),
+                /* Subtle side ambient */
+                radial-gradient(ellipse 80% 40% at 15% 20%, rgba(180, 210, 240, 0.25) 0%, transparent 50%),
+                radial-gradient(ellipse 70% 35% at 85% 25%, rgba(175, 205, 235, 0.2) 0%, transparent 45%),
+                /* Base gradient */
                 linear-gradient(180deg,
-                    #a8d4f0 0%,
-                    #8ec0e8 15%,
-                    #6aa8d8 30%,
-                    #5090c0 50%,
-                    #3a78a8 70%,
-                    #2d6890 85%,
-                    #245878 100%);
+                    #b8ddf5 0%,
+                    #9fcce8 12%,
+                    #7bb8dc 28%,
+                    #5a9cc8 48%,
+                    #4285b0 68%,
+                    #356f98 85%,
+                    #2a5a80 100%);
             pointer-events: none;
             z-index: 0;
         }
 
-        /* Subtle texture */
+        /* Animated ambient light pulse - very subtle */
         body::after {
             content: '';
             position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.012;
+            top: -20%;
+            left: 20%;
+            width: 60%;
+            height: 50%;
+            background: radial-gradient(ellipse at center, rgba(220, 240, 255, 0.15) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
+            animation: ambientPulse 8s ease-in-out infinite;
         }
 
-        /* WebGL Raytracing Canvas */
-        #raytraceCanvas {
-            position: fixed;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 2;
-            mix-blend-mode: screen;
-            opacity: 0.85;
+        @keyframes ambientPulse {
+            0%, 100% { opacity: 0.6; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.05); }
         }
 
         header, main, footer {
@@ -91,35 +85,42 @@
 
         .glass-panel {
             position: absolute;
-            background: rgba(255, 255, 255, 0.18);
-            backdrop-filter: blur(16px) saturate(1.2);
-            -webkit-backdrop-filter: blur(16px) saturate(1.2);
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px) saturate(1.3);
+            -webkit-backdrop-filter: blur(20px) saturate(1.3);
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
             box-shadow:
-                0 4px 24px rgba(120, 100, 160, 0.12),
-                0 1px 3px rgba(120, 100, 160, 0.08),
-                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+                /* Depth shadow */
+                0 8px 32px rgba(30, 60, 90, 0.15),
+                0 2px 8px rgba(30, 60, 90, 0.1),
+                /* Top edge highlight - simulates overhead light */
+                inset 0 1px 0 rgba(255, 255, 255, 0.35),
+                /* Subtle inner glow */
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
             overflow: hidden;
             cursor: grab;
             pointer-events: auto;
-            transition: box-shadow 0.3s ease, transform 0.1s ease;
+            transition: box-shadow 0.4s ease, transform 0.2s ease;
         }
 
         .glass-panel:hover {
             box-shadow:
-                0 8px 40px rgba(120, 100, 160, 0.2),
-                0 2px 8px rgba(120, 100, 160, 0.12),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+                0 12px 48px rgba(30, 60, 90, 0.2),
+                0 4px 12px rgba(30, 60, 90, 0.12),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4),
+                inset 0 0 30px rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
         }
 
         .glass-panel.dragging {
             cursor: grabbing;
             z-index: 100;
             box-shadow:
-                0 20px 60px rgba(100, 80, 150, 0.3),
-                0 8px 20px rgba(100, 80, 150, 0.2),
-                inset 0 1px 0 rgba(255, 255, 255, 0.5);
+                0 24px 64px rgba(30, 60, 90, 0.25),
+                0 8px 24px rgba(30, 60, 90, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.45),
+                inset 0 0 40px rgba(255, 255, 255, 0.1);
             animation: none !important;
         }
 
@@ -154,27 +155,30 @@
             position: relative;
         }
 
-        /* Glossy shine overlay */
+        /* Refined light reflection - simulates overhead light source */
         .panel-gradient::before {
             content: '';
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
-            height: 50%;
-            background: linear-gradient(180deg,
-                rgba(255, 255, 255, 0.35) 0%,
-                rgba(255, 255, 255, 0.12) 40%,
+            height: 45%;
+            background: linear-gradient(175deg,
+                rgba(255, 255, 255, 0.28) 0%,
+                rgba(255, 255, 255, 0.08) 50%,
                 transparent 100%);
             pointer-events: none;
             z-index: 2;
         }
 
+        /* Subtle specular highlight */
         .panel-gradient::after {
             content: '';
             position: absolute;
             inset: 0;
-            background: radial-gradient(ellipse 80% 50% at 20% 20%, rgba(255, 255, 255, 0.18) 0%, transparent 50%);
+            background:
+                radial-gradient(ellipse 60% 40% at 25% 15%, rgba(255, 255, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse 40% 30% at 80% 85%, rgba(255, 255, 255, 0.06) 0%, transparent 50%);
             pointer-events: none;
             z-index: 2;
         }
@@ -772,9 +776,6 @@
     </style>
 </head>
 <body>
-    <!-- WebGL Raytracing Canvas -->
-    <canvas id="raytraceCanvas"></canvas>
-
     <!-- Floating Glossy Panels -->
     <div class="floating-panels">
         <div class="glass-panel gp-1">
@@ -1049,352 +1050,6 @@
                     draggedPanel = null;
                 }
             };
-        })();
-
-        // ============================================
-        // WebGL RAYTRACING - Volumetric God Rays & Caustics
-        // ============================================
-        (function() {
-            var canvas = document.getElementById('raytraceCanvas');
-            var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
-
-            if (!gl) {
-                console.log('WebGL not supported');
-                return;
-            }
-
-            // Mouse tracking for dynamic light
-            var mouse = { x: 0.5, y: 0.3 };
-            var targetMouse = { x: 0.5, y: 0.3 };
-
-            document.addEventListener('mousemove', function(e) {
-                targetMouse.x = e.clientX / window.innerWidth;
-                targetMouse.y = e.clientY / window.innerHeight;
-            });
-
-            // Vertex shader - full screen quad
-            var vertexShaderSource = `
-                attribute vec2 a_position;
-                varying vec2 v_uv;
-                void main() {
-                    v_uv = a_position * 0.5 + 0.5;
-                    gl_Position = vec4(a_position, 0.0, 1.0);
-                }
-            `;
-
-            // Fragment shader - Ray marching with volumetric lighting
-            var fragmentShaderSource = `
-                precision highp float;
-
-                varying vec2 v_uv;
-                uniform float u_time;
-                uniform vec2 u_resolution;
-                uniform vec2 u_mouse;
-
-                #define PI 3.14159265359
-                #define MAX_STEPS 64
-                #define MAX_DIST 50.0
-                #define SURF_DIST 0.001
-
-                // Noise functions for volumetric effects
-                float hash(vec2 p) {
-                    return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
-                }
-
-                float noise(vec2 p) {
-                    vec2 i = floor(p);
-                    vec2 f = fract(p);
-                    f = f * f * (3.0 - 2.0 * f);
-
-                    float a = hash(i);
-                    float b = hash(i + vec2(1.0, 0.0));
-                    float c = hash(i + vec2(0.0, 1.0));
-                    float d = hash(i + vec2(1.0, 1.0));
-
-                    return mix(mix(a, b, f.x), mix(c, d, f.x), f.y);
-                }
-
-                float fbm(vec2 p) {
-                    float value = 0.0;
-                    float amplitude = 0.5;
-                    float frequency = 1.0;
-
-                    for (int i = 0; i < 5; i++) {
-                        value += amplitude * noise(p * frequency);
-                        amplitude *= 0.5;
-                        frequency *= 2.0;
-                    }
-                    return value;
-                }
-
-                // 3D noise for volumetric
-                float noise3D(vec3 p) {
-                    vec3 i = floor(p);
-                    vec3 f = fract(p);
-                    f = f * f * (3.0 - 2.0 * f);
-
-                    vec2 uv = (i.xy + vec2(37.0, 17.0) * i.z) + f.xy;
-                    float a = hash(uv);
-                    float b = hash(uv + vec2(37.0, 17.0));
-                    return mix(a, b, f.z);
-                }
-
-                // Volumetric density field
-                float volumetricDensity(vec3 p, float time) {
-                    float density = 0.0;
-
-                    // Animated flowing noise
-                    vec3 q = p * 0.5 + vec3(0.0, -time * 0.1, 0.0);
-                    density += noise3D(q) * 0.6;
-                    density += noise3D(q * 2.0 + time * 0.05) * 0.3;
-                    density += noise3D(q * 4.0 - time * 0.08) * 0.15;
-
-                    // Fade with height (denser at top)
-                    float heightFade = smoothstep(1.0, -0.5, p.y);
-                    density *= heightFade;
-
-                    // Add some variation based on position
-                    density *= 0.5 + 0.5 * sin(p.x * 2.0 + time * 0.3);
-
-                    return max(0.0, density - 0.3) * 1.5;
-                }
-
-                // God rays / volumetric light scattering
-                vec3 volumetricLightRays(vec2 uv, vec2 lightPos, float time) {
-                    vec3 color = vec3(0.0);
-
-                    // Light properties
-                    vec3 lightColor = vec3(0.7, 0.85, 1.0);
-
-                    // Ray direction from UV
-                    vec2 rayDir = uv - lightPos;
-                    float rayLength = length(rayDir);
-                    rayDir = normalize(rayDir);
-
-                    // Ray march through volume
-                    float stepSize = 0.02;
-                    float accumDensity = 0.0;
-                    float transmittance = 1.0;
-
-                    for (int i = 0; i < 48; i++) {
-                        float t = float(i) * stepSize;
-                        vec2 samplePos = lightPos + rayDir * t;
-
-                        // Check bounds
-                        if (samplePos.x < 0.0 || samplePos.x > 1.0 ||
-                            samplePos.y < 0.0 || samplePos.y > 1.0) break;
-
-                        // Sample density at this point
-                        vec3 p3d = vec3(samplePos * 4.0 - 2.0, t * 2.0);
-                        float density = volumetricDensity(p3d, time);
-
-                        // Distance from light attenuation
-                        float distFromLight = length(samplePos - lightPos);
-                        float lightAtten = 1.0 / (1.0 + distFromLight * 3.0);
-
-                        // Accumulate light
-                        float scattering = density * lightAtten * transmittance;
-                        color += lightColor * scattering * stepSize * 2.0;
-
-                        // Update transmittance
-                        transmittance *= exp(-density * stepSize * 0.5);
-
-                        if (transmittance < 0.01) break;
-                    }
-
-                    return color;
-                }
-
-                // Caustic pattern
-                float caustic(vec2 uv, float time) {
-                    vec2 p = uv * 6.0;
-                    float t = time * 0.4;
-
-                    float c = 0.0;
-                    for (int i = 0; i < 3; i++) {
-                        float fi = float(i);
-                        vec2 q = p + vec2(
-                            sin(t + fi * 1.3) * 0.5,
-                            cos(t + fi * 1.7) * 0.5
-                        );
-                        c += sin(q.x * cos(t * 0.3 + fi) + q.y * sin(t * 0.4 - fi)) *
-                             cos(q.y * sin(t * 0.2 + fi * 2.0) - q.x * cos(t * 0.5));
-                    }
-
-                    return pow(abs(sin(c * 0.5 + t)), 3.0) * 0.3;
-                }
-
-                // Light ray beams
-                float lightBeams(vec2 uv, vec2 lightPos, float time) {
-                    vec2 delta = uv - lightPos;
-                    float angle = atan(delta.y, delta.x);
-                    float dist = length(delta);
-
-                    // Create beam pattern
-                    float beams = 0.0;
-                    for (int i = 0; i < 8; i++) {
-                        float fi = float(i);
-                        float beamAngle = fi * PI * 0.25 + time * 0.1 + sin(time * 0.3 + fi) * 0.2;
-                        float angleDiff = abs(mod(angle - beamAngle + PI, PI * 2.0) - PI);
-                        float beam = smoothstep(0.15, 0.0, angleDiff);
-                        beam *= smoothstep(1.5, 0.0, dist);
-                        beam *= 0.5 + 0.5 * sin(dist * 10.0 - time * 2.0 + fi);
-                        beams += beam * 0.15;
-                    }
-
-                    return beams;
-                }
-
-                // Lens flare
-                vec3 lensFlare(vec2 uv, vec2 lightPos) {
-                    vec2 delta = uv - lightPos;
-                    float dist = length(delta);
-
-                    vec3 flare = vec3(0.0);
-
-                    // Main glow
-                    flare += vec3(0.6, 0.8, 1.0) * 0.3 / (dist * 3.0 + 0.1);
-
-                    // Anamorphic streak
-                    float streak = exp(-abs(delta.y) * 15.0) * exp(-abs(delta.x) * 2.0);
-                    flare += vec3(0.5, 0.7, 1.0) * streak * 0.3;
-
-                    // Chromatic rings
-                    float ring1 = smoothstep(0.02, 0.0, abs(dist - 0.2));
-                    float ring2 = smoothstep(0.015, 0.0, abs(dist - 0.35));
-                    flare += vec3(1.0, 0.5, 0.3) * ring1 * 0.15;
-                    flare += vec3(0.3, 0.5, 1.0) * ring2 * 0.1;
-
-                    return flare;
-                }
-
-                void main() {
-                    vec2 uv = v_uv;
-                    vec2 aspect = vec2(u_resolution.x / u_resolution.y, 1.0);
-
-                    // Light position follows mouse with offset toward top
-                    vec2 lightPos = vec2(u_mouse.x, u_mouse.y * 0.5);
-
-                    // Initialize color
-                    vec3 color = vec3(0.0);
-
-                    // Add volumetric god rays
-                    color += volumetricLightRays(uv, lightPos, u_time) * 0.8;
-
-                    // Add light beams
-                    color += vec3(0.6, 0.8, 1.0) * lightBeams(uv, lightPos, u_time);
-
-                    // Add caustic patterns
-                    float caust = caustic(uv * aspect, u_time);
-                    color += vec3(0.5, 0.75, 1.0) * caust * smoothstep(0.7, 0.0, uv.y);
-
-                    // Add lens flare at light position
-                    color += lensFlare(uv, lightPos) * 0.5;
-
-                    // Subtle vignette
-                    float vignette = 1.0 - length(uv - 0.5) * 0.5;
-                    color *= vignette;
-
-                    // Add some sparkle/shimmer
-                    float sparkle = noise(uv * 200.0 + u_time * 5.0);
-                    sparkle = pow(sparkle, 15.0) * 0.5;
-                    color += vec3(0.8, 0.9, 1.0) * sparkle;
-
-                    // Tone mapping and gamma
-                    color = color / (1.0 + color);
-                    color = pow(color, vec3(0.9));
-
-                    gl_FragColor = vec4(color, 1.0);
-                }
-            `;
-
-            // Compile shader
-            function compileShader(source, type) {
-                var shader = gl.createShader(type);
-                gl.shaderSource(shader, source);
-                gl.compileShader(shader);
-
-                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-                    console.error('Shader compile error:', gl.getShaderInfoLog(shader));
-                    return null;
-                }
-                return shader;
-            }
-
-            var vertexShader = compileShader(vertexShaderSource, gl.VERTEX_SHADER);
-            var fragmentShader = compileShader(fragmentShaderSource, gl.FRAGMENT_SHADER);
-
-            if (!vertexShader || !fragmentShader) return;
-
-            // Create program
-            var program = gl.createProgram();
-            gl.attachShader(program, vertexShader);
-            gl.attachShader(program, fragmentShader);
-            gl.linkProgram(program);
-
-            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                console.error('Program link error:', gl.getProgramInfoLog(program));
-                return;
-            }
-
-            gl.useProgram(program);
-
-            // Create full-screen quad
-            var positions = new Float32Array([
-                -1, -1,
-                 1, -1,
-                -1,  1,
-                 1,  1
-            ]);
-
-            var buffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-
-            var positionLocation = gl.getAttribLocation(program, 'a_position');
-            gl.enableVertexAttribArray(positionLocation);
-            gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
-
-            // Get uniform locations
-            var timeLocation = gl.getUniformLocation(program, 'u_time');
-            var resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
-            var mouseLocation = gl.getUniformLocation(program, 'u_mouse');
-
-            // Resize handler
-            function resize() {
-                var dpr = Math.min(window.devicePixelRatio || 1, 2);
-                canvas.width = window.innerWidth * dpr;
-                canvas.height = window.innerHeight * dpr;
-                canvas.style.width = window.innerWidth + 'px';
-                canvas.style.height = window.innerHeight + 'px';
-                gl.viewport(0, 0, canvas.width, canvas.height);
-            }
-
-            window.addEventListener('resize', resize);
-            resize();
-
-            // Animation loop
-            var startTime = Date.now();
-
-            function render() {
-                var time = (Date.now() - startTime) * 0.001;
-
-                // Smooth mouse following
-                mouse.x += (targetMouse.x - mouse.x) * 0.05;
-                mouse.y += (targetMouse.y - mouse.y) * 0.05;
-
-                // Set uniforms
-                gl.uniform1f(timeLocation, time);
-                gl.uniform2f(resolutionLocation, canvas.width, canvas.height);
-                gl.uniform2f(mouseLocation, mouse.x, 1.0 - mouse.y);
-
-                // Draw
-                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-
-                requestAnimationFrame(render);
-            }
-
-            render();
         })();
     </script>
 </body>
