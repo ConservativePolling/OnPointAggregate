@@ -18,7 +18,7 @@
         }
 
         body {
-            background: #7ba3c9;
+            background: #4a7a9e;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -26,32 +26,39 @@
             overflow-x: hidden;
         }
 
-        /* Light blue gradient background */
+        /* Scattered light gradient - bright top, darker bottom */
         body::before {
             content: '';
             position: fixed;
             inset: 0;
             background:
-                radial-gradient(ellipse 100% 70% at 50% 50%, rgba(160, 195, 230, 0.7) 0%, transparent 50%),
-                radial-gradient(ellipse 70% 50% at 15% 75%, rgba(130, 175, 210, 0.5) 0%, transparent 45%),
-                radial-gradient(ellipse 60% 45% at 88% 25%, rgba(145, 185, 220, 0.4) 0%, transparent 40%),
+                /* Main light source from top */
+                radial-gradient(ellipse 140% 60% at 50% -10%, rgba(180, 215, 245, 0.95) 0%, transparent 50%),
+                /* Secondary light scatter */
+                radial-gradient(ellipse 100% 50% at 30% 10%, rgba(160, 200, 235, 0.6) 0%, transparent 40%),
+                radial-gradient(ellipse 90% 45% at 70% 15%, rgba(170, 210, 240, 0.5) 0%, transparent 38%),
+                /* Ambient light in middle */
+                radial-gradient(ellipse 120% 60% at 50% 40%, rgba(120, 170, 210, 0.4) 0%, transparent 50%),
+                /* Base gradient - light to dark */
                 linear-gradient(180deg,
-                    #8eb8d8 0%,
-                    #7ba3c9 30%,
-                    #6a94bc 50%,
-                    #7ba3c9 70%,
-                    #8aaed2 100%);
+                    #a8d4f0 0%,
+                    #8ec0e8 15%,
+                    #6aa8d8 30%,
+                    #5090c0 50%,
+                    #3a78a8 70%,
+                    #2d6890 85%,
+                    #245878 100%);
             pointer-events: none;
             z-index: 0;
         }
 
-        /* Very subtle noise */
+        /* Subtle texture */
         body::after {
             content: '';
             position: fixed;
             inset: 0;
             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-            opacity: 0.018;
+            opacity: 0.012;
             pointer-events: none;
             z-index: 0;
         }
@@ -956,70 +963,77 @@
             if (e.target === this) closeModal();
         });
 
-        // Draggable panels - make the page feel alive and interactive
+        // Draggable panels - works on Mac/Windows/touch
         (function() {
-            const panels = document.querySelectorAll('.glass-panel');
+            var draggedPanel = null;
+            var offsetX = 0;
+            var offsetY = 0;
 
-            panels.forEach(function(panel) {
-                let isDragging = false;
-                let offsetX = 0;
-                let offsetY = 0;
+            // Get all panels
+            var panels = document.querySelectorAll('.glass-panel');
 
-                function onMouseDown(e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    isDragging = true;
-                    panel.classList.add('dragging');
+            // Add mousedown to each panel
+            for (var i = 0; i < panels.length; i++) {
+                panels[i].onmousedown = startDrag;
+                panels[i].ontouchstart = startDrag;
+            }
 
-                    const rect = panel.getBoundingClientRect();
+            function startDrag(e) {
+                draggedPanel = this;
+                draggedPanel.classList.add('dragging');
 
-                    // Get mouse/touch position
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                var rect = draggedPanel.getBoundingClientRect();
+                var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                var clientY = e.clientY || (e.touches && e.touches[0].clientY);
 
-                    // Calculate offset from panel's top-left corner
-                    offsetX = clientX - rect.left;
-                    offsetY = clientY - rect.top;
+                offsetX = clientX - rect.left;
+                offsetY = clientY - rect.top;
 
-                    // Convert to fixed positioning
-                    panel.style.position = 'fixed';
-                    panel.style.left = rect.left + 'px';
-                    panel.style.top = rect.top + 'px';
-                    panel.style.right = 'auto';
-                    panel.style.bottom = 'auto';
-                    panel.style.margin = '0';
+                // Switch to fixed positioning
+                draggedPanel.style.position = 'fixed';
+                draggedPanel.style.left = rect.left + 'px';
+                draggedPanel.style.top = rect.top + 'px';
+                draggedPanel.style.right = 'auto';
+                draggedPanel.style.bottom = 'auto';
 
-                    document.addEventListener('mousemove', onMouseMove);
-                    document.addEventListener('mouseup', onMouseUp);
-                    document.addEventListener('touchmove', onMouseMove, { passive: false });
-                    document.addEventListener('touchend', onMouseUp);
+                e.preventDefault();
+                return false;
+            }
+
+            document.onmousemove = function(e) {
+                if (!draggedPanel) return;
+
+                var clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                var clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+                draggedPanel.style.left = (clientX - offsetX) + 'px';
+                draggedPanel.style.top = (clientY - offsetY) + 'px';
+            };
+
+            document.ontouchmove = function(e) {
+                if (!draggedPanel) return;
+                e.preventDefault();
+
+                var clientX = e.touches[0].clientX;
+                var clientY = e.touches[0].clientY;
+
+                draggedPanel.style.left = (clientX - offsetX) + 'px';
+                draggedPanel.style.top = (clientY - offsetY) + 'px';
+            };
+
+            document.onmouseup = function() {
+                if (draggedPanel) {
+                    draggedPanel.classList.remove('dragging');
+                    draggedPanel = null;
                 }
+            };
 
-                function onMouseMove(e) {
-                    if (!isDragging) return;
-                    e.preventDefault();
-
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-
-                    panel.style.left = (clientX - offsetX) + 'px';
-                    panel.style.top = (clientY - offsetY) + 'px';
+            document.ontouchend = function() {
+                if (draggedPanel) {
+                    draggedPanel.classList.remove('dragging');
+                    draggedPanel = null;
                 }
-
-                function onMouseUp() {
-                    if (!isDragging) return;
-                    isDragging = false;
-                    panel.classList.remove('dragging');
-
-                    document.removeEventListener('mousemove', onMouseMove);
-                    document.removeEventListener('mouseup', onMouseUp);
-                    document.removeEventListener('touchmove', onMouseMove);
-                    document.removeEventListener('touchend', onMouseUp);
-                }
-
-                panel.addEventListener('mousedown', onMouseDown);
-                panel.addEventListener('touchstart', onMouseDown, { passive: false });
-            });
+            };
         })();
     </script>
 </body>
