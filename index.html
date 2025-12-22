@@ -19,6 +19,7 @@
 
         html {
             scroll-behavior: smooth;
+            overflow-x: hidden;
         }
 
         body {
@@ -26,6 +27,7 @@
             min-height: 100vh;
             position: relative;
             overflow-x: hidden;
+            width: 100%;
         }
 
         /* Hero section - full viewport */
@@ -707,39 +709,39 @@
             --gradient-opacity: 0;
         }
 
-        /* Prismatic rainbow halo - rectangular feel, soft dissolving edges */
+        /* Prismatic rainbow halo - stronger gradient, perfect edge dissipation */
         .research-header::before {
             content: '';
             position: absolute;
-            top: -20%;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
-            width: 120%;
+            transform: translate(-50%, -50%);
+            width: 130%;
             height: 140%;
             background: conic-gradient(
                 from 200deg at 50% 50%,
-                rgba(56, 189, 248, 0.28) 0deg,      /* cyan */
-                rgba(59, 130, 246, 0.24) 45deg,     /* blue */
-                rgba(139, 92, 246, 0.28) 90deg,     /* purple */
-                rgba(217, 70, 239, 0.24) 135deg,    /* fuchsia */
-                rgba(236, 72, 153, 0.28) 180deg,    /* pink */
-                rgba(244, 114, 182, 0.22) 225deg,   /* rose */
-                rgba(251, 146, 60, 0.18) 270deg,    /* orange */
-                rgba(6, 182, 212, 0.24) 315deg,     /* teal */
-                rgba(56, 189, 248, 0.28) 360deg     /* back to cyan */
+                rgba(56, 189, 248, 0.42) 0deg,      /* cyan */
+                rgba(59, 130, 246, 0.36) 45deg,     /* blue */
+                rgba(139, 92, 246, 0.42) 90deg,     /* purple */
+                rgba(217, 70, 239, 0.36) 135deg,    /* fuchsia */
+                rgba(236, 72, 153, 0.42) 180deg,    /* pink */
+                rgba(244, 114, 182, 0.32) 225deg,   /* rose */
+                rgba(251, 146, 60, 0.26) 270deg,    /* orange */
+                rgba(6, 182, 212, 0.36) 315deg,     /* teal */
+                rgba(56, 189, 248, 0.42) 360deg     /* back to cyan */
             );
-            filter: blur(60px);
+            filter: blur(70px);
             z-index: 0;
             pointer-events: none;
             opacity: var(--gradient-opacity);
             transition: opacity 0.15s ease-out;
             mask-image:
-                linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, black 32%, black 68%, rgba(0,0,0,0.3) 85%, transparent 100%),
-                linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 10%, black 22%, black 78%, rgba(0,0,0,0.5) 90%, transparent 100%);
+                linear-gradient(to right, transparent 0%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.6) 22%, black 34%, black 66%, rgba(0,0,0,0.6) 78%, rgba(0,0,0,0.2) 88%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.6) 22%, black 34%, black 66%, rgba(0,0,0,0.6) 78%, rgba(0,0,0,0.2) 88%, transparent 100%);
             mask-composite: intersect;
             -webkit-mask-image:
-                linear-gradient(to right, transparent 0%, rgba(0,0,0,0.3) 15%, black 32%, black 68%, rgba(0,0,0,0.3) 85%, transparent 100%),
-                linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.5) 10%, black 22%, black 78%, rgba(0,0,0,0.5) 90%, transparent 100%);
+                linear-gradient(to right, transparent 0%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.6) 22%, black 34%, black 66%, rgba(0,0,0,0.6) 78%, rgba(0,0,0,0.2) 88%, transparent 100%),
+                linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.2) 12%, rgba(0,0,0,0.6) 22%, black 34%, black 66%, rgba(0,0,0,0.6) 78%, rgba(0,0,0,0.2) 88%, transparent 100%);
             -webkit-mask-composite: source-in;
         }
 
@@ -1991,9 +1993,9 @@
             }
 
             .research-header::before {
-                width: 130%;
-                height: 180%;
-                filter: blur(70px);
+                width: 120%;
+                height: 115%;
+                filter: blur(55px);
             }
 
             .research-title {
@@ -2124,9 +2126,9 @@
             }
 
             .research-header::before {
-                width: 120%;
-                height: 160%;
-                filter: blur(60px);
+                width: 115%;
+                height: 110%;
+                filter: blur(45px);
             }
 
             .research-title {
@@ -3383,8 +3385,35 @@
                 handleGradientFade();
             }
 
+            // Debounced resize handler
+            var resizeTimeout;
+            function onResize() {
+                clearTimeout(resizeTimeout);
+                resizeTimeout = setTimeout(function() {
+                    checkVisibility();
+                    handlePanelFade();
+                    handleGradientFade();
+                }, 50);
+            }
+
+            // Immediate recalc for critical updates
+            function onVisualChange() {
+                handlePanelFade();
+                handleGradientFade();
+            }
+
             // Check on scroll
             window.addEventListener('scroll', onScroll, { passive: true });
+
+            // Check on resize/zoom
+            window.addEventListener('resize', onResize, { passive: true });
+            window.addEventListener('orientationchange', onVisualChange);
+
+            // Recalculate on visual viewport changes (handles pinch zoom)
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onVisualChange);
+                window.visualViewport.addEventListener('scroll', onVisualChange);
+            }
 
             // Check on load
             checkVisibility();
