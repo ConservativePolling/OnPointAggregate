@@ -6,288 +6,18 @@
     <title>Research - OnPointAggregate</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #fafafa;
-            color: #171717;
-            line-height: 1.6;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-
-        /* Navigation */
-        .nav {
-            position: sticky;
-            top: 0;
-            background: rgba(250, 250, 250, 0.8);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid #e5e5e5;
-            z-index: 100;
-        }
-
-        .nav-inner {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px;
-            height: 64px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-logo {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-            color: #171717;
-            text-decoration: none;
-            letter-spacing: -0.02em;
-        }
-
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 32px;
-        }
-
-        .nav-link {
-            font-size: 14px;
-            font-weight: 500;
-            color: #525252;
-            text-decoration: none;
-            transition: color 0.15s ease;
-        }
-
-        .nav-link:hover {
-            color: #171717;
-        }
-
-        .nav-link.active {
-            color: #171717;
-        }
-
-        /* Page Header */
-        .page-header {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 64px 24px 48px;
-        }
-
-        .page-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 42px;
-            font-weight: 700;
-            letter-spacing: -0.03em;
-            color: #171717;
-            margin-bottom: 16px;
-        }
-
-        .page-description {
-            font-size: 18px;
-            color: #525252;
-            max-width: 600px;
-            line-height: 1.7;
-        }
-
-        /* Main Content */
-        .main {
-            max-width: 1100px;
-            margin: 0 auto;
-            padding: 0 24px 80px;
-        }
-
-        /* Article Grid */
-        .articles {
-            display: grid;
-            gap: 24px;
-        }
-
-        /* Article Card */
-        .article {
-            display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 32px;
-            padding: 32px;
-            background: #fff;
-            border: 1px solid #e5e5e5;
-            border-radius: 12px;
-            text-decoration: none;
-            color: inherit;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .article:hover {
-            border-color: #d4d4d4;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-        }
-
-        /* Article Thumbnail */
-        .article-thumb {
-            width: 280px;
-            height: 180px;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #f5f5f5;
-        }
-
-        .article-thumb svg {
-            width: 100%;
-            height: 100%;
-            display: block;
-        }
-
-        /* Article Content */
-        .article-body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        .article-meta {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
-
-        .article-type {
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.04em;
-            color: #0a0a0a;
-            background: #f0f0f0;
-            padding: 4px 10px;
-            border-radius: 4px;
-        }
-
-        .article-date {
-            font-size: 14px;
-            color: #737373;
-        }
-
-        .article-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 24px;
-            font-weight: 600;
-            letter-spacing: -0.02em;
-            color: #171717;
-            margin-bottom: 12px;
-            line-height: 1.3;
-        }
-
-        .article-excerpt {
-            font-size: 15px;
-            color: #525252;
-            line-height: 1.65;
-            margin-bottom: 16px;
-        }
-
-        .article-link {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #171717;
-        }
-
-        .article-link svg {
-            width: 16px;
-            height: 16px;
-            transition: transform 0.15s ease;
-        }
-
-        .article:hover .article-link svg {
-            transform: translateX(3px);
-        }
-
-        /* Footer */
-        .footer {
-            border-top: 1px solid #e5e5e5;
-            padding: 32px 24px;
-            text-align: center;
-        }
-
-        .footer-text {
-            font-size: 14px;
-            color: #737373;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .page-header {
-                padding: 48px 24px 32px;
-            }
-
-            .page-title {
-                font-size: 32px;
-            }
-
-            .page-description {
-                font-size: 16px;
-            }
-
-            .article {
-                grid-template-columns: 1fr;
-                gap: 20px;
-                padding: 24px;
-            }
-
-            .article-thumb {
-                width: 100%;
-                height: 160px;
-            }
-
-            .article-title {
-                font-size: 20px;
-            }
-
-            .nav-links {
-                gap: 20px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .nav-inner {
-                height: 56px;
-            }
-
-            .page-title {
-                font-size: 28px;
-            }
-
-            .article {
-                padding: 20px;
-            }
-
-            .article-thumb {
-                height: 140px;
-            }
-
-            .article-title {
-                font-size: 18px;
-            }
-
-            .article-excerpt {
-                font-size: 14px;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research.css">
 </head>
 <body>
+    <div class="bg-grid"></div>
+    
     <nav class="nav">
-        <div class="nav-inner">
-            <a href="index.html" class="nav-logo">OnPointAggregate</a>
+        <div class="container" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <a href="index.html" class="nav-logo">
+                OnPointAggregate
+                <span class="nav-badge">Lab</span>
+            </a>
             <div class="nav-links">
                 <a href="index.html" class="nav-link">Home</a>
                 <a href="research.html" class="nav-link active">Research</a>
@@ -295,73 +25,140 @@
         </div>
     </nav>
 
-    <header class="page-header">
-        <h1 class="page-title">Research</h1>
-        <p class="page-description">Our published research, methodologies, and findings on electoral analysis and demographic modeling.</p>
-    </header>
+    <div class="container">
+        <header class="header">
+            <h1>Research</h1>
+            <p>Exploring the intersection of data science, demographic modeling, and electoral forecasting.</p>
+            
+            <div class="controls">
+                <div class="search-container">
+                    <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" placeholder="Search papers, models, and datasets...">
+                </div>
+                
+                <div class="tabs">
+                    <a class="tab active">Overview</a>
+                    <a class="tab">Papers</a>
+                    <a class="tab">Models</a>
+                    <a class="tab">Datasets</a>
+                </div>
+            </div>
+        </header>
 
-    <main class="main">
-        <div class="articles">
-            <!-- Article 1 -->
-            <a href="research_paper.html" class="article">
-                <div class="article-thumb">
-                    <svg viewBox="0 0 280 180" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#f5f5f5"/>
-                                <stop offset="100%" stop-color="#e5e5e5"/>
-                            </linearGradient>
-                        </defs>
-                        <rect width="280" height="180" fill="url(#grad1)"/>
-
-                        <!-- Abstract chart visualization -->
-                        <g opacity="0.6">
-                            <!-- Grid lines -->
-                            <line x1="40" y1="140" x2="240" y2="140" stroke="#d4d4d4" stroke-width="1"/>
-                            <line x1="40" y1="110" x2="240" y2="110" stroke="#e5e5e5" stroke-width="1"/>
-                            <line x1="40" y1="80" x2="240" y2="80" stroke="#e5e5e5" stroke-width="1"/>
-                            <line x1="40" y1="50" x2="240" y2="50" stroke="#e5e5e5" stroke-width="1"/>
-                        </g>
-
-                        <!-- Data bars -->
-                        <rect x="50" y="90" width="24" height="50" rx="2" fill="#a3a3a3"/>
-                        <rect x="85" y="70" width="24" height="70" rx="2" fill="#737373"/>
-                        <rect x="120" y="55" width="24" height="85" rx="2" fill="#525252"/>
-                        <rect x="155" y="80" width="24" height="60" rx="2" fill="#737373"/>
-                        <rect x="190" y="65" width="24" height="75" rx="2" fill="#525252"/>
-
-                        <!-- Trend line -->
-                        <path d="M62 90 L97 70 L132 55 L167 80 L202 65" fill="none" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        <circle cx="62" cy="90" r="4" fill="#171717"/>
-                        <circle cx="97" cy="70" r="4" fill="#171717"/>
-                        <circle cx="132" cy="55" r="4" fill="#171717"/>
-                        <circle cx="167" cy="80" r="4" fill="#171717"/>
-                        <circle cx="202" cy="65" r="4" fill="#171717"/>
-
-                        <!-- Label -->
-                        <text x="140" y="168" text-anchor="middle" font-family="Inter, sans-serif" font-size="10" fill="#737373">DEMOGRAPHIC ANALYSIS</text>
+        <main class="grid">
+            <!-- Featured Paper -->
+            <a href="research_paper.html" class="card">
+                <div class="card-body">
+                    <div class="card-meta">
+                        <div class="card-tags">
+                            <span class="card-tag">Paper</span>
+                        </div>
+                        <span class="card-date">DEC 2025</span>
+                    </div>
+                    <h2 class="card-title">A Latent Variable Approach to Demographic Vote Decomposition</h2>
+                    <p class="card-desc">Introducing Regularized Subspace Projection (RSP) to solve the ecological inference problem in election analysis.</p>
+                    <div class="card-stats">
+                        <div class="stat-item">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                            12 pages
+                        </div>
+                        <div class="stat-item">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            15 min read
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    Read Paper
+                    <svg class="arrow" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3.33337 8H12.6667" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M8.66663 4L12.6666 8L8.66663 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
-                <div class="article-body">
-                    <div class="article-meta">
-                        <span class="article-type">Research Paper</span>
-                        <span class="article-date">December 2025</span>
+            </a>
+            
+            <!-- Mock Item 2: Model -->
+            <a href="#" class="card" style="cursor: default;">
+                <div class="card-body">
+                    <div class="card-meta">
+                        <div class="card-tags">
+                            <span class="card-tag secondary">Model</span>
+                            <span class="card-tag secondary" style="color: var(--accents-5); border-color: var(--accents-3);">v2.1</span>
+                        </div>
+                        <span class="card-date">NOV 2025</span>
                     </div>
-                    <h2 class="article-title">Demographic Vote Decomposition</h2>
-                    <p class="article-excerpt">A comprehensive methodology for analyzing electoral patterns through demographic segmentation. This paper introduces novel statistical approaches for decomposing vote shares across demographic groups and modeling electoral outcomes.</p>
-                    <span class="article-link">
-                        Read paper
-                        <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M3.5 8h9M8.5 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                    </span>
+                    <h2 class="card-title">Precinct Shift Predictor</h2>
+                    <p class="card-desc">Gradient boosting model trained on 2016-2024 returns to forecast swing precinct behavior based on demographic drift.</p>
+                    <div class="card-stats">
+                        <div class="stat-item">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                            Python / XGBoost
+                        </div>
+                        <div class="stat-item">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            45MB
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    View Model
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow" style="opacity: 0.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
                 </div>
             </a>
-        </div>
-    </main>
+
+            <!-- Mock Item 3: Dataset -->
+            <a href="#" class="card" style="cursor: default;">
+                <div class="card-body">
+                    <div class="card-meta">
+                        <div class="card-tags">
+                            <span class="card-tag secondary">Dataset</span>
+                        </div>
+                        <span class="card-date">OCT 2025</span>
+                    </div>
+                    <h2 class="card-title">NJ-PA Consolidated Voter File</h2>
+                    <p class="card-desc">Anonymized, cross-referenced voter history for key suburban counties in New Jersey and Pennsylvania.</p>
+                    <div class="card-stats">
+                        <div class="stat-item">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                            2.4M Records
+                        </div>
+                        <div class="stat-item">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            CSV / Parquet
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    Request Access
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="arrow" style="opacity: 0.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                </div>
+            </a>
+            
+            <!-- Mock Item 4: Coming Soon -->
+            <article class="card" style="opacity: 0.6; pointer-events: none; border-style: dashed;">
+                <div class="card-body">
+                    <div class="card-meta">
+                        <div class="card-tags">
+                            <span class="card-tag" style="border-color: var(--accents-3); color: var(--accents-4);">Coming Soon</span>
+                        </div>
+                    </div>
+                    <h2 class="card-title">Real-time Precinct Feeds</h2>
+                    <p class="card-desc">Architecture for millisecond-latency ingestion of election night returns using edge functions.</p>
+                </div>
+                <div class="card-footer" style="color: var(--accents-4);">
+                    In Development
+                </div>
+            </article>
+        </main>
+    </div>
 
     <footer class="footer">
-        <p class="footer-text">&copy; 2025 OnPointAggregate. All rights reserved.</p>
+        <div class="container">
+            <p class="footer-text">&copy; 2025 OnPointAggregate Research Lab.</p>
+        </div>
     </footer>
 </body>
 </html>
