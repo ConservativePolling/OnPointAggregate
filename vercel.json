@@ -1,13 +1,25 @@
 {
   "version": 2,
-  "name": "trump-approval-aggregate",
+  "name": "onpointaggregate",
   "builds": [
     {
-      "src": "OnPointAggregate3.0/index.html",
+      "src": "OnPointAggregate3.0/**",
       "use": "@vercel/static"
+    },
+    {
+      "src": "tracker/package.json",
+      "use": "@vercel/next"
     }
   ],
   "routes": [
+    {
+      "src": "/tracker/(.*)",
+      "dest": "/tracker/$1"
+    },
+    {
+      "src": "/tracker",
+      "dest": "/tracker"
+    },
     {
       "src": "/(.*)",
       "dest": "/OnPointAggregate3.0/$1"

@@ -1,13 +1,31 @@
 [build]
+  command = "cd tracker && npm install && npm run build"
   functions = "netlify/functions"
   publish = "."
 
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+# Tracker Next.js app routes
+[[redirects]]
+  from = "/tracker/*"
+  to = "/tracker/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/tracker"
+  to = "/tracker/"
+  status = 200
+
+# Existing API routes
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
 
-# Removed catch-all redirect to allow proper file serving and authentication routing
-
 [dev]
   functions = "netlify/functions"
+
+# Environment variables needed for tracker
+[build.environment]
+  NODE_VERSION = "18"
