@@ -3,30 +3,18 @@
   "name": "onpointaggregate",
   "builds": [
     {
-      "src": "OnPointAggregate3.0/**",
+      "src": "**/*",
       "use": "@vercel/static"
-    },
-    {
-      "src": "tracker/package.json",
-      "use": "@vercel/next"
     }
   ],
   "routes": [
     {
-      "src": "/tracker/(.*)",
-      "dest": "/tracker/$1"
-    },
-    {
-      "src": "/tracker",
-      "dest": "/tracker"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/OnPointAggregate3.0/$1"
+      "src": "/(.*\\.(html|css|js|json|png|jpg|svg|ico|geojson))$",
+      "dest": "/$1"
     },
     {
       "src": "/",
-      "dest": "/OnPointAggregate3.0/index.html"
+      "dest": "/index.html"
     }
   ]
 }
