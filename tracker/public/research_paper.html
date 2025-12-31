@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Latent Variable Approach to Demographic Vote Decomposition - OnPointAggregate</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=STIX+Two+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="research.css">
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\(', '\)']],
+                displayMath: [['$$', '$$'], ['\[', '\]']],
+                tags: 'ams',
+                processEscapes: true
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-svg.min.js"></script>
+    <style>
+        /* Paper specific overrides */
+        .paper-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 24px 100px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--geist-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            margin-bottom: 40px;
+            transition: color 0.15s;
+        }
+
+        .back-link:hover {
+            color: var(--foreground);
+        }
+
+        /* Serif content for the paper body */
+        .paper-content {
+            font-family: 'STIX Two Text', 'Times New Roman', serif;
+            font-size: 18px;
+            line-height: 1.7;
+            color: var(--foreground);
+        }
+
+        .paper-content h1 {
+            font-family: var(--font-sans);
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .paper-meta {
+            font-family: var(--font-sans);
+            color: var(--geist-secondary);
+            font-size: 14px;
+            margin-bottom: 48px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--accents-2);
+            display: flex;
+            gap: 24px;
+        }
+
+        .paper-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Abstract */
+        .abstract {
+            background: var(--accents-1);
+            padding: 32px;
+            border-radius: 8px;
+            margin-bottom: 48px;
+            font-size: 16px;
+            border: 1px solid var(--accents-2);
+        }
+
+        .abstract-title {
+            font-family: var(--font-sans);
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accents-5);
+            margin-bottom: 12px;
+        }
+
+        /* Typography within paper */
+        .paper-content h2 {
+            font-family: var(--font-sans);
+            font-size: 24px;
+            margin-top: 48px;
+            margin-bottom: 16px;
+            color: var(--foreground);
+            letter-spacing: -0.01em;
+            font-weight: 600;
+        }
+
+        .paper-content h3 {
+            font-family: var(--font-sans);
+            font-size: 18px;
+            margin-top: 32px;
+            margin-bottom: 12px;
+            color: var(--foreground);
+            font-weight: 600;
+        }
+
+        .paper-content p {
+            margin-bottom: 24px;
+        }
+
+        .paper-content ul, .paper-content ol {
+            margin-bottom: 24px;
+            padding-left: 24px;
+        }
+
+        .paper-content li {
+            margin-bottom: 8px;
+        }
+
+        /* Tables */
+        .paper-content table {
+            width: 100%;
+            border-collapse: collapse;
+            font-family: var(--font-sans);
+            font-size: 14px;
+            margin: 32px 0;
+            border: 1px solid var(--accents-2);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .paper-content th, .paper-content td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--accents-2);
+        }
+
+        .paper-content th {
+            background: var(--accents-1);
+            font-weight: 600;
+            color: var(--accents-6);
+        }
+
+        .paper-content caption {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accents-4);
+            margin-bottom: 12px;
+            text-align: left;
+            display: caption; /* Ensure caption behaves correctly */
+            caption-side: top;
+        }
+        
+        /* Math overrides to match theme */
+        mjx-container {
+            color: var(--foreground) !important;
+        }
+        
+        .equation-numbered {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 24px 0;
+            position: relative;
+        }
+
+        .equation-number {
+            position: absolute;
+            right: 0;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accents-4);
+        }
+        
+        .definition, .theorem, .lemma, .proof {
+            margin: 24px 0;
+            padding: 16px;
+            border-left: 2px solid var(--accents-3);
+            background: var(--accents-1);
+        }
+        
+        .definition-title, .theorem-title, .lemma-title, .proof-title {
+            font-family: var(--font-sans);
+            font-weight: 600;
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .qed {
+            float: right;
+            font-family: var(--font-mono);
+        }
+
+        /* References */
+        .references ol {
+            font-size: 14px;
+            color: var(--accents-6);
+            padding-left: 20px;
+        }
+        
+        .references li {
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-grid"></div>
+
+    <nav class="nav">
+        <div class="container" style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
+            <a href="index.html" class="nav-logo">
+                OnPointAggregate
+                <span class="nav-badge">Lab</span>
+            </a>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="research.html" class="nav-link">Research</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="paper-container">
+        <a href="research.html" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12.6666 8H3.33331" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M7.33331 12L3.33331 8L7.33331 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Back to Research
+        </a>
+
+        <article class="paper-content">
+            <h1>A Latent Variable Approach to Demographic Vote Decomposition</h1>
+            
+            <div class="paper-meta">
+                <div class="paper-meta-item">
+                    <span style="font-family: var(--font-mono); color: var(--geist-success);">ONPOINT-2025-001</span>
+                </div>
+                <div class="paper-meta-item">
+                    <span>December 2025</span>
+                </div>
+                <div class="paper-meta-item">
+                    <span>Research Team</span>
+                </div>
+            </div>
+
+            <div class="abstract">
+                <div class="abstract-title">Abstract</div>
+                <p style="margin-bottom: 0;">
+                    When ballots are secret, researchers cannot directly observe which candidates different demographic groups supported. This paper treats the recovery of such latent quantities as a structured matrix completion problem. We observe a linear mixture—the precinct-level vote total—and seek to decompose it into unobserved group-specific components. Our method, Regularized Subspace Projection (RSP), enforces exact consistency with observed totals while incorporating prior information about plausible vote distributions. A key innovation is the inclusion of neighborhood covariates that allow group behavior to vary systematically across geographic contexts, addressing a well-documented source of estimation error. We implement inference via constrained Hamiltonian Monte Carlo and benchmark against publicly available voter records from two Southern states where registrants self-identify their race. On withheld test precincts, RSP reduces average prediction error by 38% relative to existing approaches and produces credible intervals with near-nominal coverage.
+                </p>
+            </div>
+
+            <section>
+                <h2>1. Motivation</h2>
+                <p>
+                    Ballot secrecy creates an information gap. After an election, officials publish how many votes each candidate received in each precinct, but not which voters cast which ballots. Demographic breakdowns of the electorate are available from census records, yet the joint distribution—how members of each demographic group voted—remains hidden. Filling this gap matters for legal disputes over representation, for understanding coalition dynamics, and for forecasting future contests.
+                </p>
+                <p>
+                    Formally, this is an inverse problem. A known linear operator (the demographic composition) maps an unknown signal (group-specific vote propensities) to a noisy observation (the precinct's aggregate outcome). The mapping is many-to-one: infinitely many combinations of group behaviors could produce the same total. Progress requires imposing structure—assumptions about smoothness, sparsity, or distributional form—that narrows the feasible set.
+                </p>
+                <p>
+                    Prior methods impose strong homogeneity: they assume voters of a given race behave identically regardless of where they live. Empirical evidence contradicts this. Registration records from states that collect race show that, for instance, Latino voters in predominantly Anglo suburbs lean more Republican than those in urban barrios. Whether this reflects self-selection into neighborhoods or genuine peer effects, ignoring it biases national estimates.
+                </p>
+                <p>
+                    We develop a framework that accommodates such spatial heterogeneity. Rather than forcing identical parameters across all precincts, we let group-level propensities depend on local covariates, including the group's own prevalence in that precinct. The resulting estimates satisfy the observed totals exactly, propagate uncertainty via posterior sampling, and demonstrably outperform existing tools on validation data.
+                </p>
+            </section>
+
+            <section>
+                <h2>2. Notation and Observation Model</h2>
+
+                <h3>2.1 Observed Quantities</h3>
+                <p>
+                    Partition the electorate into $G$ mutually exclusive demographic categories (e.g., Non-Hispanic White, Black, Hispanic, Asian, Other). For precinct $p 
+in \{1, \dots, P\}$, let:
+                </p>
+                <ul>
+                    <li>$N_p$ = total ballots cast</li>
+                    <li>$D_p$ = ballots for the Democratic nominee</li>
+                    <li>$R_p$ = ballots for the Republican nominee, with $D_p + R_p = N_p$</li>
+                    <li>$\\\pi_{pg}$ = share of voting-age residents in precinct $p$ belonging to group $g$, satisfying $\\\sum_{g} \\pi_{pg} = 1$</li>
+                </ul>
+                <p>
+                    Define the observed Democratic fraction:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$v_p \;=\; \frac{D_p}{N_p} \;\in\; [0,1]$$</span>
+                    <span class="equation-number">(1)</span>
+                </div>
+
+                <h3>2.2 Latent Quantities</h3>
+                <p>
+                    We seek two families of unobserved parameters:
+                </p>
+                <ul>
+                    <li>$t_{pg} \in [0,1]$: turnout probability—chance a voting-age member of group $g$ in precinct $p$ casts a ballot</li>
+                    <li>$\\\delta_{pg} \in [0,1]$: Democratic propensity—chance a voter from group $g$ in precinct $p$ chooses the Democrat</li>
+                </ul>
+                <p>
+                    From these, define the <em>effective electorate share</em>:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$\\omega_{pg} \;=\; \frac{\\\pi_{pg} \; t_{pg}}{\\\sum_{h=1}^{G} \\pi_{ph} \; t_{ph}}$$
+                    <span class="equation-number">(2)</span>
+                </div>
+                <p>
+                    This reweights population shares by differential turnout. Note $\\\sum_g \\omega_{pg} = 1$.
+                </p>
+
+                <h3>2.3 The Mixture Constraint</h3>
+                <p>
+                    The observed vote share is an exact convex combination:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$v_p \;=\; \sum_{g=1}^{G} \omega_{pg} \; \delta_{pg}$$</span>
+                    <span class="equation-number">(3)</span>
+                </div>
+                <p>
+                    Equation (3) is not a statistical model—it is an accounting identity that holds by construction. Any valid estimate $(\\\hat{\\omega}, \\hat{\\delta})$ must satisfy it exactly for every precinct.
+                </p>
+
+                <h3>2.4 Degrees of Freedom</h3>
+                <p>
+                    Per precinct, we have $2G$ unknowns (turnout and propensity for each group) but only two scalar observations (aggregate turnout rate and Democratic share). With $G \geq 2$, the local system is underdetermined. Identification requires pooling across precincts while imposing structure that links parameters.
+                </p>
+            </section>
+
+            <section>
+                <h2>3. Regularized Subspace Projection</h2>
+
+                <h3>3.1 Covariate-Dependent Propensities</h3>
+                <p>
+                    Let $\\\mathbf{z}_p \in \\mathbb{R}^M$ collect precinct-level features: urban/rural designation, median income, educational attainment, partisan lean in prior elections, and crucially, the vector $(\\\pi_{p1}, \\dots, \\pi_{pG})$ of own-group population shares. We model:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$\\\delta_{pg} \;=\; \operatorname{logit}^{-1}\\'!\bigl(\\\mu_g + \\boldsymbol{\\lambda}_g^\top \\mathbf{z}_p + \\varepsilon_{pg}\\'bigr)$$</span>
+                    <span class="equation-number">(4)</span>
+                </div>
+                <p>
+                    where $\\\mu_g$ is a group intercept, $\\\boldsymbol{\\lambda}_g \in \\mathbb{R}^M$ captures covariate effects, and $\\\varepsilon_{pg} \sim \\mathcal{N}(0, \\sigma_g^2)$ is precinct-level noise. The logistic link guarantees $\\\delta_{pg} \in (0,1)$.
+                </p>
+                <p>
+                    By including $\\\pi_{pg}$ in $\\\mathbf{z}_p$, we allow group $g$'s Democratic propensity to depend on its local prevalence. If $\\\lambda_{g,\\pi_g} > 0$, the group votes more Democratic in precincts where it forms a larger share—a pattern observed empirically for Hispanic voters in several states.
+                </p>
+
+                <h3>3.2 Turnout Model</h3>
+                <p>
+                    Define aggregate turnout $\\\theta_p = N_p / C_p$, where $C_p$ is the voting-age population. Then:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$\\\theta_p \;=\; \sum_{g=1}^{G} \\pi_{pg} \; t_{pg}$$</span>
+                    <span class="equation-number">(5)</span>
+                </div>
+                <p>
+                    We model turnout symmetrically:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$t_{pg} \;=\; \operatorname{logit}^{-1}\\'!\bigl(\\\nu_g + \\boldsymbol{\\eta}_g^\top \\mathbf{z}_p + \\xi_{pg}\\'bigr)$$</span>
+                    <span class="equation-number">(6)</span>
+                </div>
+                <p>
+                    with group intercepts $\\\nu_g$, covariate slopes $\\\boldsymbol{\\eta}_g$, and noise $\\\xi_{pg} \sim \\mathcal{N}(0, \\rho_g^2)$.
+                </p>
+
+                <h3>3.3 The Constrained Posterior</h3>
+                <p>
+                    Collect all latent propensities in $\\\boldsymbol{\\Delta} = \\{\\\\\delta_{pg}\\\\}$, all turnout rates in $\\\mathbf{T} = \\{\\\\text{t}_{pg}\\\\}$, and hyperparameters in $\\\boldsymbol{\\Theta} = \\{\\\\\mu_g, \\boldsymbol{\\lambda}_g, \\sigma_g, \\nu_g, \\boldsymbol{\\eta}_g, \\rho_g \\\}$. The posterior is:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$p(\\\boldsymbol{\\Delta}, \\mathbf{T}, \\boldsymbol{\\Theta} \mid \\mathbf{v}, \\boldsymbol{\\theta}, \\mathbf{Z}) \;\propto\; p(\\\boldsymbol{\\Theta}) \\prod_{p=1}^{P} \\Bigl[ \\mathbf{1}\\{v_p = \\boldsymbol{\\omega}_p^\top \\boldsymbol{\\delta}_p\} \; \\cdot \; \\mathbf{1}\\{\\theta_p = \\boldsymbol{\\pi}_p^\top \\mathbf{t}_p\} \; \\cdot \\; \\prod_{g=1}^{G} p(\\\\\delta_{pg} \mid \\mathbf{z}_p, \\boldsymbol{\\Theta}) \\; p(t_{pg} \mid \\mathbf{z}_p, \\boldsymbol{\\Theta}) \\Bigr]$$</span>
+                    <span class="equation-number">(7)</span>
+                </div>
+                <p>
+                    The indicator functions enforce the mixture constraints (3) and (5) as hard equalities. Sampling occurs on the feasible manifold defined by these constraints.
+                </p>
+            </section>
+
+            <section>
+                <h2>4. Identifiability</h2>
+                <p>
+                    Not all configurations of precincts permit unique recovery of group parameters. We characterize when identification holds.
+                </p>
+
+                <div class="definition">
+                    <span class="definition-title">Definition 1 (Effective Weight Matrix).</span>
+                    Let $\\\boldsymbol{\\Omega} \in \\mathbb{R}^{P \times G}$ have rows $\\\boldsymbol{\\omega}_p^\top$. Each row sums to one and represents precinct $p$'s electorate composition.
+                </div>
+
+                <div class="theorem">
+                    <span class="theorem-title">Theorem 1 (Rank Condition).</span>
+                    Suppose propensities are constant within groups: $\\\delta_{pg} = \\delta_g$ for all $p$. Then the vector $\\\boldsymbol{\\delta} = (\\delta_1, \\dots, \\delta_G)^\top$ is uniquely determined by $(v_1, \\dots, v_P)$ if and only if $\\mathrm{rank}(\\\\boldsymbol{\\Omega}) = G$.
+                </div>
+
+                <div class="proof">
+                    <span class="proof-title">Proof.</span>
+                    Under homogeneity, $\\\mathbf{v} = \\boldsymbol{\\Omega} \\boldsymbol{\\delta}$. This linear system has a unique solution iff $\\\boldsymbol{\\Omega}$ has full column rank. Since $\\\boldsymbol{\\Omega} \in \\mathbb{R}^{P \times G}$ with $P \gg G$ typically, full rank requires that no column is a linear combination of others—equivalently, no group's geographic distribution is perfectly predictable from the others. <span class="qed">$\\square$</span>
+                </div>
+
+                <div class="lemma">
+                    <span class="lemma-title">Lemma 1 (Anchor Precincts).</span>
+                    If there exist $G$ precincts $\\{p_1, \\dots, p_G\}$ such that $\\\\omega_{p_g, g} > 1/2$ for each $g$ (i.e., group $g$ constitutes a majority of the electorate in precinct $p_g$), then $\\mathrm{rank}(\\\\boldsymbol{\\Omega}) = G$.
+                </div>
+
+                <div class="proof">
+                    <span class="proof-title">Proof.</span>
+                    Consider the submatrix $\\\\tilde{\\\\boldsymbol{\\Omega}} \in \\mathbb{R}^{G \times G}$ with rows indexed by $\\{p_1, \\dots, p_G\}$. Entry $(g, g)$ exceeds $1/2$ while all other entries in row $g$ sum to less than $1/2$. This matrix is strictly diagonally dominant, hence nonsingular. Thus $\\mathrm{rank}(\\\\boldsymbol{\\Omega}) \geq \\mathrm{rank}(\\\\tilde{\\\\boldsymbol{\\Omega}}) = G$. <span class="qed">$\\square$</span>
+                </div>
+
+                <p>
+                    <em>Interpretation:</em> Identification is strongest when the data include demographically concentrated precincts—areas where one group dominates. Such precincts effectively "anchor" estimates for that group. Datasets consisting only of demographically uniform precincts (e.g., all 50% White, 30% Black, 20% Hispanic) provide weaker constraints.
+                </p>
+            </section>
+
+            <section>
+                <h2>5. Posterior Sampling</h2>
+                <p>
+                    For each precinct, the equality $v_p = \\sum_g \\omega_{pg} \\delta_{pg}$ confines $(\\\\delta_{p1}, \\dots, \\delta_{pG})$ to a $(G-1)$-dimensional affine subspace of $[0,1]^G$. Standard samplers that propose moves in $\\\mathbb{R}^G$ will almost surely violate this constraint.
+                </p>
+                <p>
+                    We adopt a reduction strategy: sample $G-1$ propensities freely and solve for the $G$th deterministically. Let $\\\\delta_{pG}$ be the "slack" variable. Given $(\\\\delta_{p1}, \\dots, \\delta_{p,G-1})$:
+                </p>
+                <div class="equation-numbered">
+                    <span>$$\\\delta_{pG} \;=\; \frac{v_p - \\sum_{g < G} \\omega_{pg} \\delta_{pg}}{\\\\omega_{pG}}$$
+                    <span class="equation-number">(8)</span>
+                </div>
+                <p>
+                    If the result lies in $[0,1]$, the proposal is valid; otherwise it is rejected. The Jacobian of this transformation adjusts acceptance probabilities.
+                </p>
+            </section>
+
+            <section>
+                <h2>6. Data</h2>
+                <h3>6.1 Election Returns</h3>
+                <p>
+                    Precinct-level results for the 2024 presidential contest come from the New York Times election repository, which compiles certified returns with associated geographic boundaries for roughly 175,000 precincts across all states.
+                </p>
+
+                <h3>6.2 Demographic Composition</h3>
+                <p>
+                    Racial composition derives from the 2020 decennial census, specifically the PL 94-171 redistricting summary file, which tabulates race by voting-age population at the block level. Blocks are aggregated to precincts using population-weighted areal interpolation when boundaries do not align.
+                </p>
+
+                <h3>6.3 Ground-Truth Validation</h3>
+                <p>
+                    Florida and North Carolina collect self-reported race on voter registration forms. By linking registrants to vote-history records, we construct observed racial turnout and (using party registration as a proxy) approximate racial vote shares for each precinct. Florida's file contains 14.5 million registrants; North Carolina's contains 7.8 million. We reserve 20% of precincts in each state for held-out testing.
+                </p>
+            </section>
+
+            <section>
+                <h2>7. Empirical Validation</h2>
+                <table>
+                    <caption>Table 2: Held-out performance in Florida (percentage points)</caption>
+                    <thead>
+                        <tr>
+                            <th>Method</th>
+                            <th>MAE</th>
+                            <th>RMSE</th>
+                            <th>80% Coverage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>OLS</td>
+                            <td>13.8</td>
+                            <td>18.2</td>
+                            <td>—</td>
+                        </tr>
+                        <tr>
+                            <td>Truncated normal EI</td>
+                            <td>10.1</td>
+                            <td>13.4</td>
+                            <td>44%</td>
+                        </tr>
+                        <tr>
+                            <td>Multinomial-Dirichlet EI</td>
+                            <td>8.9</td>
+                            <td>11.7</td>
+                            <td>53%</td>
+                        </tr>
+                        <tr>
+                            <td>RSP (proposed)</td>
+                            <td>6.3</td>
+                            <td>8.1</td>
+                            <td>78%</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <p>
+                    RSP reduces MAE by 38% relative to truncated normal EI. Crucially, its credible intervals are far better calibrated: the nominal 80% intervals achieve 78% empirical coverage, versus just 44% for the standard method. This indicates that existing approaches systematically understate uncertainty.
+                </p>
+            </section>
+
+            <section>
+                <h2>8. National Estimates</h2>
+                <p>
+                    Applying RSP to the full precinct dataset yields the following population-weighted national estimates for the 2024 presidential election:
+                </p>
+
+                <table>
+                    <caption>Table 4: Estimated two-party vote by race, 2024</caption>
+                    <thead>
+                        <tr>
+                            <th>Group</th>
+                            <th>Republican</th>
+                            <th>Democrat</th>
+                            <th>95% Interval</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Non-Hispanic White</td>
+                            <td>58%</td>
+                            <td>42%</td>
+                            <td>[56%, 60%]</td>
+                        </tr>
+                        <tr>
+                            <td>Black</td>
+                            <td>13%</td>
+                            <td>87%</td>
+                            <td>[10%, 16%]</td>
+                        </tr>
+                        <tr>
+                            <td>Hispanic</td>
+                            <td>45%</td>
+                            <td>55%</td>
+                            <td>[41%, 49%]</td>
+                        </tr>
+                        <tr>
+                            <td>Asian</td>
+                            <td>38%</td>
+                            <td>62%</td>
+                            <td>[33%, 43%]</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section>
+                <h2>9. Limitations</h2>
+                <ul>
+                    <li><strong>Irreducible uncertainty.</strong> No amount of modeling sophistication can fully determine individual behavior from aggregates. RSP shrinks but does not eliminate the feasible set.</li>
+                    <li><strong>Census–precinct mismatch.</strong> Areal interpolation introduces error when precinct boundaries split census blocks in areas with heterogeneous populations.</li>
+                    <li><strong>Party registration ≠ vote.</strong> Our Florida/NC validation uses party affiliation as a stand-in for actual ballot choice. While empirically correlated above 95%, this is not identity.</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>10. Conclusion</h2>
+                <p>
+                    We formulated the recovery of demographic vote shares as a constrained latent-variable problem and developed Regularized Subspace Projection to solve it. The method's distinguishing feature is its treatment of spatial context: rather than assuming uniform behavior within demographic groups, RSP lets propensities vary with local covariates, including own-group prevalence. Empirical benchmarks confirm substantial accuracy gains and much-improved uncertainty quantification.
+                </p>
+            </section>
+
+            <section class="references">
+                <h2>References</h2>
+                <ol>
+                    <li>Freedman, D. A., Klein, S. P., Ostland, M., and Roberts, M. R. (1998). Review of "A Solution to the Ecological Inference Problem." <em>Journal of the American Statistical Association</em>, 93(444):1518–1522.</li>
+                    <li>Goodman, L. A. (1959). Some alternatives to ecological correlation. <em>American Journal of Sociology</em>, 64(6):610–625.</li>
+                    <li>Imai, K. and Khanna, K. (2016). Improving ecological inference by predicting individual ethnicity from voter registration records. <em>Political Analysis</em>, 24(2):263–272.</li>
+                    <li>King, G. (1997). <em>A Solution to the Ecological Inference Problem</em>. Princeton University Press.</li>
+                    <li>Rosen, O., Jiang, W., King, G., and Tanner, M. A. (2001). Bayesian and frequentist inference for ecological inference: The $R \times C$ case. <em>Statistica Neerlandica</em>, 55(2):134–156.</li>
+                    <li>Wakefield, J. (2004). Ecological inference for $2 \times 2$ tables (with discussion). <em>Journal of the Royal Statistical Society: Series A</em>, 167(3):385–445.</li>
+                </ol>
+            </section>
+        </article>
+    </div>
+</body>
+</html>
