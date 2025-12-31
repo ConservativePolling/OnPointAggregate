@@ -10,7 +10,6 @@
     "sync:socials": "node scripts/sync-socials.mjs"
   },
   "dependencies": {
-    "@next/swc-darwin-arm64": "^16.1.1",
     "fast-xml-parser": "^4.5.1",
     "next": "16.1.1",
     "react": "19.2.3",
