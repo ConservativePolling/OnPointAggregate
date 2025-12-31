@@ -1,0 +1,2466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do Americans approve of Donald Trump? - VoteHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/geist" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+    <style>
+        :root {
+            /* Vercel Design System Colors */
+            --geist-foreground: #000;
+            --geist-background: #fff;
+            --accents-1: #fafafa;
+            --accents-2: #eaeaea;
+            --accents-3: #999;
+            --accents-4: #888;
+            --accents-5: #666;
+            --accents-6: #444;
+            --accents-7: #333;
+            --accents-8: #111;
+            --geist-success: #0070f3;
+            --geist-error: #ee0000;
+            --geist-warning: #f5a623;
+            --shadow-small: 0 5px 10px rgba(0,0,0,.12);
+            --shadow-medium: 0 8px 30px rgba(0,0,0,.12);
+            --shadow-large: 0 30px 60px rgba(0,0,0,.12);
+            --border-radius: 8px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f8f6fc 0%, #faf9fd 25%, #f5f3fa 50%, #faf8fd 75%, #f7f5fb 100%);
+            min-height: 100vh;
+            color: var(--geist-foreground);
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            letter-spacing: -0.02em;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Floating Panels Background */
+        .floating-panels-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .bg-glow {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.3;
+        }
+
+        .bg-glow-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(167, 139, 250, 0.4), transparent 70%);
+            top: -150px;
+            left: -100px;
+        }
+
+        .bg-glow-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(251, 191, 36, 0.25), transparent 70%);
+            top: 30%;
+            right: -100px;
+        }
+
+        .bg-glow-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, rgba(244, 114, 182, 0.2), transparent 70%);
+            bottom: 10%;
+            left: 20%;
+        }
+
+        .floating-panel {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            animation: floatPanel 12s ease-in-out infinite;
+            opacity: 0.5;
+        }
+
+        .floating-panel-header {
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .panel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            opacity: 0.8;
+        }
+
+        .panel-dot-red { background: #ff6b6b; }
+        .panel-dot-yellow { background: #ffd93d; }
+        .panel-dot-green { background: #6bcb77; }
+
+        .floating-panel-body {
+            position: relative;
+            overflow: hidden;
+        }
+
+        .panel-gradient {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .panel-gradient::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 30%, rgba(255, 255, 255, 0.4) 0%, transparent 60%);
+        }
+
+        /* Panel 1 - Top left */
+        .fp-1 {
+            width: 280px;
+            height: 200px;
+            top: 8%;
+            left: 3%;
+            animation-delay: 0s;
+        }
+
+        .fp-1 .panel-gradient {
+            height: 166px;
+            background: linear-gradient(135deg, #a78bfa 0%, #c4b5fd 40%, #fde68a 80%, #fbbf24 100%);
+        }
+
+        /* Panel 2 - Top right */
+        .fp-2 {
+            width: 200px;
+            height: 150px;
+            top: 5%;
+            right: 5%;
+            animation-delay: -3s;
+        }
+
+        .fp-2 .panel-gradient {
+            height: 116px;
+            background: linear-gradient(160deg, #ddd6fe 0%, #e9d5ff 50%, #fce7f3 100%);
+        }
+
+        /* Panel 3 - Middle right */
+        .fp-3 {
+            width: 180px;
+            height: 220px;
+            top: 35%;
+            right: 2%;
+            animation-delay: -6s;
+        }
+
+        .fp-3 .panel-gradient {
+            height: 186px;
+            background: linear-gradient(180deg, #818cf8 0%, #a5b4fc 50%, #c7d2fe 100%);
+        }
+
+        /* Panel 4 - Bottom left */
+        .fp-4 {
+            width: 240px;
+            height: 160px;
+            bottom: 15%;
+            left: 2%;
+            animation-delay: -2s;
+        }
+
+        .fp-4 .panel-gradient {
+            height: 126px;
+            background: linear-gradient(135deg, #c4b5fd 0%, #ddd6fe 30%, #fbcfe8 70%, #fda4af 100%);
+        }
+
+        /* Panel 5 - Bottom right */
+        .fp-5 {
+            width: 160px;
+            height: 130px;
+            bottom: 25%;
+            right: 8%;
+            animation-delay: -8s;
+        }
+
+        .fp-5 .panel-gradient {
+            height: 96px;
+            background: linear-gradient(145deg, #e9d5ff 0%, #fce7f3 50%, #fef3c7 100%);
+        }
+
+        @keyframes floatPanel {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-6px) rotate(0.3deg); }
+            50% { transform: translateY(-3px) rotate(0deg); }
+            75% { transform: translateY(-9px) rotate(-0.3deg); }
+        }
+
+        @media (max-width: 1024px) {
+            .fp-1 { width: 200px; height: 150px; left: 2%; }
+            .fp-2 { width: 150px; height: 120px; }
+            .fp-3 { width: 140px; height: 180px; }
+            .fp-4 { width: 180px; height: 130px; }
+            .fp-5 { display: none; }
+            .fp-1 .panel-gradient { height: 116px; }
+            .fp-2 .panel-gradient { height: 86px; }
+            .fp-3 .panel-gradient { height: 146px; }
+            .fp-4 .panel-gradient { height: 96px; }
+        }
+
+        @media (max-width: 768px) {
+            .floating-panels-bg { display: none; }
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: saturate(180%) blur(20px);
+            position: relative;
+            z-index: 100;
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            border-bottom: 1px solid var(--accents-2);
+            padding: 0 2.5rem;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes popIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.125rem;
+            font-weight: 800;
+            color: #0a0a0a;
+            letter-spacing: 0.02em;
+        }
+
+        .logo-icon {
+            width: 22px;
+            height: 22px;
+            background: #0a0a0a;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #0a0a0a;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            transition: color 0.15s ease;
+        }
+
+        .nav-links a:hover {
+            color: #525252;
+        }
+
+        .nav-icons {
+            display: flex;
+            gap: 1.25rem;
+            align-items: center;
+        }
+
+        .nav-icons svg {
+            width: 19px;
+            height: 19px;
+            cursor: pointer;
+            color: #0a0a0a;
+            opacity: 0.65;
+            transition: opacity 0.15s ease;
+        }
+
+        .nav-icons svg:hover {
+            opacity: 1;
+        }
+
+        .container {
+            max-width: 1160px;
+            margin: 0 auto;
+            padding: 3.5rem 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .preview-hero {
+            position: relative;
+            background: radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), rgba(37, 99, 235, 0))
+                        , linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 251, 255, 0.88) 100%);
+            border: 1.5px solid rgba(213, 220, 235, 0.8);
+            box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+            border-radius: 20px;
+            padding: 2.75rem;
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+            gap: 3rem;
+            margin-bottom: 3rem;
+            overflow: hidden;
+            isolation: isolate;
+            opacity: 0;
+            transform: translateY(10px);
+            animation: popIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+        }
+
+        .preview-hero::before {
+            content: '';
+            position: absolute;
+            inset: -40% -30% auto auto;
+            width: 480px;
+            height: 480px;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.14), transparent 65%);
+            filter: blur(0px);
+            z-index: -1;
+        }
+
+        .preview-hero::after {
+            content: '';
+            position: absolute;
+            right: -120px;
+            top: 40%;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(236, 72, 153, 0.28), transparent 70%);
+            transform: translateY(-50%) rotate(-6deg);
+            z-index: -1;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .hero-tag {
+            align-self: flex-start;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: #1d4ed8;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero-tag svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .hero-title {
+            font-size: 2.75rem;
+            line-height: 1.1;
+            font-weight: 700;
+            color: #0b0b0f;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-description {
+            font-size: 1.05rem;
+            line-height: 1.7;
+            color: #4b5563;
+            max-width: 480px;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.85rem;
+        }
+
+        .hero-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            padding: 0.85rem 1.45rem;
+            border-radius: 999px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .hero-button svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .hero-button-primary {
+            background: linear-gradient(135deg, #2563eb, #1e3a8a);
+            color: white;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+        }
+
+        .hero-button-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 32px rgba(37, 99, 235, 0.28);
+        }
+
+        .hero-button-ghost {
+            background: rgba(255, 255, 255, 0.65);
+            border-color: rgba(37, 99, 235, 0.16);
+            color: #1f2937;
+        }
+
+        .hero-button-ghost:hover {
+            border-color: rgba(37, 99, 235, 0.35);
+            color: #111827;
+            transform: translateY(-1px);
+        }
+
+        .hero-meta {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.25rem;
+        }
+
+        .hero-meta-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(213, 220, 235, 0.6);
+            border-radius: 14px;
+            padding: 0.9rem 1.1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+        }
+
+        .hero-meta-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .hero-meta-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .hero-panel {
+            position: relative;
+            background: rgba(255, 255, 255, 0.82);
+            border-radius: 16px;
+            border: 1.5px solid rgba(213, 220, 235, 0.7);
+            padding: 1.75rem;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .hero-panel::before {
+            content: '';
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(16, 185, 129, 0.28), transparent 70%);
+        }
+
+        .hero-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hero-panel-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #6b7280;
+            font-weight: 600;
+        }
+
+        .hero-panel-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.75rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 999px;
+            background: rgba(16, 185, 129, 0.15);
+            color: #047857;
+            font-weight: 600;
+        }
+
+        .hero-panel svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        .hero-panel-metric {
+            display: flex;
+            align-items: flex-end;
+            gap: 0.5rem;
+        }
+
+        .hero-panel-metric strong {
+            font-size: 2.5rem;
+            color: #0b0f19;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-panel-metric span {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .hero-trend-list {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .hero-trend-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .hero-trend-info {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .hero-trend-change {
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .hero-trend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .trend-positive {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .trend-negative {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+        }
+
+        .hero-sparkline {
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            height: 48px;
+        }
+
+        .hero-sparkline span {
+            display: block;
+            width: 6px;
+            border-radius: 999px 999px 0 0;
+            background: linear-gradient(180deg, rgba(37, 99, 235, 0.45), rgba(37, 99, 235, 0.1));
+        }
+
+        .hero-sparkline span:nth-child(odd) {
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.55), rgba(16, 185, 129, 0.15));
+        }
+
+        .hero-panel-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.8125rem;
+            color: #6b7280;
+        }
+
+        .hero-panel-footer a {
+            color: #1d4ed8;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .chart-container {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 3rem 2rem 2.5rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 2px 6px rgba(0,0,0,0.05), 0 4px 12px rgba(0,0,0,0.06);
+            border: 1.5px solid #d5dceb;
+            position: relative;
+            overflow: visible;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: popIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+        }
+
+        .chart-header {
+            margin-bottom: 1rem;
+            position: relative;
+        }
+
+        .chart-title {
+            font-size: 1.875rem;
+            font-weight: 600;
+            color: #0a0a0a;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.025em;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+        }
+
+        .chart-subtitle {
+            font-size: 0.875rem;
+            color: #8a92a3;
+            line-height: 1.5;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .filter-icon {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 0.75rem;
+            border: 1.5px solid #d5dceb;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            background: #fafbfc;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+        }
+
+        .filter-icon:hover {
+            background: #f3f4f6;
+            border-color: #e5e7eb;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.06);
+        }
+
+        .filter-icon svg {
+            width: 17px;
+            height: 17px;
+            opacity: 0.5;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 680px;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #eff1f3;
+        }
+
+        .chart-wrapper canvas {
+            image-rendering: auto;
+            image-rendering: high-quality;
+            -webkit-font-smoothing: subpixel-antialiased;
+            -moz-osx-font-smoothing: auto;
+            text-rendering: geometricPrecision;
+            cursor: crosshair;
+        }
+
+        .chart-footer {
+            margin-top: 1.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #a3a3a3;
+            font-size: 0.8125rem;
+            position: relative;
+        }
+
+        .chart-footer svg {
+            width: 13px;
+            height: 13px;
+            flex-shrink: 0;
+        }
+
+        .chart-footer a {
+            color: #a3a3a3;
+            text-decoration: none;
+            border-bottom: 1px solid #e5e5e5;
+            transition: all 0.15s ease;
+            padding-bottom: 1px;
+        }
+
+        .chart-footer a:hover {
+            color: #525252;
+            border-bottom-color: #a3a3a3;
+        }
+
+        .votehub-watermark {
+            position: absolute;
+            right: 0;
+            font-weight: 800;
+            color: #0a0a0a;
+            font-size: 0.8125rem;
+            letter-spacing: 0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+
+        .votehub-watermark::before {
+            content: '✓';
+            font-size: 0.75rem;
+        }
+
+        /* Poll Box Section - Vercel Style */
+        .poll-box-section {
+            margin: 48px auto;
+            max-width: 1200px;
+            background: var(--geist-background);
+            border: 1px solid var(--accents-2);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-small);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+            position: relative;
+            z-index: 10;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .poll-box-section:hover {
+            box-shadow: var(--shadow-medium);
+            border-color: var(--accents-3);
+        }
+
+        .poll-box-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg,
+                rgba(16, 185, 129, 0.2) 0%,
+                rgba(236, 72, 153, 0.2) 100%);
+        }
+
+        .poll-box-container {
+            max-height: 500px;
+            overflow-y: auto;
+            overflow-x: auto;
+            scroll-behavior: smooth;
+        }
+
+        .poll-box-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .poll-box-container::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .poll-box-container::-webkit-scrollbar-thumb {
+            background: var(--accents-3);
+            border-radius: 3px;
+            transition: background 0.2s ease;
+        }
+
+        .poll-box-container::-webkit-scrollbar-thumb:hover {
+            background: var(--accents-4);
+        }
+
+        .poll-box-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-family: 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-size: 14px;
+            letter-spacing: -0.01em;
+        }
+
+        .poll-box-table thead {
+            background: var(--accents-1);
+            border-bottom: 1px solid var(--accents-2);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .poll-box-table th {
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 500;
+            color: var(--accents-5);
+            font-size: 12px;
+            white-space: nowrap;
+            background: transparent;
+            border-bottom: 1px solid var(--accents-2);
+            letter-spacing: -0.005em;
+            text-transform: uppercase;
+        }
+
+        .poll-box-table th:nth-child(5),
+        .poll-box-table th:nth-child(6) {
+            text-align: center;
+        }
+
+        .poll-box-table tbody tr {
+            border-bottom: 1px solid var(--accents-2);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(10px);
+            animation: fadeInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .poll-box-table tbody tr:hover {
+            background: var(--accents-1);
+        }
+
+        .poll-box-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .poll-box-table td {
+            padding: 12px 16px;
+            color: var(--geist-foreground);
+            vertical-align: middle;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .poll-box-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .poll-box-table .poll-date-cell {
+            color: var(--geist-foreground);
+            font-weight: 400;
+            white-space: nowrap;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .poll-box-table .poll-sample-cell {
+            white-space: nowrap;
+        }
+
+        .poll-box-table .poll-sample-number {
+            font-weight: 500;
+            color: var(--geist-foreground);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .poll-box-table .poll-sample-badge {
+            display: inline-block;
+            background: var(--accents-2);
+            border: 1px solid var(--accents-2);
+            color: var(--accents-5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            margin-left: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .poll-box-table tbody tr:hover .poll-sample-badge {
+            background: var(--accents-3);
+            border-color: var(--accents-3);
+            color: var(--geist-background);
+        }
+
+        .poll-box-table .poll-pollster-cell {
+            font-weight: 400;
+            color: var(--geist-foreground);
+        }
+
+        .poll-box-table .poll-sponsor-cell {
+            color: var(--accents-5);
+            font-weight: 400;
+        }
+
+        /* Visual Bar Cells for Approve/Disapprove */
+        .poll-box-table .poll-bar-cell {
+            position: relative;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            padding: 0 !important;
+            min-width: 140px;
+        }
+
+        .poll-box-table .poll-bar-content {
+            position: relative;
+            z-index: 1;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            transition: all 0.3s ease;
+        }
+
+        .poll-box-table tbody tr:hover .poll-bar-content {
+            font-weight: 700;
+        }
+
+        .poll-box-table .poll-bar-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .poll-box-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+        .poll-box-table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+        .poll-box-table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+        .poll-box-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+        .poll-box-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
+        .poll-box-table tbody tr:nth-child(6) { animation-delay: 0.3s; }
+        .poll-box-table tbody tr:nth-child(7) { animation-delay: 0.35s; }
+        .poll-box-table tbody tr:nth-child(8) { animation-delay: 0.4s; }
+        .poll-box-table tbody tr:nth-child(9) { animation-delay: 0.45s; }
+        .poll-box-table tbody tr:nth-child(10) { animation-delay: 0.5s; }
+
+        .poll-box-table .poll-approve-bar .poll-bar-bg {
+            background: rgba(16, 185, 129, 0.12);
+        }
+
+        .poll-box-table .poll-approve-bar .poll-bar-content {
+            color: #10b981;
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        .poll-box-table .poll-disapprove-bar .poll-bar-bg {
+            background: rgba(236, 72, 153, 0.12);
+        }
+
+        .poll-box-table .poll-disapprove-bar .poll-bar-content {
+            color: #db2777;
+            font-variant-numeric: tabular-nums;
+            font-weight: 500;
+        }
+
+        .poll-box-table tbody tr:hover .poll-approve-bar .poll-bar-bg {
+            background: rgba(16, 185, 129, 0.18);
+        }
+
+        .poll-box-table tbody tr:hover .poll-disapprove-bar .poll-bar-bg {
+            background: rgba(236, 72, 153, 0.18);
+        }
+
+        /* Mobile bar adjustments */
+        @media (max-width: 768px) {
+            .poll-box-table .poll-approve-bar .poll-bar-bg {
+                background: rgba(16, 185, 129, 0.07);
+            }
+
+            .poll-box-table .poll-disapprove-bar .poll-bar-bg {
+                background: rgba(236, 72, 153, 0.07);
+            }
+
+            .poll-box-table tbody tr:hover .poll-approve-bar .poll-bar-bg {
+                background: rgba(16, 185, 129, 0.11);
+            }
+
+            .poll-box-table tbody tr:hover .poll-disapprove-bar .poll-bar-bg {
+                background: rgba(236, 72, 153, 0.11);
+            }
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            body {
+                background-size: 16px 16px;
+            }
+
+            .container {
+                padding: 1rem 0.75rem;
+            }
+
+            .navbar {
+                padding: 0 1rem;
+                height: 56px;
+            }
+
+            .logo {
+                font-size: 0.875rem;
+            }
+
+            .logo-icon {
+                width: 20px;
+                height: 20px;
+                font-size: 12px;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .nav-icons {
+                gap: 1rem;
+            }
+
+            .nav-icons svg {
+                width: 17px;
+                height: 17px;
+            }
+
+            .preview-hero {
+                grid-template-columns: 1fr;
+                padding: 2rem 1.5rem;
+                gap: 2rem;
+            }
+
+            .hero-title {
+                font-size: 2.1rem;
+            }
+
+            .hero-actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-button {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .hero-meta {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .hero-panel {
+                padding: 1.5rem;
+            }
+
+            .chart-container {
+                padding: 1.75rem 1rem 1.5rem;
+                border-radius: 8px;
+                margin-left: 0;
+                margin-right: 0;
+                width: 100%;
+                border: 1px solid var(--accents-2);
+            }
+
+            .chart-title {
+                font-size: 1.25rem;
+                padding: 0 0.5rem;
+            }
+
+            .chart-subtitle {
+                font-size: 0.8125rem;
+                padding: 0 0.5rem;
+            }
+
+            .chart-wrapper {
+                margin: 0;
+                padding: 0;
+                height: 370px;
+                width: 100%;
+            }
+
+            .chart-wrapper canvas {
+                width: 100% !important;
+                height: 100% !important;
+            }
+
+            .chart-footer {
+                padding: 0 0.5rem;
+                font-size: 0.75rem;
+            }
+
+            /* Poll Box Mobile */
+            .poll-box-section {
+                margin: 20px -0.75rem;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                width: calc(100% + 1.5rem);
+            }
+
+            .poll-box-container {
+                max-height: 360px;
+            }
+
+            .poll-box-table {
+                font-size: 12px;
+            }
+
+            .poll-box-table th {
+                padding: 10px 8px;
+                font-size: 10px;
+            }
+
+            .poll-box-table td {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+
+            .poll-box-table .poll-sample-badge {
+                font-size: 8px;
+                padding: 2px 4px;
+                margin-left: 4px;
+            }
+
+            .poll-box-table .poll-bar-cell {
+                min-width: 80px;
+            }
+
+            .poll-box-table .poll-bar-content {
+                padding: 10px 8px;
+                font-size: 12px;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 480px) {
+            .container {
+                padding: 0.75rem 0.5rem;
+            }
+
+            .navbar {
+                padding: 0 0.75rem;
+                height: 54px;
+            }
+
+            .logo {
+                font-size: 0.8125rem;
+            }
+
+            .logo-icon {
+                width: 18px;
+                height: 18px;
+                font-size: 11px;
+            }
+
+            .nav-icons {
+                gap: 0.875rem;
+            }
+
+            .nav-icons svg {
+                width: 16px;
+                height: 16px;
+            }
+
+            .preview-hero {
+                padding: 1.75rem 1.25rem;
+                margin-bottom: 2rem;
+            }
+
+            .hero-title {
+                font-size: 1.85rem;
+            }
+
+            .hero-actions {
+                gap: 0.75rem;
+            }
+
+            .hero-button {
+                justify-content: space-between;
+            }
+
+            .hero-meta {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-panel {
+                padding: 1.25rem;
+            }
+
+            .chart-container {
+                margin-left: 0;
+                margin-right: 0;
+                width: 100%;
+                padding: 1.5rem 0.75rem 1.25rem;
+                border: 1px solid var(--accents-2);
+                border-radius: 8px;
+            }
+
+            .chart-wrapper {
+                margin: 0;
+                padding: 0;
+                height: 330px;
+                width: 100%;
+            }
+
+            .chart-title {
+                font-size: 1.125rem;
+                padding: 0 0.25rem;
+            }
+
+            .chart-subtitle {
+                font-size: 0.75rem;
+                padding: 0 0.25rem;
+            }
+
+            .poll-box-section {
+                margin: 16px -0.5rem;
+                width: calc(100% + 1rem);
+            }
+
+            .poll-box-container {
+                max-height: 320px;
+            }
+
+            .poll-box-table th,
+            .poll-box-table td {
+                padding: 8px 6px;
+            }
+
+            .poll-box-table .poll-bar-cell {
+                min-width: 70px;
+            }
+
+            .poll-box-table .poll-bar-content {
+                font-size: 11px;
+            }
+
+            /* Subtle overlay for smallest screens */
+            .poll-box-table .poll-approve-bar .poll-bar-bg {
+                background: rgba(16, 185, 129, 0.05);
+            }
+
+            .poll-box-table .poll-disapprove-bar .poll-bar-bg {
+                background: rgba(236, 72, 153, 0.05);
+            }
+
+            .poll-box-table tbody tr:hover .poll-approve-bar .poll-bar-bg {
+                background: rgba(16, 185, 129, 0.09);
+            }
+
+            .poll-box-table tbody tr:hover .poll-disapprove-bar .poll-bar-bg {
+                background: rgba(236, 72, 153, 0.09);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Floating Panels Background -->
+    <div class="floating-panels-bg">
+        <div class="bg-glow bg-glow-1"></div>
+        <div class="bg-glow bg-glow-2"></div>
+        <div class="bg-glow bg-glow-3"></div>
+
+        <div class="floating-panel fp-1">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-2">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-3">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-4">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+
+        <div class="floating-panel fp-5">
+            <div class="floating-panel-header">
+                <div class="panel-dot panel-dot-red"></div>
+                <div class="panel-dot panel-dot-yellow"></div>
+                <div class="panel-dot panel-dot-green"></div>
+            </div>
+            <div class="floating-panel-body">
+                <div class="panel-gradient"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">✓</div>
+            VOTEHUB
+        </div>
+        <ul class="nav-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">Polls ▾</a></li>
+            <li><a href="#">Analysis</a></li>
+            <li><a href="#">Projects ▾</a></li>
+            <li><a href="#">Elections ▾</a></li>
+        </ul>
+        <div class="nav-icons">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"></circle>
+                <path d="m21 21-4.35-4.35"></path>
+            </svg>
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M23.643 4.937c-.835.37-1.732.62-2.675.733.962-.576 1.7-1.49 2.048-2.578-.9.534-1.897.922-2.958 1.13-.85-.904-2.06-1.47-3.4-1.47-2.572 0-4.658 2.086-4.658 4.66 0 .364.042.718.12 1.06-3.873-.195-7.304-2.05-9.602-4.868-.4.69-.63 1.49-.63 2.342 0 1.616.823 3.043 2.072 3.878-.764-.025-1.482-.234-2.11-.583v.06c0 2.257 1.605 4.14 3.737 4.568-.392.106-.803.162-1.227.162-.3 0-.593-.028-.877-.082.593 1.85 2.313 3.198 4.352 3.234-1.595 1.25-3.604 1.995-5.786 1.995-.376 0-.747-.022-1.112-.065 2.062 1.323 4.51 2.093 7.14 2.093 8.57 0 13.255-7.098 13.255-13.254 0-.2-.005-.402-.014-.602.91-.658 1.7-1.477 2.323-2.41z"/>
+            </svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section class="preview-hero">
+            <div class="hero-content">
+                <span class="hero-tag">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m5 13 4 4L19 7"></path>
+                    </svg>
+                    OnPointAggregate 3.0 Preview
+                </span>
+                <h1 class="hero-title">Participate in the OnPointAggregate preview experience.</h1>
+                <p class="hero-description">
+                    Help us refine our next-generation political intelligence dashboard with your early feedback.
+                    Enjoy refreshed visuals, richer crosstabs, and faster live updates tailored for newsrooms.
+                </p>
+                <div class="hero-actions">
+                    <a href="#" class="hero-button hero-button-primary">
+                        Request early access
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14"></path>
+                            <path d="m12 5 7 7-7 7"></path>
+                        </svg>
+                    </a>
+                    <a href="#" class="hero-button hero-button-ghost">
+                        View roadmap
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 5v14"></path>
+                            <path d="m19 12-7 7-7-7"></path>
+                        </svg>
+                    </a>
+                </div>
+                <div class="hero-meta">
+                    <div class="hero-meta-item">
+                        <span class="hero-meta-label">Refresh cadence</span>
+                        <span class="hero-meta-value">Every 15 minutes</span>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span class="hero-meta-label">Preview testers</span>
+                        <span class="hero-meta-value">312 newsrooms</span>
+                    </div>
+                    <div class="hero-meta-item">
+                        <span class="hero-meta-label">Feedback velocity</span>
+                        <span class="hero-meta-value">&uarr; 42% this week</span>
+                    </div>
+                </div>
+            </div>
+            <aside class="hero-panel">
+                <div class="hero-panel-header">
+                    <span class="hero-panel-label">Today&apos;s signal</span>
+                    <span class="hero-panel-pill">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 18V5l12-2v13"></path>
+                            <circle cx="6" cy="18" r="3"></circle>
+                            <circle cx="18" cy="16" r="3"></circle>
+                        </svg>
+                        Stable trend
+                    </span>
+                </div>
+                <div class="hero-panel-metric">
+                    <strong>44.8%</strong>
+                    <span>approval average · 7d</span>
+                </div>
+                <div class="hero-trend-list">
+                    <div class="hero-trend-item">
+                        <div class="hero-trend-info">
+                            <span class="hero-trend-dot trend-positive"></span>
+                            Independents
+                        </div>
+                        <span class="hero-trend-change">+1.3%</span>
+                    </div>
+                    <div class="hero-trend-item">
+                        <div class="hero-trend-info">
+                            <span class="hero-trend-dot trend-negative"></span>
+                            Suburban women
+                        </div>
+                        <span class="hero-trend-change">-0.6%</span>
+                    </div>
+                    <div class="hero-trend-item">
+                        <div class="hero-trend-info">
+                            <span class="hero-trend-dot trend-positive"></span>
+                            Young voters
+                        </div>
+                        <span class="hero-trend-change">+0.9%</span>
+                    </div>
+                </div>
+                <div class="hero-sparkline" aria-hidden="true">
+                    <span style="height: 18px;"></span>
+                    <span style="height: 32px;"></span>
+                    <span style="height: 26px;"></span>
+                    <span style="height: 40px;"></span>
+                    <span style="height: 35px;"></span>
+                    <span style="height: 44px;"></span>
+                    <span style="height: 28px;"></span>
+                    <span style="height: 38px;"></span>
+                </div>
+                <div class="hero-panel-footer">
+                    <span>Aggregated from 58 live trackers</span>
+                    <a href="#">See methodology</a>
+                </div>
+            </aside>
+        </section>
+
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="filter-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                    </svg>
+                </div>
+                <h1 class="chart-title">Do Americans approve of Donald Trump?</h1>
+                <p class="chart-subtitle">Live, time-weighted average of high-quality polls tracking President Trump's approval.</p>
+            </div>
+
+            <div class="chart-wrapper">
+                <canvas id="approvalChart"></canvas>
+            </div>
+
+            <div class="chart-footer">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <path d="M12 16v-4M12 8h.01"></path>
+                </svg>
+                <a href="#">Our methodology.</a>
+                <div class="votehub-watermark">VOTEHUB</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Poll Box Section -->
+    <section class="poll-box-section">
+        <div class="poll-box-container">
+            <table id="pollBoxTable" class="poll-box-table">
+                <thead>
+                    <tr>
+                        <th>Dates</th>
+                        <th>Sample</th>
+                        <th>Pollster</th>
+                        <th>Sponsor</th>
+                        <th>Approve</th>
+                        <th>Disapprove</th>
+                    </tr>
+                </thead>
+                <tbody id="pollBoxTableBody">
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <script>
+        // Real poll data
+        const rawPolls = [
+            { endDate: '2025-10-28', pollster: 'Big Data Poll', approve: 45, disapprove: 51 },
+            { endDate: '2025-10-27', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-27', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-26', pollster: 'Ipsos', approve: 40, disapprove: 57 },
+            { endDate: '2025-10-23', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 52 },
+            { endDate: '2025-10-20', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-20', pollster: 'Ipsos', approve: 42, disapprove: 56 },
+            { endDate: '2025-10-20', pollster: 'Echelon Insights', approve: 46, disapprove: 53 },
+            { endDate: '2025-10-20', pollster: 'Quinnipiac University', approve: 40, disapprove: 54 },
+            { endDate: '2025-10-20', pollster: 'University of Massachusetts Department of Political Science/YouGov', approve: 42, disapprove: 58 },
+            { endDate: '2025-10-16', pollster: 'Gallup', approve: 41, disapprove: 54 },
+            { endDate: '2025-10-16', pollster: 'The Argument/Verasight', approve: 44, disapprove: 54 },
+            { endDate: '2025-10-15', pollster: 'J.L. Partners', approve: 46, disapprove: 44 },
+            { endDate: '2025-10-14', pollster: 'Emerson College', approve: 45, disapprove: 48 },
+            { endDate: '2025-10-13', pollster: 'YouGov', approve: 44, disapprove: 54 },
+            { endDate: '2025-10-12', pollster: 'John Zogby Strategies', approve: 44, disapprove: 51 },
+            { endDate: '2025-10-12', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 44, disapprove: 52 },
+            { endDate: '2025-10-12', pollster: 'Ipsos', approve: 40, disapprove: 58 },
+            { endDate: '2025-10-07', pollster: 'Quantus Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-10-06', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-10-03', pollster: 'YouGov', approve: 42, disapprove: 58 },
+            { endDate: '2025-10-02', pollster: 'TIPP Insights', approve: 42, disapprove: 46 },
+            { endDate: '2025-09-30', pollster: 'InsiderAdvantage', approve: 52, disapprove: 46 },
+            { endDate: '2025-09-29', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-09-29', pollster: 'YouGov', approve: 44, disapprove: 55 },
+            { endDate: '2025-09-28', pollster: 'Pew Research Center', approve: 40, disapprove: 58 },
+            { endDate: '2025-09-27', pollster: 'The New York Times/Siena College', approve: 43, disapprove: 54 },
+            { endDate: '2025-09-26', pollster: 'Marist College', approve: 42, disapprove: 53 },
+            { endDate: '2025-09-24', pollster: 'Marquette University Law School', approve: 45, disapprove: 55 },
+            { endDate: '2025-09-22', pollster: 'Echelon Insights', approve: 45, disapprove: 53 },
+            { endDate: '2025-09-22', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-09-21', pollster: 'Quantus Insights', approve: 48, disapprove: 50 },
+            { endDate: '2025-09-21', pollster: 'Quinnipiac University', approve: 38, disapprove: 54 },
+            { endDate: '2025-09-19', pollster: 'Verasight', approve: 42, disapprove: 55 },
+            { endDate: '2025-09-18', pollster: 'The Argument/Verasight', approve: 42, disapprove: 56 },
+            { endDate: '2025-09-16', pollster: 'AtlasIntel', approve: 47, disapprove: 52 },
+            { endDate: '2025-09-16', pollster: 'Gallup', approve: 40, disapprove: 56 },
+            { endDate: '2025-09-16', pollster: 'TIPP Insights', approve: 45, disapprove: 49 },
+            { endDate: '2025-09-15', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-09-15', pollster: 'YouGov', approve: 41, disapprove: 55 },
+            { endDate: '2025-09-15', pollster: 'Ipsos', approve: 45, disapprove: 55 },
+            { endDate: '2025-09-11', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 52 },
+            { endDate: '2025-09-09', pollster: 'Ipsos', approve: 42, disapprove: 56 },
+            { endDate: '2025-09-09', pollster: 'Beacon Research/Shaw & Co. Research', approve: 46, disapprove: 54 },
+            { endDate: '2025-09-08', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-09-08', pollster: 'Public Religion Research Institute', approve: 42, disapprove: 56 },
+            { endDate: '2025-09-05', pollster: 'YouGov', approve: 44, disapprove: 56 },
+            { endDate: '2025-09-02', pollster: 'YouGov', approve: 44, disapprove: 55 },
+            { endDate: '2025-09-02', pollster: 'YouGov', approve: 40, disapprove: 55 },
+            { endDate: '2025-09-01', pollster: 'J.L. Partners', approve: 55, disapprove: 45 },
+            { endDate: '2025-08-30', pollster: 'John Zogby Strategies', approve: 46, disapprove: 52 },
+            { endDate: '2025-08-29', pollster: 'TIPP Insights', approve: 43, disapprove: 47 },
+            { endDate: '2025-08-26', pollster: 'Emerson College', approve: 45, disapprove: 47 },
+            { endDate: '2025-08-26', pollster: 'Quantus Insights', approve: 48, disapprove: 51 },
+            { endDate: '2025-08-25', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-08-25', pollster: 'Quinnipiac University', approve: 37, disapprove: 55 },
+            { endDate: '2025-08-24', pollster: 'Ipsos', approve: 40, disapprove: 54 },
+            { endDate: '2025-08-21', pollster: 'Verasight', approve: 41, disapprove: 56 },
+            { endDate: '2025-08-20', pollster: 'Gallup', approve: 40, disapprove: 56 },
+            { endDate: '2025-08-19', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-08-18', pollster: 'Echelon Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-08-18', pollster: 'Ipsos', approve: 40, disapprove: 54 },
+            { endDate: '2025-08-17', pollster: 'InsiderAdvantage', approve: 54, disapprove: 44 },
+            { endDate: '2025-08-17', pollster: 'The Argument/Verasight', approve: 43, disapprove: 55 },
+            { endDate: '2025-08-13', pollster: 'Quantus Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-08-11', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-08-10', pollster: 'Pew Research Center', approve: 38, disapprove: 60 },
+            { endDate: '2025-08-04', pollster: 'YouGov', approve: 43, disapprove: 55 },
+            { endDate: '2025-08-03', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 46, disapprove: 51 },
+            { endDate: '2025-08-02', pollster: 'TIPP Insights', approve: 45, disapprove: 46 },
+            { endDate: '2025-07-31', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 51 },
+            { endDate: '2025-07-30', pollster: 'University of Massachusetts Department of Political Science/YouGov', approve: 38, disapprove: 58 },
+            { endDate: '2025-07-29', pollster: 'John Zogby Strategies', approve: 43, disapprove: 54 },
+            { endDate: '2025-07-28', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-07-28', pollster: 'YouGov', approve: 44, disapprove: 54 },
+            { endDate: '2025-07-27', pollster: 'Ipsos', approve: 40, disapprove: 56 },
+            { endDate: '2025-07-23', pollster: 'Quantus Insights', approve: 47, disapprove: 50 },
+            { endDate: '2025-07-22', pollster: 'J.L. Partners', approve: 45, disapprove: 46 },
+            { endDate: '2025-07-22', pollster: 'Emerson College', approve: 46, disapprove: 47 },
+            { endDate: '2025-07-21', pollster: 'YouGov', approve: 43, disapprove: 56 },
+            { endDate: '2025-07-21', pollster: 'Beacon Research/Shaw & Co. Research', approve: 46, disapprove: 54 },
+            { endDate: '2025-07-21', pollster: 'Gallup', approve: 37, disapprove: 58 },
+            { endDate: '2025-07-21', pollster: 'YouGov', approve: 39, disapprove: 56 },
+            { endDate: '2025-07-21', pollster: 'GBAO Strategies', approve: 45, disapprove: 55 },
+            { endDate: '2025-07-18', pollster: 'AtlasIntel', approve: 44, disapprove: 55 },
+            { endDate: '2025-07-18', pollster: 'YouGov', approve: 42, disapprove: 58 },
+            { endDate: '2025-07-16', pollster: 'Ipsos', approve: 41, disapprove: 54 },
+            { endDate: '2025-07-16', pollster: 'Quantus Insights', approve: 48, disapprove: 50 },
+            { endDate: '2025-07-16', pollster: 'Verasight', approve: 42, disapprove: 57 },
+            { endDate: '2025-07-16', pollster: 'Marquette University Law School', approve: 46, disapprove: 54 },
+            { endDate: '2025-07-14', pollster: 'Echelon Insights', approve: 45, disapprove: 53 },
+            { endDate: '2025-07-14', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-07-14', pollster: 'Quinnipiac University', approve: 40, disapprove: 54 },
+            { endDate: '2025-07-14', pollster: 'Big Data Poll', approve: 48, disapprove: 49 },
+            { endDate: '2025-07-13', pollster: 'YouGov', approve: 39, disapprove: 56 },
+            { endDate: '2025-07-13', pollster: 'CNN/SSRS', approve: 42, disapprove: 58 },
+            { endDate: '2025-07-10', pollster: 'J.L. Partners', approve: 48, disapprove: 52 },
+            { endDate: '2025-07-07', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-07-02', pollster: 'Quantus Insights', approve: 47, disapprove: 49 },
+            { endDate: '2025-06-30', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-30', pollster: 'YouGov', approve: 45, disapprove: 54 },
+            { endDate: '2025-06-27', pollster: 'TIPP Insights', approve: 44, disapprove: 45 },
+            { endDate: '2025-06-25', pollster: 'Emerson College', approve: 45, disapprove: 46 },
+            { endDate: '2025-06-25', pollster: 'John Zogby Strategies', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-25', pollster: 'Quantus Insights', approve: 47, disapprove: 50 },
+            { endDate: '2025-06-25', pollster: 'Marist College', approve: 44, disapprove: 53 },
+            { endDate: '2025-06-24', pollster: 'Quinnipiac University', approve: 41, disapprove: 54 },
+            { endDate: '2025-06-23', pollster: 'Ipsos', approve: 41, disapprove: 57 },
+            { endDate: '2025-06-23', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-06-22', pollster: 'Ipsos', approve: 41, disapprove: 54 },
+            { endDate: '2025-06-19', pollster: 'Gallup', approve: 40, disapprove: 57 },
+            { endDate: '2025-06-18', pollster: 'Echelon Insights', approve: 48, disapprove: 52 },
+            { endDate: '2025-06-17', pollster: 'Echelon Insights', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-16', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-06-16', pollster: 'Ipsos', approve: 42, disapprove: 54 },
+            { endDate: '2025-06-16', pollster: 'InsiderAdvantage', approve: 54, disapprove: 44 },
+            { endDate: '2025-06-16', pollster: 'Beacon Research/Shaw & Co. Research', approve: 46, disapprove: 54 },
+            { endDate: '2025-06-14', pollster: 'Clarity Campaign Labs', approve: 47, disapprove: 50 },
+            { endDate: '2025-06-12', pollster: 'Verasight', approve: 42, disapprove: 56 },
+            { endDate: '2025-06-11', pollster: 'Quantus Insights', approve: 48, disapprove: 49 },
+            { endDate: '2025-06-11', pollster: 'TIPP Insights', approve: 43, disapprove: 50 },
+            { endDate: '2025-06-09', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-06-09', pollster: 'Quinnipiac University', approve: 38, disapprove: 54 },
+            { endDate: '2025-06-08', pollster: 'Pew Research Center', approve: 41, disapprove: 58 },
+            { endDate: '2025-06-06', pollster: 'YouGov', approve: 45, disapprove: 55 },
+            { endDate: '2025-06-06', pollster: 'J.L. Partners', approve: 47, disapprove: 53 },
+            { endDate: '2025-06-04', pollster: 'Quantus Insights', approve: 49, disapprove: 48 },
+            { endDate: '2025-06-02', pollster: 'YouGov', approve: 46, disapprove: 51 },
+            { endDate: '2025-05-30', pollster: 'TIPP Insights', approve: 43, disapprove: 45 },
+            { endDate: '2025-05-29', pollster: 'John Zogby Strategies', approve: 48, disapprove: 49 },
+            { endDate: '2025-05-27', pollster: 'AtlasIntel', approve: 45, disapprove: 55 },
+            { endDate: '2025-05-27', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-05-26', pollster: 'YouGov', approve: 46, disapprove: 52 },
+            { endDate: '2025-05-20', pollster: 'Civiqs', approve: 47, disapprove: 52 },
+            { endDate: '2025-05-20', pollster: 'Quantus Insights', approve: 48, disapprove: 48 },
+            { endDate: '2025-05-19', pollster: 'YouGov', approve: 45, disapprove: 52 },
+            { endDate: '2025-05-19', pollster: 'Fabrizio Ward', approve: 46, disapprove: 49 },
+            { endDate: '2025-05-18', pollster: 'InsiderAdvantage', approve: 55, disapprove: 44 },
+            { endDate: '2025-05-18', pollster: 'Ipsos', approve: 42, disapprove: 52 },
+            { endDate: '2025-05-18', pollster: 'Gallup', approve: 43, disapprove: 53 },
+            { endDate: '2025-05-15', pollster: 'Marquette University Law School', approve: 46, disapprove: 54 },
+            { endDate: '2025-05-13', pollster: 'Ipsos', approve: 44, disapprove: 52 },
+            { endDate: '2025-05-12', pollster: 'Echelon Insights', approve: 46, disapprove: 52 },
+            { endDate: '2025-05-12', pollster: 'YouGov', approve: 45, disapprove: 52 },
+            { endDate: '2025-05-09', pollster: 'co/efficient', approve: 49, disapprove: 51 },
+            { endDate: '2025-05-08', pollster: 'YouGov', approve: 42, disapprove: 50 },
+            { endDate: '2025-05-07', pollster: 'Quantus Insights', approve: 48, disapprove: 48 },
+            { endDate: '2025-05-06', pollster: 'Verasight', approve: 40, disapprove: 56 },
+            { endDate: '2025-05-05', pollster: 'YouGov', approve: 44, disapprove: 52 },
+            { endDate: '2025-05-05', pollster: 'Big Data Poll', approve: 48, disapprove: 47 },
+            { endDate: '2025-05-02', pollster: 'TIPP Insights', approve: 42, disapprove: 47 },
+            { endDate: '2025-04-28', pollster: 'YouGov', approve: 43, disapprove: 54 },
+            { endDate: '2025-04-28', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-04-28', pollster: 'J.L. Partners', approve: 45, disapprove: 55 },
+            { endDate: '2025-04-28', pollster: 'Emerson College', approve: 45, disapprove: 45 },
+            { endDate: '2025-04-27', pollster: 'Ipsos', approve: 42, disapprove: 53 },
+            { endDate: '2025-04-25', pollster: 'YouGov', approve: 45, disapprove: 55 },
+            { endDate: '2025-04-25', pollster: 'Ipsos', approve: 42, disapprove: 55 },
+            { endDate: '2025-04-24', pollster: 'The New York Times/Siena College', approve: 42, disapprove: 54 },
+            { endDate: '2025-04-24', pollster: 'CNN/SSRS', approve: 43, disapprove: 57 },
+            { endDate: '2025-04-23', pollster: 'Quantus Insights', approve: 48, disapprove: 50 },
+            { endDate: '2025-04-23', pollster: 'John Zogby Strategies', approve: 48, disapprove: 50 },
+            { endDate: '2025-04-23', pollster: 'YouGov', approve: 44, disapprove: 52 },
+            { endDate: '2025-04-23', pollster: 'Marist College', approve: 42, disapprove: 53 },
+            { endDate: '2025-04-22', pollster: 'YouGov', approve: 44, disapprove: 53 },
+            { endDate: '2025-04-21', pollster: 'Ipsos', approve: 42, disapprove: 53 },
+            { endDate: '2025-04-21', pollster: 'Beacon Research/Shaw & Co. Research', approve: 44, disapprove: 55 },
+            { endDate: '2025-04-18', pollster: 'Civiqs', approve: 46, disapprove: 53 },
+            { endDate: '2025-04-15', pollster: 'YouGov', approve: 45, disapprove: 53 },
+            { endDate: '2025-04-14', pollster: 'Echelon Insights', approve: 47, disapprove: 51 },
+            { endDate: '2025-04-14', pollster: 'J.L. Partners', approve: 48, disapprove: 42 },
+            { endDate: '2025-04-14', pollster: 'Gallup', approve: 44, disapprove: 53 },
+            { endDate: '2025-04-14', pollster: 'Clarity Campaign Labs', approve: 46, disapprove: 49 },
+            { endDate: '2025-04-14', pollster: 'AtlasIntel', approve: 46, disapprove: 52 },
+            { endDate: '2025-04-13', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 44, disapprove: 51 },
+            { endDate: '2025-04-13', pollster: 'Pew Research Center', approve: 40, disapprove: 59 },
+            { endDate: '2025-04-11', pollster: 'YouGov', approve: 47, disapprove: 53 },
+            { endDate: '2025-04-10', pollster: 'YouGov', approve: 41, disapprove: 54 },
+            { endDate: '2025-04-09', pollster: 'TIPP Insights', approve: 43, disapprove: 50 },
+            { endDate: '2025-04-09', pollster: 'Quantus Insights', approve: 47, disapprove: 50 },
+            { endDate: '2025-04-09', pollster: 'University of Massachusetts Department of Political Science/YouGov', approve: 44, disapprove: 51 },
+            { endDate: '2025-04-08', pollster: 'YouGov', approve: 45, disapprove: 52 },
+            { endDate: '2025-04-07', pollster: 'Quinnipiac University', approve: 41, disapprove: 53 },
+            { endDate: '2025-04-03', pollster: 'J.L. Partners', approve: 47, disapprove: 42 },
+            { endDate: '2025-04-03', pollster: 'Cygnal', approve: 47, disapprove: 51 },
+            { endDate: '2025-04-02', pollster: 'Ipsos', approve: 43, disapprove: 53 },
+            { endDate: '2025-04-01', pollster: 'YouGov', approve: 46, disapprove: 51 },
+            { endDate: '2025-03-28', pollster: 'TIPP Insights', approve: 44, disapprove: 45 },
+            { endDate: '2025-03-27', pollster: 'J.L. Partners', approve: 45, disapprove: 46 },
+            { endDate: '2025-03-27', pollster: 'Quantus Insights', approve: 49, disapprove: 46 },
+            { endDate: '2025-03-27', pollster: 'Marquette University Law School', approve: 48, disapprove: 52 },
+            { endDate: '2025-03-26', pollster: 'YouGov', approve: 50, disapprove: 50 },
+            { endDate: '2025-03-25', pollster: 'YouGov', approve: 48, disapprove: 50 },
+            { endDate: '2025-03-24', pollster: 'YouGov', approve: 44, disapprove: 50 },
+            { endDate: '2025-03-23', pollster: 'Ipsos', approve: 45, disapprove: 51 },
+            { endDate: '2025-03-23', pollster: 'GBAO Strategies', approve: 48, disapprove: 50 },
+            { endDate: '2025-03-20', pollster: 'Public Religion Research Institute', approve: 43, disapprove: 54 },
+            { endDate: '2025-03-18', pollster: 'YouGov', approve: 47, disapprove: 50 },
+            { endDate: '2025-03-17', pollster: 'Beacon Research/Shaw & Co. Research', approve: 49, disapprove: 51 },
+            { endDate: '2025-03-17', pollster: 'North Star Opinion Research', approve: 46, disapprove: 51 },
+            { endDate: '2025-03-16', pollster: 'Gallup', approve: 43, disapprove: 53 },
+            { endDate: '2025-03-14', pollster: 'Blueprint Polling', approve: 45, disapprove: 51 },
+            { endDate: '2025-03-13', pollster: 'Echelon Insights', approve: 49, disapprove: 48 },
+            { endDate: '2025-03-12', pollster: 'Ipsos', approve: 44, disapprove: 52 },
+            { endDate: '2025-03-12', pollster: 'AtlasIntel', approve: 47, disapprove: 52 },
+            { endDate: '2025-03-12', pollster: 'Quantus Insights', approve: 50, disapprove: 47 },
+            { endDate: '2025-03-11', pollster: 'YouGov', approve: 48, disapprove: 49 },
+            { endDate: '2025-03-11', pollster: 'Hart Research Associates/Public Opinion Strategies', approve: 47, disapprove: 51 },
+            { endDate: '2025-03-10', pollster: 'Emerson College', approve: 47, disapprove: 45 },
+            { endDate: '2025-03-10', pollster: 'Quinnipiac University', approve: 42, disapprove: 53 },
+            { endDate: '2025-03-10', pollster: 'Clarity Campaign Labs', approve: 50, disapprove: 46 },
+            { endDate: '2025-03-09', pollster: 'CNN/SSRS', approve: 45, disapprove: 54 },
+            { endDate: '2025-03-07', pollster: 'J.L. Partners', approve: 49, disapprove: 51 },
+            { endDate: '2025-03-06', pollster: 'TIPP Insights', approve: 43, disapprove: 48 },
+            { endDate: '2025-03-05', pollster: 'Cygnal', approve: 47, disapprove: 51 },
+            { endDate: '2025-03-04', pollster: 'Ipsos', approve: 44, disapprove: 51 },
+            { endDate: '2025-03-04', pollster: 'YouGov', approve: 48, disapprove: 46 },
+            { endDate: '2025-03-03', pollster: 'Emerson College', approve: 48, disapprove: 43 },
+            { endDate: '2025-03-03', pollster: 'Civiqs', approve: 48, disapprove: 52 },
+            { endDate: '2025-03-02', pollster: 'Public Opinion Strategies', approve: 51, disapprove: 49 },
+            { endDate: '2025-03-01', pollster: 'John Zogby Strategies', approve: 48, disapprove: 48 },
+            { endDate: '2025-02-28', pollster: 'YouGov', approve: 51, disapprove: 49 },
+            { endDate: '2025-02-28', pollster: 'CNN/SSRS', approve: 48, disapprove: 52 },
+            { endDate: '2025-02-28', pollster: 'TIPP Insights', approve: 46, disapprove: 43 },
+            { endDate: '2025-02-28', pollster: 'AtlasIntel', approve: 50, disapprove: 50 },
+            { endDate: '2025-02-26', pollster: 'Quantus Insights', approve: 51, disapprove: 45 },
+            { endDate: '2025-02-26', pollster: 'Marist College', approve: 45, disapprove: 51 },
+            { endDate: '2025-02-25', pollster: 'YouGov', approve: 48, disapprove: 47 },
+            { endDate: '2025-02-25', pollster: 'J.L. Partners', approve: 45, disapprove: 39 },
+            { endDate: '2025-02-23', pollster: 'Ipsos', approve: 44, disapprove: 50 },
+            { endDate: '2025-02-20', pollster: 'Echelon Insights', approve: 48, disapprove: 49 },
+            { endDate: '2025-02-20', pollster: 'YouGov', approve: 48, disapprove: 44 },
+            { endDate: '2025-02-18', pollster: 'YouGov', approve: 50, disapprove: 47 },
+            { endDate: '2025-02-18', pollster: 'Ipsos', approve: 44, disapprove: 51 },
+            { endDate: '2025-02-18', pollster: 'Ipsos', approve: 48, disapprove: 51 },
+            { endDate: '2025-02-18', pollster: 'YouGov', approve: 46, disapprove: 46 },
+            { endDate: '2025-02-17', pollster: 'Emerson College', approve: 48, disapprove: 42 },
+            { endDate: '2025-02-17', pollster: 'CNN/SSRS', approve: 46, disapprove: 54 },
+            { endDate: '2025-02-17', pollster: 'co/efficient', approve: 48, disapprove: 48 },
+            { endDate: '2025-02-17', pollster: 'Quinnipiac University', approve: 45, disapprove: 49 },
+            { endDate: '2025-02-17', pollster: 'Blueprint Polling', approve: 47, disapprove: 48 },
+            { endDate: '2025-02-16', pollster: 'SurveyUSA', approve: 51, disapprove: 45 },
+            { endDate: '2025-02-16', pollster: 'Gallup', approve: 45, disapprove: 51 },
+            { endDate: '2025-02-13', pollster: 'Echelon Insights', approve: 52, disapprove: 46 },
+            { endDate: '2025-02-12', pollster: 'Quantus Insights', approve: 53, disapprove: 44 },
+            { endDate: '2025-02-11', pollster: 'YouGov', approve: 47, disapprove: 49 },
+            { endDate: '2025-02-11', pollster: 'YouGov', approve: 45, disapprove: 41 },
+            { endDate: '2025-02-07', pollster: 'YouGov', approve: 53, disapprove: 47 },
+            { endDate: '2025-02-06', pollster: 'Clarity Campaign Labs', approve: 48, disapprove: 43 },
+            { endDate: '2025-02-05', pollster: 'Cygnal', approve: 50, disapprove: 48 },
+            { endDate: '2025-02-05', pollster: 'Marquette University Law School', approve: 48, disapprove: 52 },
+            { endDate: '2025-02-04', pollster: 'YouGov', approve: 48, disapprove: 47 },
+            { endDate: '2025-02-03', pollster: 'Quantus Insights', approve: 52, disapprove: 45 },
+            { endDate: '2025-02-02', pollster: 'Pew Research Center', approve: 47, disapprove: 51 },
+            { endDate: '2025-01-31', pollster: 'TIPP Insights', approve: 46, disapprove: 41 },
+            { endDate: '2025-01-28', pollster: 'YouGov', approve: 50, disapprove: 46 },
+            { endDate: '2025-01-28', pollster: 'Emerson College', approve: 49, disapprove: 41 },
+            { endDate: '2025-01-28', pollster: 'co/efficient', approve: 52, disapprove: 47 },
+            { endDate: '2025-01-27', pollster: 'Quinnipiac University', approve: 46, disapprove: 43 },
+            { endDate: '2025-01-27', pollster: 'Gallup', approve: 47, disapprove: 48 },
+            { endDate: '2025-01-26', pollster: 'Ipsos', approve: 45, disapprove: 46 },
+            { endDate: '2025-01-24', pollster: 'Echelon Insights', approve: 51, disapprove: 43 },
+            { endDate: '2025-01-23', pollster: 'AtlasIntel', approve: 50, disapprove: 50 },
+            { endDate: '2025-01-23', pollster: 'Quantus Insights', approve: 54, disapprove: 40 },
+            { endDate: '2025-01-22', pollster: 'Big Data Poll', approve: 56, disapprove: 37 },
+            { endDate: '2025-01-21', pollster: 'Ipsos', approve: 47, disapprove: 41 }
+        ];
+
+        // Parse poll dates
+        function parseDate(dateStr) {
+            // Handle different date formats: "Oct. 26-28" or single dates
+            const match = dateStr.match(/(\d{4})-(\d{2})-(\d{2})/);
+            if (match) {
+                return new Date(match[1], parseInt(match[2]) - 1, match[3]);
+            }
+            return new Date(dateStr);
+        }
+
+        // Calculate time-weighted average using 14-day half-life
+        function calculateTimeWeightedAverage(polls, referenceDate = new Date('2025-10-30')) {
+            const HALF_LIFE_DAYS = 14;
+
+            // Group polls by pollster
+            const pollsterGroups = {};
+            polls.forEach(poll => {
+                const pollDate = parseDate(poll.endDate);
+                if (!pollsterGroups[poll.pollster]) {
+                    pollsterGroups[poll.pollster] = [];
+                }
+                pollsterGroups[poll.pollster].push({
+                    ...poll,
+                    date: pollDate,
+                    daysAgo: (referenceDate - pollDate) / (1000 * 60 * 60 * 24)
+                });
+            });
+
+            // Calculate weight for each pollster (based on their most recent poll)
+            const pollsterAverages = [];
+            Object.entries(pollsterGroups).forEach(([pollster, pollsterPolls]) => {
+                // Sort by date (most recent first)
+                pollsterPolls.sort((a, b) => b.date - a.date);
+
+                // Calculate time-weighted average within this pollster's polls
+                let approveSum = 0, disapproveSum = 0, weightSum = 0;
+
+                pollsterPolls.forEach(poll => {
+                    // Weight = 0.5^(days_ago / half_life)
+                    const weight = Math.pow(0.5, poll.daysAgo / HALF_LIFE_DAYS);
+                    approveSum += poll.approve * weight;
+                    disapproveSum += poll.disapprove * weight;
+                    weightSum += weight;
+                });
+
+                const avgApprove = approveSum / weightSum;
+                const avgDisapprove = disapproveSum / weightSum;
+
+                // The pollster's weight in the overall average is based on their most recent poll
+                const mostRecentDaysAgo = pollsterPolls[0].daysAgo;
+                const pollsterWeight = Math.pow(0.5, mostRecentDaysAgo / HALF_LIFE_DAYS);
+
+                pollsterAverages.push({
+                    pollster,
+                    approve: avgApprove,
+                    disapprove: avgDisapprove,
+                    weight: pollsterWeight,
+                    mostRecentDate: pollsterPolls[0].date
+                });
+            });
+
+            // Calculate overall weighted average
+            let totalApprove = 0, totalDisapprove = 0, totalWeight = 0;
+            pollsterAverages.forEach(p => {
+                totalApprove += p.approve * p.weight;
+                totalDisapprove += p.disapprove * p.weight;
+                totalWeight += p.weight;
+            });
+
+            return {
+                approve: totalApprove / totalWeight,
+                disapprove: totalDisapprove / totalWeight
+            };
+        }
+
+        // Get current aggregate
+        const currentAggregate = calculateTimeWeightedAverage(rawPolls);
+        console.log('Current Aggregate:', currentAggregate);
+
+        // Convert polls to chart format
+        const approvePolls = rawPolls.map(poll => ({
+            x: parseDate(poll.endDate),
+            y: poll.approve
+        }));
+
+        const disapprovePolls = rawPolls.map(poll => ({
+            x: parseDate(poll.endDate),
+            y: poll.disapprove
+        }));
+
+        // Calculate daily time-weighted averages for trend line
+        function calculateDailyAverages(polls, startDate, endDate) {
+            const daily = [];
+            const currentDate = new Date(startDate);
+
+            while (currentDate <= endDate) {
+                // IMPORTANT: Only include polls published on or before this date
+                const pollsUpToDate = polls.filter(poll => {
+                    const pollDate = parseDate(poll.endDate);
+                    return pollDate <= currentDate;
+                });
+
+                // Only calculate if we have polls
+                if (pollsUpToDate.length > 0) {
+                    const aggregate = calculateTimeWeightedAverage(pollsUpToDate, new Date(currentDate));
+                    daily.push({
+                        x: new Date(currentDate),
+                        y: aggregate
+                    });
+                }
+
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            return daily;
+        }
+
+        const startDate = new Date('2025-01-21');
+        const endDate = new Date('2025-10-30');
+        const dailyAverages = calculateDailyAverages(rawPolls, startDate, endDate);
+
+        const approveTrend = dailyAverages.map(d => ({ x: d.x, y: d.y.approve }));
+        const disapproveTrend = dailyAverages.map(d => ({ x: d.x, y: d.y.disapprove }));
+
+        // Create confidence intervals (±2.5%)
+        const approveUpper = dailyAverages.map(d => ({ x: d.x, y: d.y.approve + 2.5 }));
+        const approveLower = dailyAverages.map(d => ({ x: d.x, y: d.y.approve - 2.5 }));
+        const disapproveUpper = dailyAverages.map(d => ({ x: d.x, y: d.y.disapprove + 2.5 }));
+        const disapproveLower = dailyAverages.map(d => ({ x: d.x, y: d.y.disapprove - 2.5 }));
+
+        const canvas = document.getElementById('approvalChart');
+        let chart = null;
+        let hoverX = null, hoverDate = null, hoverApprove = null, hoverDisapprove = null;
+
+        function createChart() {
+            // Destroy existing chart if it exists
+            if (chart) {
+                chart.destroy();
+            }
+
+            // Get current zoom level (devicePixelRatio includes browser zoom)
+            const dpr = window.devicePixelRatio || 1;
+
+            const canvasParent = canvas.parentElement;
+            const displayWidth = canvasParent.clientWidth;
+            const displayHeight = 680;
+
+            // Set canvas display size
+            canvas.style.width = displayWidth + 'px';
+            canvas.style.height = displayHeight + 'px';
+
+            // Maximum resolution scaling - 48x minimum for ultra crispness even at high zoom
+            const scaleFactor = Math.max(dpr * 24, 48);
+            canvas.width = displayWidth * scaleFactor;
+            canvas.height = displayHeight * scaleFactor;
+
+            const ctx = canvas.getContext('2d', {
+                alpha: true,
+                desynchronized: false,
+                willReadFrequently: false
+            });
+
+            // Force text rendering quality
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = 'high';
+            ctx.textRendering = 'optimizeLegibility';
+
+            chart = new Chart(ctx, {
+            type: 'scatter',
+            devicePixelRatio: scaleFactor,
+            data: {
+                datasets: [
+                    // Disapprove Confidence Interval
+                    {
+                        type: 'line',
+                        label: 'Disapprove CI Lower',
+                        data: disapproveLower,
+                        borderColor: 'transparent',
+                        backgroundColor: 'transparent',
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0.4,
+                        fill: false,
+                        order: 6
+                    },
+                    {
+                        type: 'line',
+                        label: 'Disapprove CI Upper',
+                        data: disapproveUpper,
+                        borderColor: 'transparent',
+                        backgroundColor: 'rgba(236, 72, 153, 0.20)',
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0.4,
+                        fill: '-1',
+                        order: 6
+                    },
+                    // Approve Confidence Interval
+                    {
+                        type: 'line',
+                        label: 'Approve CI Lower',
+                        data: approveLower,
+                        borderColor: 'transparent',
+                        backgroundColor: 'transparent',
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0.4,
+                        fill: false,
+                        order: 7
+                    },
+                    {
+                        type: 'line',
+                        label: 'Approve CI Upper',
+                        data: approveUpper,
+                        borderColor: 'transparent',
+                        backgroundColor: 'rgba(22, 163, 74, 0.20)',
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0.4,
+                        fill: '-1',
+                        order: 7
+                    },
+                    {
+                        label: 'Disapprove',
+                        data: disapprovePolls,
+                        backgroundColor: 'rgba(244, 114, 182, 0.22)',
+                        borderColor: 'transparent',
+                        pointRadius: 4.5,
+                        pointHoverRadius: 4.5,
+                        order: 3
+                    },
+                    {
+                        label: 'Approve',
+                        data: approvePolls,
+                        backgroundColor: 'rgba(22, 163, 74, 0.22)',
+                        borderColor: 'transparent',
+                        pointRadius: 4.5,
+                        pointHoverRadius: 4.5,
+                        order: 4
+                    },
+                    {
+                        type: 'line',
+                        label: 'Disapprove',
+                        data: disapproveTrend,
+                        borderColor: 'rgb(241, 90, 162)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3.5,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0.4,
+                        order: 1
+                    },
+                    {
+                        type: 'line',
+                        label: 'Approve',
+                        data: approveTrend,
+                        borderColor: 'rgb(22, 163, 74)',
+                        backgroundColor: 'transparent',
+                        borderWidth: 3.5,
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0.4,
+                        order: 2
+                    },
+                    {
+                        type: 'line',
+                        label: '50% Reference',
+                        data: [
+                            { x: new Date('2025-01-21'), y: 50 },
+                            { x: new Date('2025-10-30'), y: 50 }
+                        ],
+                        borderColor: '#d1d5db',
+                        backgroundColor: 'transparent',
+                        borderWidth: 1.5,
+                        borderDash: [6, 6],
+                        pointRadius: 0,
+                        pointHoverRadius: 0,
+                        tension: 0,
+                        order: 5
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                layout: {
+                    padding: {
+                        top: 50,
+                        right: 0,
+                        bottom: 10,
+                        left: 25
+                    }
+                },
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: {
+                        type: 'time',
+                        time: {
+                            unit: 'month',
+                            displayFormats: { month: 'MMM' }
+                        },
+                        grid: { display: false, drawBorder: false },
+                        ticks: {
+                            color: '#737373',
+                            font: {
+                                size: 11,
+                                weight: '500',
+                                family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                            },
+                            padding: 10
+                        },
+                        border: { display: false }
+                    },
+                    y: {
+                        min: 30,
+                        max: 65,
+                        ticks: {
+                            stepSize: 5,
+                            color: '#5a5f6b',
+                            font: {
+                                size: 12,
+                                weight: '700',
+                                family: 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif'
+                            },
+                            padding: 10,
+                            callback: value => value + '%'
+                        },
+                        grid: {
+                            display: false,
+                            drawBorder: true,
+                            drawTicks: false
+                        },
+                        border: {
+                            display: true,
+                            color: '#d8dce0',
+                            width: 1.5
+                        }
+                    }
+                },
+                onHover: (event, activeElements, chart) => {
+                    const chartArea = chart.chartArea;
+                    if (!chartArea) return;
+
+                    const x = event.native.offsetX;
+                    if (x >= chartArea.left && x <= chartArea.right) {
+                        // Instant update - no delay, no animation
+                        hoverX = x;
+                        const xScale = chart.scales.x;
+                        hoverDate = new Date(xScale.getValueForPixel(x));
+
+                        // Updated indices: trends are now at 6 (disapprove) and 7 (approve)
+                        const disapproveDataset = chart.data.datasets[6];
+                        const approveDataset = chart.data.datasets[7];
+
+                        const closestDisapprove = disapproveDataset.data.reduce((prev, curr) =>
+                            Math.abs(new Date(curr.x) - hoverDate) < Math.abs(new Date(prev.x) - hoverDate) ? curr : prev
+                        );
+
+                        const closestApprove = approveDataset.data.reduce((prev, curr) =>
+                            Math.abs(new Date(curr.x) - hoverDate) < Math.abs(new Date(prev.x) - hoverDate) ? curr : prev
+                        );
+
+                        hoverApprove = closestApprove.y;
+                        hoverDisapprove = closestDisapprove.y;
+
+                        chart.update('none');
+                    }
+                }
+            },
+            plugins: [{
+                id: 'customAnnotations',
+                afterDatasetsDraw: function(chart) {
+                    const ctx = chart.ctx;
+                    const xAxis = chart.scales.x;
+                    const yAxis = chart.scales.y;
+                    
+                    // Hover crosshair
+                    if (hoverX && hoverDate && hoverApprove && hoverDisapprove) {
+                        ctx.save();
+                        
+                        // Check if at latest date
+                        const latestDate = new Date('2025-10-30');
+                        const daysDiff = Math.abs((hoverDate - latestDate) / (1000 * 60 * 60 * 24));
+                        const isAtLatestDate = daysDiff < 1; // Within 1 day of latest
+
+                        // Vertical line - dotted if at latest date, dashed otherwise
+                        ctx.strokeStyle = isAtLatestDate ? '#d1d5db' : '#a3a3a3';
+                        ctx.lineWidth = isAtLatestDate ? 1.5 : 1;
+                        ctx.setLineDash(isAtLatestDate ? [3, 3] : [4, 4]);
+                        ctx.beginPath();
+                        ctx.moveTo(hoverX, isAtLatestDate ? yAxis.top - 30 : yAxis.top);
+                        ctx.lineTo(hoverX, yAxis.bottom);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+
+                        // Date at top - show "NOW" if at the latest date, otherwise show date
+
+                        const dateText = isAtLatestDate ? 'NOW' : hoverDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                        ctx.font = isAtLatestDate ? '700 11px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif' : '600 14px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                        ctx.textAlign = 'center';
+
+                        // Subtle text shadow for readability
+                        ctx.shadowColor = 'rgba(255, 255, 255, 0.9)';
+                        ctx.shadowBlur = 3;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 1;
+
+                        // Draw date text
+                        ctx.fillStyle = '#9ca3af';
+                        ctx.letterSpacing = isAtLatestDate ? '0.05em' : '0';
+                        ctx.fillText(dateText, hoverX, yAxis.top - 18);
+
+                        // Reset shadow
+                        ctx.shadowColor = 'transparent';
+                        ctx.shadowBlur = 0;
+                        ctx.shadowOffsetX = 0;
+                        ctx.shadowOffsetY = 0;
+                        ctx.letterSpacing = '0';
+                        
+                        // Text with stronger halo effect
+                        function drawTextWithHalo(text, x, y, color) {
+                            // Draw multiple white layers for stronger halo
+                            ctx.shadowColor = 'rgba(255, 255, 255, 1)';
+                            ctx.shadowBlur = 12;
+                            ctx.fillStyle = 'rgba(255, 255, 255, 1)';
+                            for (let i = 0; i < 5; i++) ctx.fillText(text, x, y);
+
+                            // Add extra solid white background
+                            ctx.shadowColor = 'transparent';
+                            ctx.shadowBlur = 0;
+                            ctx.fillStyle = 'rgba(255, 255, 255, 0.98)';
+                            for (let i = 0; i < 3; i++) ctx.fillText(text, x, y);
+
+                            // Draw colored text on top
+                            ctx.fillStyle = color;
+                            ctx.fillText(text, x, y);
+                        }
+
+                        // Labels - two lines per value (label + percentage)
+                        // Detect if near right edge and flip label to left side
+                        const labelWidth = 100; // Approximate max label width
+                        const isNearRightEdge = (hoverX + labelWidth) > xAxis.right;
+                        const labelOffsetX = isNearRightEdge ? -12 : 12;
+
+                        ctx.font = '700 14px Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                        ctx.textAlign = isNearRightEdge ? 'right' : 'left';
+
+                        const disapproveY = yAxis.getPixelForValue(hoverDisapprove);
+                        // Disapprove label
+                        drawTextWithHalo(
+                            'Disapprove',
+                            hoverX + labelOffsetX,
+                            disapproveY - 2,
+                            'rgb(241, 90, 162)'
+                        );
+                        // Disapprove percentage
+                        drawTextWithHalo(
+                            `${hoverDisapprove.toFixed(1)}%`,
+                            hoverX + labelOffsetX,
+                            disapproveY + 14,
+                            'rgb(241, 90, 162)'
+                        );
+
+                        const approveY = yAxis.getPixelForValue(hoverApprove);
+                        // Approve label
+                        drawTextWithHalo(
+                            'Approve',
+                            hoverX + labelOffsetX,
+                            approveY - 2,
+                            'rgb(22, 163, 74)'
+                        );
+                        // Approve percentage
+                        drawTextWithHalo(
+                            `${hoverApprove.toFixed(1)}%`,
+                            hoverX + labelOffsetX,
+                            approveY + 14,
+                            'rgb(22, 163, 74)'
+                        );
+
+                        // Dots
+                        ctx.shadowColor = 'transparent';
+                        [
+                            { y: disapproveY, color: 'rgb(241, 90, 162)' },
+                            { y: approveY, color: 'rgb(22, 163, 74)' }
+                        ].forEach(dot => {
+                            ctx.beginPath();
+                            ctx.arc(hoverX, dot.y, 4, 0, Math.PI * 2);
+                            ctx.fillStyle = dot.color;
+                            ctx.fill();
+                            ctx.strokeStyle = 'white';
+                            ctx.lineWidth = 2;
+                            ctx.stroke();
+                        });
+                        
+                        ctx.restore();
+                    }
+                    
+                    ctx.save();
+                    
+                    // Month dots
+                    [2, 3, 4, 5, 6, 7, 8, 9, 10].forEach(month => {
+                        const dotX = xAxis.getPixelForValue(new Date(2025, month - 1, 1));
+                        ctx.beginPath();
+                        ctx.arc(dotX, yAxis.bottom + 14, 2.5, 0, Math.PI * 2);
+                        ctx.fillStyle = '#a3a3a3';
+                        ctx.fill();
+                    });
+
+                    ctx.restore();
+                }
+            }]
+            });
+
+            canvas.addEventListener('mouseleave', () => {
+                hoverX = hoverDate = hoverApprove = hoverDisapprove = null;
+                chart.update('none');
+            });
+        }
+
+        // Wait for fonts to load before creating chart
+        let lastDpr = window.devicePixelRatio;
+        let resizeTimeout;
+
+        document.fonts.ready.then(() => {
+            // Initial chart creation after fonts load
+            createChart();
+        });
+
+        // Listen for resize events (which fire on zoom)
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                const currentDpr = window.devicePixelRatio;
+                // Always re-create on resize to handle zoom changes
+                lastDpr = currentDpr;
+                createChart();
+            }, 30);
+        });
+
+        // Aggressive zoom detection - check frequently
+        setInterval(() => {
+            const currentDpr = window.devicePixelRatio;
+            if (currentDpr !== lastDpr) {
+                lastDpr = currentDpr;
+                createChart();
+            }
+        }, 100);
+
+        // Also listen for wheel events (touchpad pinch zoom)
+        let wheelTimeout;
+        window.addEventListener('wheel', (e) => {
+            if (e.ctrlKey || e.metaKey) {
+                clearTimeout(wheelTimeout);
+                wheelTimeout = setTimeout(() => {
+                    if (window.devicePixelRatio !== lastDpr) {
+                        lastDpr = window.devicePixelRatio;
+                        createChart();
+                    }
+                }, 100);
+            }
+        }, { passive: true });
+
+        // Force maximum quality font rendering for Chart.js
+        Chart.defaults.font.family = 'Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        Chart.defaults.font.lineHeight = 1.2;
+
+        // Listen for visibility changes to re-render
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                setTimeout(createChart, 50);
+            }
+        });
+
+        // Render poll box with visual bars
+        function renderPollBox() {
+            const tbody = document.getElementById('pollBoxTableBody');
+
+            if (!tbody) {
+                console.error('Poll box table body not found!');
+                return;
+            }
+
+            tbody.innerHTML = '';
+
+            // Sort polls by date (latest first)
+            const sortedPolls = [...rawPolls].sort((a, b) => {
+                return new Date(b.endDate) - new Date(a.endDate);
+            });
+
+            // Render rows
+            sortedPolls.forEach(poll => {
+                const row = document.createElement('tr');
+
+                // Format date with period after month abbreviation
+                const date = new Date(poll.endDate);
+                const month = date.toLocaleDateString('en-US', { month: 'short' });
+                const day = date.getDate();
+                const formattedDate = `${month}. ${day}`;
+
+                // Get sample info
+                const sampleNumber = poll.sample || '-';
+                const sampleType = poll.sampleType || 'RV';
+
+                // Get sponsor
+                const sponsor = poll.sponsor || '-';
+
+                row.innerHTML = `
+                    <td class="poll-date-cell">${formattedDate}</td>
+                    <td class="poll-sample-cell">
+                        <span class="poll-sample-number">${sampleNumber}</span>
+                        <span class="poll-sample-badge">${sampleType}</span>
+                    </td>
+                    <td class="poll-pollster-cell">${poll.pollster}</td>
+                    <td class="poll-sponsor-cell">${sponsor}</td>
+                    <td class="poll-bar-cell poll-approve-bar">
+                        <div class="poll-bar-bg" data-width="${poll.approve}%"></div>
+                        <div class="poll-bar-content">${poll.approve}%</div>
+                    </td>
+                    <td class="poll-bar-cell poll-disapprove-bar">
+                        <div class="poll-bar-bg" data-width="${poll.disapprove}%"></div>
+                        <div class="poll-bar-content">${poll.disapprove}%</div>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            // Animate bars after a short delay
+            setTimeout(() => {
+                const bars = tbody.querySelectorAll('.poll-bar-bg');
+                bars.forEach(bar => {
+                    const targetWidth = bar.getAttribute('data-width');
+                    bar.style.width = targetWidth;
+                });
+            }, 100);
+        }
+
+        // Render poll box when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            renderPollBox();
+        });
+
+        // Also render immediately if DOM already loaded
+        if (document.readyState !== 'loading') {
+            renderPollBox();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Code — OnPointAggregate</title>
+    <script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body {
+            background: #fafafa;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 440px;
+        }
+
+        .card {
+            background: #fff;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 48px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: #000;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #000;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #666;
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .email-display {
+            font-weight: 500;
+            color: #000;
+        }
+
+        /* Code Input */
+        .code-container {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .code-box {
+            width: 48px;
+            height: 56px;
+            font-size: 24px;
+            font-weight: 600;
+            font-family: 'Space Grotesk', sans-serif;
+            text-align: center;
+            border-radius: 6px;
+            background: #fff;
+            border: 1px solid #eaeaea;
+            transition: all 0.2s ease;
+            caret-color: transparent;
+        }
+
+        .code-box:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .code-box.filled {
+            border-color: #d1d1d1;
+        }
+
+        .code-box.error {
+            border-color: #ef4444;
+            animation: shake 0.3s ease;
+        }
+
+        .code-box.success {
+            border-color: #22c55e;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-4px); }
+            75% { transform: translateX(4px); }
+        }
+
+        /* Timer */
+        .timer {
+            text-align: center;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 24px;
+        }
+
+        .timer.warning {
+            color: #f59e0b;
+        }
+
+        .timer.danger {
+            color: #ef4444;
+        }
+
+        /* Password Section */
+        .password-section {
+            display: none;
+        }
+
+        .password-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 6px;
+        }
+
+        input[type="password"] {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid #eaeaea;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        input[type="password"]:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Buttons */
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: #000;
+            color: #fff;
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #333;
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: #fff;
+            color: #666;
+            border: 1px solid #eaeaea;
+            margin-top: 8px;
+        }
+
+        .btn-secondary:hover {
+            background: #fafafa;
+            border-color: #d1d1d1;
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .success-message {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+            padding: 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 24px;
+            font-size: 13px;
+            color: #666;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: #000;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 32px 24px;
+            }
+
+            .code-box {
+                width: 42px;
+                height: 50px;
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo">OnPointAggregate</div>
+
+            <!-- Code Verification Section -->
+            <div id="codeSection" class="code-section">
+                <h1>Enter verification code</h1>
+                <p class="subtitle">
+                    We sent a code to <span class="email-display" id="emailDisplay"></span>
+                </p>
+
+                <div class="error-message" id="errorMessage"></div>
+                <div class="success-message" id="successMessage"></div>
+
+                <div class="code-container" id="codeContainer">
+                    <input type="text" maxlength="1" class="code-box" data-index="0" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="1" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="2" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="3" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="4" inputmode="numeric" pattern="[0-9]">
+                    <input type="text" maxlength="1" class="code-box" data-index="5" inputmode="numeric" pattern="[0-9]">
+                </div>
+
+                <div class="timer" id="timer">Code expires in 2:00</div>
+
+                <button type="button" class="btn-secondary" id="resendBtn">Resend code</button>
+            </div>
+
+            <!-- Password Reset Section (hidden initially) -->
+            <div id="passwordSection" class="password-section">
+                <h1>Set new password</h1>
+                <p class="subtitle">Choose a strong password for your account</p>
+
+                <form id="resetPasswordForm">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" required minlength="8">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" required minlength="8">
+                    </div>
+
+                    <button type="submit" class="btn-primary" id="submitBtn">Reset password</button>
+                </form>
+            </div>
+
+            <a href="/login.html" class="back-link">Back to login</a>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const email = urlParams.get('email');
+        const codeBoxes = document.querySelectorAll('.code-box');
+        const codeSection = document.getElementById('codeSection');
+        const passwordSection = document.getElementById('passwordSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const successMessage = document.getElementById('successMessage');
+
+        let recoveryToken = null;
+        let timeRemaining = 120; // 2 minutes
+
+        // Display email
+        if (email) {
+            document.getElementById('emailDisplay').textContent = email;
+        } else {
+            window.location.href = '/login.html';
+        }
+
+        // Timer countdown
+        const timerElement = document.getElementById('timer');
+        const timerInterval = setInterval(() => {
+            timeRemaining--;
+
+            const minutes = Math.floor(timeRemaining / 60);
+            const seconds = timeRemaining % 60;
+            timerElement.textContent = `Code expires in ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+            if (timeRemaining <= 30) {
+                timerElement.classList.add('danger');
+            } else if (timeRemaining <= 60) {
+                timerElement.classList.add('warning');
+            }
+
+            if (timeRemaining <= 0) {
+                clearInterval(timerInterval);
+                timerElement.textContent = 'Code expired';
+                codeBoxes.forEach(box => box.disabled = true);
+                showError('Code expired. Please request a new one.');
+            }
+        }, 1000);
+
+        // Code input handling
+        codeBoxes.forEach((box, index) => {
+            box.addEventListener('input', (e) => {
+                const value = e.target.value;
+
+                if (!/^\d$/.test(value)) {
+                    e.target.value = '';
+                    return;
+                }
+
+                box.classList.add('filled');
+
+                // Auto-advance
+                if (value && index < codeBoxes.length - 1) {
+                    codeBoxes[index + 1].focus();
+                }
+
+                // Auto-validate when complete
+                if (index === codeBoxes.length - 1 && value) {
+                    setTimeout(validateCode, 200);
+                }
+            });
+
+            box.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !box.value && index > 0) {
+                    codeBoxes[index - 1].focus();
+                    codeBoxes[index - 1].value = '';
+                    codeBoxes[index - 1].classList.remove('filled');
+                }
+            });
+
+            // Handle paste
+            box.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pastedData = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+
+                pastedData.split('').forEach((char, i) => {
+                    if (codeBoxes[i]) {
+                        codeBoxes[i].value = char;
+                        codeBoxes[i].classList.add('filled');
+                    }
+                });
+
+                if (pastedData.length === 6) {
+                    setTimeout(validateCode, 200);
+                }
+            });
+        });
+
+        // Focus first box
+        codeBoxes[0].focus();
+
+        async function validateCode() {
+            const code = Array.from(codeBoxes).map(box => box.value).join('');
+
+            if (code.length !== 6) {
+                return;
+            }
+
+            console.log('Validating code:', code);
+
+            try {
+                const response = await fetch('/.netlify/functions/verify-reset-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code, email })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || 'Invalid code');
+                }
+
+                console.log('Code verified successfully');
+
+                // Mark boxes as success
+                codeBoxes.forEach(box => {
+                    box.classList.remove('error');
+                    box.classList.add('success');
+                    box.disabled = true;
+                });
+
+                recoveryToken = data.token;
+
+                // Show password section
+                setTimeout(() => {
+                    codeSection.style.display = 'none';
+                    passwordSection.classList.add('active');
+                }, 600);
+
+            } catch (error) {
+                console.error('Code validation error:', error);
+                showError(error.message);
+
+                // Mark boxes as error
+                codeBoxes.forEach(box => {
+                    box.classList.add('error');
+                    setTimeout(() => {
+                        box.classList.remove('error');
+                        box.value = '';
+                        box.classList.remove('filled');
+                    }, 500);
+                });
+
+                codeBoxes[0].focus();
+            }
+        }
+
+        // Password reset
+        document.getElementById('resetPasswordForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (newPassword !== confirmPassword) {
+                showError('Passwords do not match');
+                return;
+            }
+
+            if (newPassword.length < 8) {
+                showError('Password must be at least 8 characters');
+                return;
+            }
+
+            try {
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Resetting...';
+
+                const user = await netlifyIdentity.gotrue.recover(recoveryToken, true);
+                await user.update({ password: newPassword });
+
+                console.log('Password reset successful');
+
+                showSuccess('Password reset successful! Redirecting...');
+
+                setTimeout(() => {
+                    window.location.href = '/login.html';
+                }, 1500);
+
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showError('Error resetting password. Please try again.');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Reset password';
+            }
+        });
+
+        // Resend code
+        document.getElementById('resendBtn').addEventListener('click', async () => {
+            console.log('Requesting new code');
+            try {
+                const response = await fetch('/.netlify/functions/request-reset-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+
+                if (response.ok) {
+                    showSuccess('New code sent! Check your email.');
+                    timeRemaining = 120;
+                    timerElement.classList.remove('warning', 'danger');
+                    codeBoxes.forEach(box => {
+                        box.value = '';
+                        box.disabled = false;
+                        box.classList.remove('filled', 'error', 'success');
+                    });
+                    codeBoxes[0].focus();
+                } else {
+                    throw new Error('Failed to resend code');
+                }
+            } catch (error) {
+                console.error('Resend error:', error);
+                showError('Failed to resend code. Please try again.');
+            }
+        });
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add('active');
+            successMessage.classList.remove('active');
+
+            setTimeout(() => {
+                errorMessage.classList.remove('active');
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            successMessage.textContent = message;
+            successMessage.classList.add('active');
+            errorMessage.classList.remove('active');
+        }
+    </script>
+</body>
+</html>
