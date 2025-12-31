@@ -1,8 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  basePath: "/tracker",
-  assetPrefix: "/tracker",
+  // Serve at root
 };
 
 export default nextConfig;

@@ -1,19 +1,10 @@
 [build]
-  publish = "."
+  base = "tracker"
+  command = "npm install && npm run build"
+  publish = ".next"
 
-# Netlify Functions for authentication
-[functions]
-  directory = "netlify/functions"
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
 
-# API routes to Netlify Functions
-[[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
-  status = 200
-
-# SPA fallback - serve index.html for all routes
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-  force = false
+[build.environment]
+  NODE_VERSION = "18"

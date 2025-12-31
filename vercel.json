@@ -1,20 +1,7 @@
 {
   "version": 2,
   "name": "onpointaggregate",
-  "builds": [
-    {
-      "src": "**/*",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*\\.(html|css|js|json|png|jpg|svg|ico|geojson))$",
-      "dest": "/$1"
-    },
-    {
-      "src": "/",
-      "dest": "/index.html"
-    }
-  ]
+  "buildCommand": "cd tracker && npm install && npm run build",
+  "outputDirectory": "tracker/.next",
+  "framework": "nextjs"
 }
