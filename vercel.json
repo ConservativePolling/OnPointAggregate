@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "name": "onpointaggregate",
-  "buildCommand": "cd tracker && npm install && npm run build",
-  "outputDirectory": "tracker/.next",
-  "framework": "nextjs"
-}
