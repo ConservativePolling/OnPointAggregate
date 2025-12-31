@@ -1,0 +1,13 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+# Removed catch-all redirect to allow proper file serving and authentication routing
+
+[dev]
+  functions = "netlify/functions"

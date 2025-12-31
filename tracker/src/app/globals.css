@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #ffffff;
+  --ink: #0b0b0b;
+  --muted: #2e2e2e;
+  --line: #111111;
+  --soft: #f1f1f1;
+  --ghost: #f7f7f7;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-soft: var(--soft);
+  --color-ghost: var(--ghost);
+  --font-display: var(--font-display);
+  --font-ui: var(--font-ui);
+  --font-mono: var(--font-mono);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--soft) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: var(--soft);
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(11, 11, 11, 0.2);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-ui), "Helvetica Neue", Arial, sans-serif;
+  background-image: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--ink);
+  color: var(--paper);
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display), "Times New Roman", serif;
+  }
+
+  .font-ui {
+    font-family: var(--font-ui), "Helvetica Neue", Arial, sans-serif;
+  }
+
+  .font-mono {
+    font-family: var(--font-mono), "Courier New", monospace;
+  }
+
+  .border-faint {
+    border-color: rgba(11, 11, 11, 0.12);
+  }
+
+  .text-faint {
+    color: rgba(11, 11, 11, 0.55);
+  }
+
+  .label {
+    font-family: var(--font-mono), "Courier New", monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.02em;
+    color: rgba(11, 11, 11, 0.55);
+  }
+
+  .label-strong {
+    color: rgba(11, 11, 11, 0.85);
+  }
+}
