@@ -28,7 +28,7 @@ const mono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VoteHub PoliticalTracker",
+  title: "OnPointTracker",
   description:
     "Track Congress, the executive branch, and live legislation in a black-and-white editorial interface.",
 };

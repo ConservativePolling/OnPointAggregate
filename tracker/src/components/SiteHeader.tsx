@@ -20,11 +20,11 @@ export default function SiteHeader() {
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-4">
         <Link href="/" className="group flex items-center gap-3 transition-opacity hover:opacity-70">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-ink text-sm font-semibold transition-colors group-hover:bg-ink group-hover:text-paper">
-            VH
+            OP
           </div>
           <div className="leading-tight">
-            <p className="font-display text-base tracking-tight">VoteHub</p>
-            <p className="font-mono text-[0.65rem] text-faint">PoliticalTracker</p>
+            <p className="font-display text-base tracking-tight">OnPoint</p>
+            <p className="font-mono text-[0.65rem] text-faint">Tracker</p>
           </div>
         </Link>
         <nav className="flex items-center gap-1">

@@ -75,7 +75,7 @@ export default async function Home() {
               The live ledger for Congress, the cabinet, and the movement of law.
             </h1>
             <p className="max-w-xl text-lg text-muted">
-              VoteHub PoliticalTracker consolidates members, executive desks, and
+              OnPointTracker consolidates members, executive desks, and
               bill movement into a single oversight view built for daily use.
             </p>
           </div>
