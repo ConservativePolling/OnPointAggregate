@@ -45,7 +45,8 @@ const BILL_PAGE_LIMIT =
   Number.isFinite(parsedBillLimit) && parsedBillLimit >= 0
     ? parsedBillLimit || undefined
     : 20;
-const CONGRESS_SESSION = process.env.CONGRESS_SESSION?.trim();
+// Default to 119th Congress (2025-2026) if not specified
+const CONGRESS_SESSION = process.env.CONGRESS_SESSION?.trim() || "119";
 
 function resolveCongressStartYear(congress?: string) {
   const congressNumber = congress ? Number(congress) : NaN;
