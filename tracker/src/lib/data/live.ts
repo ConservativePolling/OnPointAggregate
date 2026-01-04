@@ -136,7 +136,13 @@ export function buildSponsorLookup(members: Member[]): Record<string, string> {
 
 export async function getLiveMembers(): Promise<Member[]> {
   const apiKey = process.env.CONGRESS_API_KEY;
-  if (!apiKey) return [...fallbackMembers, ...executiveRoster];
+  if (!apiKey) {
+    console.warn(
+      "[PoliticalTracker] CONGRESS_API_KEY not set - using placeholder data. " +
+      "Get your free API key at: https://api.congress.gov/sign-up/"
+    );
+    return [...fallbackMembers, ...executiveRoster];
+  }
   if (isCacheFresh(memberCache)) return memberCache.data;
 
   const timeout = createTimeoutSignal(REQUEST_TIMEOUT_MS);
@@ -173,7 +179,13 @@ export async function getLiveMembers(): Promise<Member[]> {
 
 export async function getLiveBills(): Promise<Bill[]> {
   const apiKey = process.env.CONGRESS_API_KEY;
-  if (!apiKey) return fallbackBills;
+  if (!apiKey) {
+    console.warn(
+      "[PoliticalTracker] CONGRESS_API_KEY not set - using placeholder bills. " +
+      "Get your free API key at: https://api.congress.gov/sign-up/"
+    );
+    return fallbackBills;
+  }
   if (isCacheFresh(billCache)) return billCache.data;
 
   // Use longer timeout for fetching bills from congress
